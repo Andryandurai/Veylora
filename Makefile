@@ -11,10 +11,10 @@ endif
 # Use the venv interpreter when it exists, otherwise whatever `python` is on PATH.
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python)
 
-.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards test lint format clean help
+.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot test lint format clean help
 
 help:
-	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards test lint format clean')"
+	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot test lint format clean')"
 
 setup:
 	python -m venv .venv
@@ -70,6 +70,12 @@ dashboards:
 
 test-dashboards:
 	$(PY) scripts/screenshot_dashboards.py
+
+bot:
+	$(PY) -m uvicorn advisory.bot:app --port 8000
+
+test-bot:
+	$(PY) scripts/smoke_bot.py
 
 test:
 	$(PY) -m pytest

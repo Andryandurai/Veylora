@@ -41,7 +41,7 @@ SMS/WhatsApp advisories.
 | 6 | Prescriptive optimization | `analytics/prescriptive/{water_balance,irrigation_lp,crop_switch}.py`; CLI `python -m analytics.prescriptive.run`; `config/crop_params.yaml`, `config/economics.yaml` |
 | 7 | 3D simulator | `simulator/export_sim_data.py` -> `simulator/sim_data.json`; `simulator/index.html`; `python -m simulator.embed` -> `index_embedded.html` |
 | 8 | Streamlit dashboards | `make dashboards` (= `streamlit run dashboards/app.py`); router `app.py`, pages in `dashboards/pages/`, shared code in `dashboards/components/`; numbers read from `reports/*.json`; `make test-dashboards` runs the browser check |
-| 9 | Farmer advisory | `advisory.generate.generate(district_id, crop, as_of_date, lang) -> str` and `compose(...)` -> `Advisory` (text, reasoning); `predict.explain_yield`; Twilio wrapper (DRY_RUN default); FastAPI bot |
+| 9 | Farmer advisory | `advisory.generate.generate(district_id, crop, as_of_date, lang) -> str` / `compose(...)`; `advisory/twilio_client.py` (`send_sms`, `send_whatsapp`, dry run by default); `advisory/bot.py` (FastAPI `/whatsapp`, `/health`); `scripts/bulk_advisory.py`; `make bot`, `make test-bot`; `advisory/README.md` |
 | 10 | Hardening, deploy, report | `make pipeline`, Dockerfile, `reports/final_report.md`, README, demo script |
 
 Dependencies flow downward only: a phase may import from earlier phases, never later ones. If a later

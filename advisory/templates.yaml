@@ -3,7 +3,7 @@
 # !!! TRANSLATIONS NEED NATIVE-SPEAKER REVIEW BEFORE ANY REAL USE !!!
 # The Hindi (hi), Tamil (ta) and Telugu (te) texts were drafted by an AI assistant, not by a translator or an
 # agronomist. They may contain errors of grammar, register or agronomic meaning. Do not send them to farmers until a
-# native speaker and an agronomist have reviewed every line (docs/DECISIONS.md D-025).
+# native speaker and an agronomist have reviewed every line (docs/DECISIONS.md D-026).
 #
 # Placeholders: {district}, {crop}, {date}, {mm}, {risk}. {crop} and {risk} are replaced by the localised words in
 # the `crops` and `risk` tables below. Keep every message under 160 characters where possible: SMS is 160 characters

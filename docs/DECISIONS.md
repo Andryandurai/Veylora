@@ -251,3 +251,26 @@ not a fitted value.
 ### D-026: Translations are unreviewed drafts
 Hindi, Tamil and Telugu templates in `advisory/templates.yaml` were written without a native-speaker or agronomist review. The
 dashboard warns on every non-English advisory and the sender defaults to dry run (Phase 9). Review is a manual step before any real send.
+
+## 2026-10-16 - Phase 9 (advisory delivery)
+
+### D-027: Delivery and bot are safe by default; the bot answers about the last observed day
+- **Dry run unless explicitly disabled.** Only `DRY_RUN` set to false/0/no/off leaves dry-run mode (any other value, including a typo,
+  stays dry). Real sending additionally needs the account SID, auth token and sender number, otherwise `ConfigError` is raised
+  before a client exists. The Twilio library is only imported on the real-send path.
+- **The webhook is closed by default.** Every `/whatsapp` call needs a valid `X-Twilio-Signature`; with no auth token configured
+  the endpoint answers 403 unless `ALLOW_UNSIGNED_WEBHOOK=true` (local testing). `PUBLIC_BASE_URL` is used to rebuild the URL Twilio
+  signed when the bot sits behind a tunnel or proxy. The reply is TwiML in the webhook response, so `DRY_RUN` (which governs
+  outbound API sends) does not apply: the bot only answers people who wrote to it.
+- **Uncertain districts are never used silently.** A fuzzy match is accepted only at a score of at least 92 (rapidfuzz, whole-word
+  containment counts as 95) and at least 4 points ahead of a different district; between 70 and 92, or when two districts are
+  close ("godavari"), the bot asks. Thresholds are in `settings.yaml` (`advisory.bot`) and are judgement calls checked on a few
+  dozen spellings, not tuned on data.
+- **State is minimal.** Conversation memory (district, crop, language) is in process memory for 30 minutes, keyed by a hash of the
+  number. The only persisted personal data is the opt-out list (salted SHA-256 hashes) and an audit log of masked numbers and
+  message lengths, never message bodies or tokens. STOP is honoured by the bot, the sender and the bulk tool.
+- **No live weather feed exists in the project**, so without a date in the message the bot advises for the last day of the observed
+  record (`ADVISORY_AS_OF` overrides). This is stated in the README; a real deployment needs a forecast source.
+- Control replies (help, confirmation questions) are English only; district names must be typed in English letters. Both are
+  limitations of this version.
+- Bulk composition never sends; it writes a reviewable CSV with masked numbers.

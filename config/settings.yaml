@@ -121,6 +121,14 @@ advisory:
   irrigation_min_mm: 5          # planned weekly irrigation below this is not worth a message
   sowing_lead_days: 21          # announce the sowing window this many days before the season starts
   sms_max_chars: 320
+  delivery:                     # outbound limits applied by advisory/twilio_client.py (sending is a dry run unless DRY_RUN=false)
+    max_per_minute: 30          # all recipients together
+    per_recipient_per_day: 3    # protects one phone from repeated sends by a faulty loop
+  bot:                          # advisory/conversation.py (WhatsApp assistant)
+    session_ttl_minutes: 30     # how long a sender's last district/crop is remembered (memory only)
+    accept_score: 92            # fuzzy district match this good (0-100) and clearly ahead of the runner-up is accepted
+    confirm_score: 70           # between this and accept_score the bot asks "Did you mean ...?"
+    messages_per_minute: 10     # per sender
 
 # Early-warning relevance rule (analytics/predictive/extreme_weather.py: risk_forecast): a drought probability only sets
 # the risk level if the target month normally receives at least this much rain (district mean over the reference years).

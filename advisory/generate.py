@@ -239,3 +239,34 @@ def compose(district_id: str, crop: str, as_of_date: str | Date, lang: str = "en
 def generate(district_id: str, crop: str, as_of_date: str | Date, lang: str = "en") -> str:
     """The advisory text for a district and crop on a date, in ``lang`` (en, hi, ta, te); at most 320 characters."""
     return compose(district_id, crop, as_of_date, lang).text
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Command line: ``python -m advisory.generate DISTRICT_ID CROP DATE [--lang hi] [--explain]``."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Print the advisory for a district, crop and date."
+    )
+    parser.add_argument("district_id", help="e.g. tamil_nadu__thanjavur")
+    parser.add_argument("crop", choices=sorted(load_templates()["crops"]))
+    parser.add_argument("date", help="YYYY-MM-DD within the observed weather record")
+    parser.add_argument("--lang", default="en", choices=load_templates()["languages"])
+    parser.add_argument(
+        "--explain", action="store_true", help="also print the risk levels and rule notes"
+    )
+    args = parser.parse_args(argv)
+    result = compose(args.district_id, args.crop, args.date, args.lang)
+    print(result.text)  # noqa: T201 - CLI output
+    if args.explain:
+        levels = result.risk["levels"]
+        print(
+            f"[messages {result.messages}; levels {levels}; {len(result.text)} chars, {result.sms_segments} SMS part(s)]"
+        )  # noqa: T201
+        for note in result.notes:
+            print(f"[note: {note}]")  # noqa: T201
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

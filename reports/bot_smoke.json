@@ -1,0 +1,40 @@
+{
+  "health": {
+    "ok": true,
+    "detail": {
+      "status": "ok",
+      "dry_run": true,
+      "signature_validation": true,
+      "models_ready": true
+    }
+  },
+  "signed_message_english": {
+    "ok": true,
+    "detail": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>No weather alert for Thanjavur on 2024-12-31. Keep normal care of your rice and check again soon.</Message></Response>"
+  },
+  "signed_message_hindi": {
+    "ok": true,
+    "detail": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Warangal के लिए 2024-12-31 को कोई मौसम चेतावनी नहीं है। अपनी कपास की सामान्य देखभाल जारी रखें।</Message></Response>"
+  },
+  "forged_signature_refused": {
+    "ok": true,
+    "detail": null
+  },
+  "missing_signature_refused": {
+    "ok": true,
+    "detail": null
+  },
+  "misspelt_district_is_understood": {
+    "ok": true,
+    "detail": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Thanjavur के लिए 2024-12-31 को कोई मौसम चेतावनी नहीं है। अपनी धान की सामान्य देखभाल जारी रखें।</Message></Response>"
+  },
+  "seconds": {
+    "first_advisory_incl_model_load": 9.56,
+    "second_advisory": 0.36
+  },
+  "unconfigured_bot_refuses": {
+    "ok": true,
+    "detail": "{\"detail\":\"webhook signature validation is not configured (set TWILIO_AUTH_TOKEN)\"}"
+  },
+  "failures": []
+}
