@@ -145,3 +145,24 @@ humidity, wind and solar come from NASA POWER. Comparing the two on the same dis
 annual district rain correlation 0.81, daily Tmax correlation 0.85 (POWER 0.19 C cooler on average), but **heat days (Tmax >= 40 C)
 average 10.6 per district-year in IMD versus 21.9 in POWER**. Results that were first produced from the POWER stand-in
 (Phase 3 findings, Phase 4 first runs) were regenerated on IMD before the phases were tagged.
+
+## 2026-10-16 - Phase 5 (extreme-weather early warning)
+
+### D-018: Reference period and evaluation design for rare events
+- **Reference period 1991-2014 (training years), not the plan's 1991-2020**, for the heatwave daily normals and the SPI gamma fits,
+  so that no fitted quantity (and hence no feature or label threshold) depends on validation or test years. Cost: a 24-year
+  rather than 30-year normal, and a reference cooler/drier than 2020-2024, which shifts base rates between splits.
+- **Heatwave onsets are extremely rare** with the IMD criterion on 1-degree district-mean data: 108 onsets in 34 years x 51 districts
+  (~0.06 percent of days are heatwave days); the plan's test window 2020-2024 has only 3 onsets. Besides the plan's fixed split
+  (final fold), skill is therefore judged on pooled **rolling-origin folds** (always train on earlier years, validate on the 3-5 years
+  before the test block; test blocks 2005-09, 2010-14, 2015-19, 2020-24 give 37 pooled onsets). Block bootstrap (district-years)
+  supplies the confidence intervals.
+- Drought uses the plan split only (its features use the reference-period SPI, so rolling folds would leak). Test years 2020-2024
+  are much wetter than the reference: next-month drought base rate 15.8 percent (train), 20.9 percent (validation), 7.5 percent (test).
+
+### D-019: The heatwave LSTM does not beat climatology, so climatology is served
+Pooled out-of-sample, the LSTM is *worse* than a district-by-calendar-day climatological frequency at all three horizons (PR-AUC,
+Brier skill); the 14-day lead is therefore not supported. `risk_forecast` returns the climatological probability for heatwave
+(flagged `heatwave_source="climatology"`) and switches to the LSTM automatically only if its 14-day PR-AUC advantage has a
+95 percent bootstrap interval above zero when retrained. The drought model does beat climatology and persistence (PR-AUC 0.38 vs
+0.09 / 0.16 on the test years). Per-hazard risk thresholds replace the single shared set because base rates differ by ~20x.

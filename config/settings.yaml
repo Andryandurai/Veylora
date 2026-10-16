@@ -63,6 +63,13 @@ splits:
     train_end: 2014
     valid: [2015, 2019]
     test: [2020, 2024]
+    # Heatwave onsets are so rare (2020-2024 has only 3) that the fixed split above cannot support
+    # conclusions. These extra rolling-origin folds (always train on earlier years, validate on the
+    # years just before the test block) pool more out-of-sample onsets; the fixed split is the last fold.
+    rolling_origin:
+      - {train: [1991, 2001], valid: [2002, 2004], test: [2005, 2009]}
+      - {train: [1991, 2006], valid: [2007, 2009], test: [2010, 2014]}
+      - {train: [1991, 2011], valid: [2012, 2014], test: [2015, 2019]}
 
 paths:
   data_raw: data/raw
@@ -100,8 +107,10 @@ etl:
   max_plausible_yield_t_ha: {rice: 7.0, wheat: 4.5, cotton: 1.2}
   min_plausible_yield_t_ha: {rice: 0.2, wheat: 0.1, cotton: 0.02}
 
-# Phase 5 risk level thresholds on the larger of heatwave_p / drought_p (documented in the report).
+# Phase 5 risk levels. Thresholds apply to each hazard's *calibrated probability* and differ per hazard because
+# the base rates differ by an order of magnitude: a heatwave onset within 14 days in the March-June season
+# has a base rate of well under 1 percent, while next-month SPI-3 drought has a base rate of 8-20 percent.
+# The overall level is the higher of the two hazard levels. See reports/extreme_weather_report.md.
 risk_levels:
-  moderate: 0.20
-  high: 0.40
-  severe: 0.65
+  heatwave: {moderate: 0.05, high: 0.15, severe: 0.35}
+  drought: {moderate: 0.30, high: 0.50, severe: 0.70}
