@@ -127,6 +127,17 @@ def irrigation_result() -> Result:
     )
 
 
+def satellite_credit() -> str:
+    """Attribution for the satellite data, only when the satellite table is real (empty otherwise)."""
+    quality = _read_json("data_quality.json") or {}
+    if quality.get("synthetic_share", {}).get("satellite_16d", 1.0) > 0:
+        return ""
+    return (
+        " Vegetation index: MODIS MOD13Q1 (NASA LP DAAC). Soil moisture: ERA5-Land, generated using "
+        "Copernicus Climate Change Service information. Both accessed through Google Earth Engine."
+    )
+
+
 def synthetic_note() -> str:
     """The data caveat (empty when no table contains synthetic rows)."""
     quality = _read_json("data_quality.json") or {}
@@ -312,7 +323,7 @@ def render(
 </div>
 </main>
 <footer class="site"><div class="wrap">
-  <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js.</p>
+  <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js.{satellite_credit()}</p>
   <p>Veylora is decision support with uncertainty, not a substitute for local agronomic advice.</p>
 </div></footer>
 </body>

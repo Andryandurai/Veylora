@@ -1,6 +1,6 @@
 {
-  "created": "2026-10-16T13:47:48+00:00",
-  "note": "derived district-level tables and serving models; satellite_16d is synthetic (is_synthetic=True)",
+  "created": "2026-10-16T16:08:02+00:00",
+  "note": "derived district-level tables and serving models; satellite_16d is real (MODIS NDVI and ERA5-Land soil moisture from Google Earth Engine)",
   "files": {
     "processed/districts.parquet": {
       "bytes": 353089,
@@ -15,28 +15,28 @@
       "sha256": "f9c764b2f9bafd4b8d23611f31c51a870907fbdebafae050a22c26589b379c6b"
     },
     "processed/satellite_16d.parquet": {
-      "bytes": 362855,
-      "sha256": "863b8d33e8a715b242e9ba2306b80b855b93769003bb1d9d6c2dd93f60b331d2"
+      "bytes": 355740,
+      "sha256": "7b5b0ba571bd646008dbb0a96bafcd28c5ce7c827b08546453feb56857b30bb5"
     },
     "processed/district_clusters.parquet": {
       "bytes": 9104,
       "sha256": "877c051afc1eca80af93ff232fc64800d9eed9a567766fd1e454507bee5eaf96"
     },
     "models/yield_xgb.joblib": {
-      "bytes": 1022521,
-      "sha256": "55a11cff7bac65455a0e3b04760c2e4206b5dfa573c79a9b54f42b65a8d13654"
+      "bytes": 1022505,
+      "sha256": "8cf092fc26b933fc05fe41e3e89e29876b5db49633a133784f35f2789776d701"
     },
     "models/drought_xgb.joblib": {
       "bytes": 149360,
-      "sha256": "fdd88a2a4811fa326f4f6c3befdaedee82fa1ffe87a216cc31abe15aaad01c42"
+      "sha256": "47b5fe72b3d6b7f5d9be57ae0a87d1b0f42ae7e5c47759e93c13425e3b6f1b05"
     },
     "models/heatwave_lstm.pt": {
       "bytes": 492769,
-      "sha256": "09a74c389f47a61223a816be0864abfac5764956821ecfd1a163cea7b005c54d"
+      "sha256": "3eaf0d279422a85082511997cd1c5b76f35dcb50562b6c096c6d185d713d9ed9"
     },
     "simulator/index_embedded.html": {
-      "bytes": 11991161,
-      "sha256": "8b32c3750b139e13552918db6667bf2d7581f7a269d2b89c045ede58de6c6be3"
+      "bytes": 11991133,
+      "sha256": "2fb2fd436c78ed64e71554831d248a764eb3e27074e98b870f127c299161ccbb"
     },
     "simulator/sim_districts.json": {
       "bytes": 1004,

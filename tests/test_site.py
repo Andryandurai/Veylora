@@ -96,3 +96,10 @@ def test_vercel_config_serves_the_web_folder_and_copies_the_simulator():
     )
     assert (ROOT / "data" / "sample" / "simulator" / "index_embedded.html").is_file()
     assert "web/simulator.html" in (ROOT / ".gitignore").read_text(encoding="utf-8")
+
+
+def test_satellite_credit_appears_only_when_the_satellite_data_is_real(site):
+    quality = json.loads((ROOT / "reports" / "data_quality.json").read_text(encoding="utf-8"))
+    real = quality["synthetic_share"]["satellite_16d"] == 0
+    page = _page(site)
+    assert ("MODIS MOD13Q1" in page and "Copernicus Climate Change Service" in page) == real

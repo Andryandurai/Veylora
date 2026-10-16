@@ -394,3 +394,19 @@ carry no timestamps or commit ids (and the exporter no longer writes them), and 
 GitHub or source links and no command line. A browser scan of every page (all Methodology tabs), the simulator frame and the static site for commands, file names,
 paths, internal ids, hashes and timestamps finds nothing; Streamlit's menu, Deploy button and footer are not in the page. Technical terms that describe the
 method (XGBoost, SHAP, FAO-56) stay on the Methodology page: they document how the numbers were made.
+
+### D-036: Real satellite data from Earth Engine; it does not earn a place in the served models
+
+- **Data.** On 2026-10-16 the satellite table was replaced by real data: MODIS MOD13Q1 NDVI and ERA5-Land layer-1 soil moisture, averaged per district unit through
+  Google Earth Engine (Cloud project `veylora-ee`, non-commercial registration, Community tier). 29,172 composites for 51 units, 2000-2024, none missing, none synthetic.
+  Sanity checks: NDVI has the monsoon cycle (June low, October high); soil moisture peaks in July to September; CHIRPS and IMD monthly rainfall agree (r = 0.90 over
+  15,300 district-months). The pull is cached per year in `data/interim/gee` and can be redone with `python -m etl.run --source gee --force`.
+- **Result.** Test years, 60-day lead: the yield XGBoost has the same relative error with and without satellite features (0.404 against 0.405); the drought model changes by +0.012 F1
+  and +0.004 PR-AUC, and by only +0.0015 PR-AUC on the validation years. Satellite features do not clearly help. (The weather-only yield and drought results reproduced the earlier ones.)
+- **Decision.** The served models stay weather-only. The drought rule used to serve whichever feature set had the higher validation PR-AUC, which here would have switched to the
+  satellite model on a 0.001 difference. The rule now requires a gain of at least 0.01 (`SATELLITE_MIN_GAIN`). That threshold was chosen after seeing these results, so this is
+  a post-hoc choice; it uses validation years only, and the test gain (0.004) would not have met it either. The reasons are simplicity and a practical constraint: the simulator's
+  what-if scenarios cannot recompute NDVI or soil moisture (`risk_scenarios` refuses a drought model that needs them).
+- **Bug found by the real data.** `simulator.export_sim_data.reference_ndvi` failed on the parquet date resolution (ns) against Python timestamps (us); fixed and tested.
+- **Everything that said "synthetic satellite" now follows the data**: the pages' note, Methodology table, report and demo-script sentences, the bundle manifest note and the
+  site's data credit. The synthetic generator remains the fallback when Earth Engine is unavailable, and those texts switch back automatically.

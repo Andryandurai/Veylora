@@ -33,6 +33,9 @@ from config import get_path, get_seed, load_settings, set_global_seed
 LOG = logging.getLogger(__name__)
 
 N_BOOT = 300
+# Satellite features are served only if they raise validation PR-AUC by at least this much (D-036): a gain
+# smaller than the noise would pick a more complex model, and the simulator cannot recompute them for scenarios.
+SATELLITE_MIN_GAIN = 0.01
 
 
 def folds() -> list[dict[str, Any]]:
@@ -328,7 +331,14 @@ def run_drought(
         y_test, probs, blocks, reference="climatology", n_boot=30 if quick else N_BOOT
     )
     scores = {k: results["feature_sets"][k]["valid"]["pr_auc"] for k in fitted}
-    served = "weather" if satellite_synthetic else max(scores, key=scores.get)
+    gain = scores["weather+satellite"] - scores["weather"]
+    served = (
+        "weather+satellite"
+        if (not satellite_synthetic and gain >= SATELLITE_MIN_GAIN)
+        else "weather"
+    )
+    results["satellite_gain_valid"] = float(gain)
+    results["satellite_min_gain"] = SATELLITE_MIN_GAIN
     results["served_feature_set"] = served
     results["satellite_features_synthetic"] = satellite_synthetic
     artifact = {

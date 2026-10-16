@@ -381,6 +381,23 @@ def test_reference_ndvi_uses_the_covering_composite_and_keeps_the_synthetic_flag
     assert X.reference_ndvi(one_synthetic, "a__b", 2000, "kharif")["is_synthetic"] is True
 
 
+@pytest.mark.parametrize("unit", ["ns", "us", "s"])
+def test_reference_ndvi_accepts_any_datetime_resolution(unit: str) -> None:
+    """Real satellite tables come from parquet (ns) while Python timestamps are us: the merge must not care."""
+    dates = pd.date_range("2000-05-20", periods=4, freq="16D").astype(f"datetime64[{unit}]")
+    sat = pd.DataFrame(
+        {
+            "district_id": "a__b",
+            "date": dates,
+            "ndvi": np.linspace(0.2, 0.8, 4),
+            "is_synthetic": False,
+        }
+    )
+    result = X.reference_ndvi(sat, "a__b", 2000, "kharif")
+    assert result is not None and len(result["weekly"]) == 16 and result["is_synthetic"] is False
+    assert result["weekly"][0] == pytest.approx(0.4, abs=0.21)
+
+
 @pytest.mark.skipif(
     not (ROOT / "data" / "processed" / "weather_daily.parquet").exists(),
     reason="run `make etl` first",

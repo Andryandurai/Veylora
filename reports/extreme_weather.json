@@ -1,11 +1,11 @@
 {
  "meta": {
-  "generated_at": "2026-10-16T07:29:40+00:00",
+  "generated_at": "2026-10-16T14:47:29+00:00",
   "seed": 42,
   "reference_end_year": 2014,
   "quick": false,
   "weather_synthetic": false,
-  "satellite_features_synthetic": true,
+  "satellite_features_synthetic": false,
   "split": {
    "train_end": 2014,
    "valid": [
@@ -35,7 +35,7 @@
     "severe": 0.7
    }
   },
-  "runtime_s": 170.1,
+  "runtime_s": 243.4,
   "heatwave_served": "climatology"
  },
  "heatwave": {
@@ -1234,39 +1234,39 @@
    },
    "weather+satellite": {
     "params": {
-     "max_depth": 4,
-     "learning_rate": 0.16707221510623524,
-     "subsample": 0.6353970008207678,
-     "colsample_bytree": 0.5979914312095727,
-     "min_child_weight": 1,
-     "reg_lambda": 0.5605248221933016,
-     "n_estimators": 43
+     "max_depth": 5,
+     "learning_rate": 0.03747286278913031,
+     "subsample": 0.8189071324479794,
+     "colsample_bytree": 0.8183771004634136,
+     "min_child_weight": 18,
+     "reg_lambda": 5.6711518210443606,
+     "n_estimators": 158
     },
     "calibration": "isotonic",
-    "threshold": 0.40782122905027934,
+    "threshold": 0.42790697674418604,
     "valid": {
      "n": 3009,
      "n_positive": 629,
      "base_rate": 0.20903954802259886,
-     "threshold": 0.40782122905027934,
-     "precision": 0.6390685640362225,
-     "recall": 0.7853736089030207,
-     "f1": 0.7047075606276747,
-     "pr_auc": 0.75970228614085,
-     "roc_auc": 0.9253062751332647,
-     "brier": 0.08594241791048776
+     "threshold": 0.42790697674418604,
+     "precision": 0.6399474375821288,
+     "recall": 0.7742448330683624,
+     "f1": 0.7007194244604316,
+     "pr_auc": 0.7603552528015777,
+     "roc_auc": 0.9243460341211205,
+     "brier": 0.08635293308452857
     },
     "test": {
      "n": 3009,
      "n_positive": 225,
      "base_rate": 0.07477567298105683,
-     "threshold": 0.40782122905027934,
-     "precision": 0.3910761154855643,
-     "recall": 0.6622222222222223,
-     "f1": 0.49174917491749176,
-     "pr_auc": 0.3671520729310085,
-     "roc_auc": 0.9151716155810984,
-     "brier": 0.0570851819520055
+     "threshold": 0.42790697674418604,
+     "precision": 0.40575916230366493,
+     "recall": 0.6888888888888889,
+     "f1": 0.5107084019769358,
+     "pr_auc": 0.3816986206804067,
+     "roc_auc": 0.9195657726692209,
+     "brier": 0.054982165560092694
     },
     "reliability_test": [
      {
@@ -1280,48 +1280,48 @@
       "n": 301
      },
      {
-      "mean_pred": 0.00029437739181630853,
+      "mean_pred": 0.0,
       "observed": 0.0,
       "n": 301
      },
      {
-      "mean_pred": 0.0018083182640144665,
+      "mean_pred": 0.001534739274880832,
+      "observed": 0.0,
+      "n": 301
+     },
+     {
+      "mean_pred": 0.0018115942028985507,
       "observed": 0.0033222591362126247,
       "n": 301
      },
      {
-      "mean_pred": 0.0018083182640144665,
-      "observed": 0.0,
-      "n": 301
-     },
-     {
-      "mean_pred": 0.01513506429090322,
-      "observed": 0.01,
+      "mean_pred": 0.007802039482845422,
+      "observed": 0.0033333333333333335,
       "n": 300
      },
      {
-      "mean_pred": 0.03503317833655771,
+      "mean_pred": 0.03533092839379643,
       "observed": 0.036544850498338874,
       "n": 301
      },
      {
-      "mean_pred": 0.12096912212219825,
-      "observed": 0.07973421926910298,
+      "mean_pred": 0.12074968617493824,
+      "observed": 0.07308970099667775,
       "n": 301
      },
      {
-      "mean_pred": 0.27319804352091764,
-      "observed": 0.19601328903654486,
+      "mean_pred": 0.2812905949506626,
+      "observed": 0.2026578073089701,
       "n": 301
      },
      {
-      "mean_pred": 0.5685001739590958,
-      "observed": 0.4219269102990033,
+      "mean_pred": 0.5359859711368216,
+      "observed": 0.42857142857142855,
       "n": 301
      }
     ],
-    "brier_skill_vs_climatology_test": 0.2586839846161182,
-    "mean_predicted_test": 0.10170341986597342,
+    "brier_skill_vs_climatology_test": 0.2859940444009942,
+    "mean_predicted_test": 0.09848068115626026,
     "mean_predicted_valid": 0.20903954802259886
    }
   },
@@ -1375,7 +1375,9 @@
    },
    "n_boot_used": 300
   },
+  "satellite_gain_valid": 0.0014905849937115745,
+  "satellite_min_gain": 0.01,
   "served_feature_set": "weather",
-  "satellite_features_synthetic": true
+  "satellite_features_synthetic": false
  }
 }

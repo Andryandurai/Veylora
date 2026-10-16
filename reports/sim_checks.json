@@ -1,13 +1,13 @@
 {
  "title": "Crop-Climate Simulator \u00b7 Veylora",
- "scenarios_chip": "6 districts, 2772 scenarios, built 2026-10-16 (bd4998c)",
+ "scenarios_chip": "6 districts, 2772 scenarios",
  "drought_gauge_normal_rain": 0.043,
  "drought_gauge_rain_0.4": 0.816,
  "heat_gauge_dT0_week3": 0.0,
  "heat_gauge_max_dT+4": 0.0,
  "compare_water_baseline_mm": 600.0,
  "compare_water_optimized_mm": 409.604,
- "average_fps_5s_headless_software_gl": 12.2,
+ "average_fps_5s_headless_software_gl": 13.2,
  "yield_shown_vs_file_optimized": [
   2.677,
   2.677
@@ -94,6 +94,7 @@
   3481
  ],
  "terrain_note": "Terrain: real relief of a 10 km window (38 m, drawn 3x exaggerated)",
+ "observed_greenness_offered": true,
  "observed_ndvi_test": {
   "proxy_height": 0.3300214220620681,
   "observed_height": 0.2310149954657074,

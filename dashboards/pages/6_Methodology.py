@@ -11,12 +11,20 @@ import pandas as pd
 import streamlit as st
 
 from analytics.prescriptive.wording import paired_phrase
+from config import load_settings
 from dashboards.components import guards, labels, layout
+
+
+def _satellite_is_synthetic(quality: dict) -> bool:
+    """True when the data-quality report says any satellite rows are synthetic (or there is no report)."""
+    return quality.get("synthetic_share", {}).get("satellite_16d", 1.0) > 0
 
 
 def data_section() -> None:
     st.header("Data and provenance")
     quality = guards.read_report("data_quality.json")
+    satellite_years = load_settings()["satellite_years"]
+    synthetic_satellite = _satellite_is_synthetic(quality)
     rows = [
         (
             "Rainfall, Tmax, Tmin",
@@ -28,9 +36,11 @@ def data_section() -> None:
         ("Crop yield, area, production", "ICRISAT DLD district database", "real", "2000-2017"),
         (
             "NDVI, soil moisture (satellite)",
-            "Placeholder values, not real satellite observations",
-            "SYNTHETIC",
-            "2000-2017",
+            "Placeholder values, not real satellite observations"
+            if synthetic_satellite
+            else "MODIS NDVI and ERA5-Land soil moisture (Earth Engine)",
+            "SYNTHETIC" if synthetic_satellite else "real",
+            f"{satellite_years['start']}-{satellite_years['end']}",
         ),
     ]
     st.dataframe(
@@ -255,10 +265,14 @@ def prescriptive_section() -> None:
 
 def limits_section() -> None:
     st.header("Limitations")
+    if _satellite_is_synthetic(guards.read_report("data_quality.json")):
+        satellite_limit = "The satellite data (vegetation and soil moisture) is synthetic placeholder data, not real observations."
+    else:
+        satellite_limit = "Satellite vegetation and soil moisture are district averages from coarse grids (250 m vegetation index, about 9 km soil moisture), so clouds and mixed land use blur them."
     st.markdown(
         "- Yields are observed to 2017 only, so test years 2015-17 are the latest honest hold-out; nothing here is validated on recent seasons.\n"
         "- Forecast skill over simple baselines is small or unproven (see above). Use the intervals, not just the point forecast.\n"
-        "- The satellite data (vegetation and soil moisture) is synthetic placeholder data, not real observations.\n"
+        f"- {satellite_limit}\n"
         "- Crop and price parameters are approximate and not verified against current sources.\n"
         "- Advisory translations (Hindi, Tamil, Telugu) are drafts and need native-speaker and agronomist review; this site does not send messages.\n"
         "- The 3D simulator was tested with software rendering only; its frame rate on real hardware is not measured.\n"

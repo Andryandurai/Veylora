@@ -3,13 +3,13 @@
   "failed_checks": [],
   "synthetic_share": {
     "weather_daily": 0.0,
-    "satellite_16d": 1.0,
+    "satellite_16d": 0.0,
     "crops_annual": 0.0
   },
   "rows": {
     "districts": 51,
     "weather_daily": 633369,
-    "satellite_16d": 29325,
+    "satellite_16d": 29172,
     "crops_annual": 4286
   },
   "crop_join_coverage": 1.0

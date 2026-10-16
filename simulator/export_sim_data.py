@@ -186,9 +186,13 @@ def reference_ndvi(
         .assign(
             is_synthetic=lambda d: d["is_synthetic"].astype(float),
             ndvi=lambda d: d["ndvi"].astype(float),
+            # one datetime resolution on both sides of the merge (parquet gives ns, Python timestamps give us)
+            date=lambda d: d["date"].astype("datetime64[ns]"),
         )
     )
-    ends = pd.DataFrame({"end": [start + pd.Timedelta(days=7 * w + 6) for w in range(n_weeks)]})
+    ends = pd.DataFrame(
+        {"end": pd.to_datetime([start + pd.Timedelta(days=7 * w + 6) for w in range(n_weeks)])}
+    ).astype({"end": "datetime64[ns]"})
     merged = pd.merge_asof(
         ends, group[["date", "ndvi", "is_synthetic"]], left_on="end", right_on="date"
     )

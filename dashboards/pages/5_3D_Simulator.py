@@ -28,7 +28,7 @@ def main() -> None:
     if choice.note:
         st.info(choice.note)
     url = assets.simulator_url(choice.district_id, choice.crop)
-    st.iframe(url, height=900)
+    st.iframe(url, height=980)
     st.markdown(f"[Open the simulator in its own tab]({url})")
     st.caption(
         "The scene interpolates a precomputed grid (7 rainfall x 6 temperature x 3 irrigation strategies per district and crop; FAO-56 water balance plus the yield response, with paddy rice as a ponded field). It does not run a crop model live. "

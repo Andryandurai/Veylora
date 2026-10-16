@@ -142,7 +142,54 @@ def collect(f: Facts, count_tests: bool) -> dict[str, str]:
     def warm_median(page: str) -> float:
         return float(dash["pages"][page]["warm_s"])
 
+    def sat_synthetic() -> bool:
+        return q["synthetic_share"]["satellite_16d"] > 0
+
+    def drought_uses() -> str:
+        served = ext["drought"]["served_feature_set"]
+        return "weather" if served == "weather" else "weather and satellite"
+
+    def sat_use() -> str:
+        return (
+            "the served yield model uses weather features only and the served drought model uses "
+            f"{drought_uses()} features"
+        )
+
+    def sat_headline() -> str:
+        if sat_synthetic():
+            return (
+                "Satellite NDVI/soil-moisture inputs are **synthetic** (Earth Engine was not "
+                "authenticated). The served models do not use them."
+            )
+        return (
+            "Satellite NDVI and soil moisture are **real** (MODIS and ERA5-Land through Google "
+            f"Earth Engine); {sat_use()}."
+        )
+
+    def sat_limit() -> str:
+        if sat_synthetic():
+            return "Satellite features are synthetic"
+        return (
+            "Satellite features are district averages of coarse grids (250 m vegetation index, "
+            "about 9 km soil moisture), so clouds and mixed land use blur them"
+        )
+
+    def sat_intro() -> str:
+        if sat_synthetic():
+            return "the satellite table is synthetic and the served models do not use it"
+        return f"the satellite data is real; {sat_use()}"
+
     out: dict[str, str] = {
+        "sat_use": f.show("satellite use in served models", sat_use, "{}"),
+        "sat_headline": f.show("satellite status sentence", sat_headline, "{}"),
+        "sat_limit": f.show("satellite limitation", sat_limit, "{}"),
+        "sat_intro": f.show("satellite status in the demo script", sat_intro, "{}"),
+        "sat_banner": f.show(
+            "banner pointer", lambda: "the yellow banner and " if sat_synthetic() else "", "{}"
+        ),
+        "sat_next": f.show(
+            "next steps prefix", lambda: "real satellite data, " if sat_synthetic() else "", "{}"
+        ),
         "n_districts": f.show("districts", lambda: q["rows"]["districts"], "{:d}"),
         "n_weather": f.show("weather rows", lambda: q["rows"]["weather_daily"], "{:,}"),
         "n_yield": f.show("yield rows", lambda: q["rows"]["crops_annual"], "{:,}"),
@@ -355,7 +402,7 @@ def results_table(v: dict[str, str]) -> str:
     """The compact results table shared by README and report."""
     return f"""| Area | Measured result (held-out years) | What it means |
 |---|---|---|
-| Data | {v["n_districts"]} district units, {v["n_weather"]} daily weather rows, {v["n_yield"]} yield records; satellite table {v["sat_synth"]} synthetic | {v["dq_ok"]}; satellite features are not used by the served models |
+| Data | {v["n_districts"]} district units, {v["n_weather"]} daily weather rows, {v["n_yield"]} yield records; satellite table {v["sat_synth"]} synthetic | {v["dq_ok"]}; {v["sat_use"]} |
 | Yield forecast (2015-17, 60-day lead) | relative RMSE {v["y_rel"]} (pooled RMSE {v["y_rmse"]} t/ha, R² {v["y_r2"]}); best simple baseline ({v["y_best"]}) {v["y_best_rel"]} | Level with the best baselines: ratio vs district trend {v["y_trend_ratio"]} (95% interval {v["y_trend_lo"]} to {v["y_trend_hi"]}); clearly better than last year's yield ({v["y_naive_ratio"]}). 80% interval covers {v["y_cover"]} of test cases |
 | Drought warning (2020-24) | F1 {v["d_f1"]}, PR-AUC {v["d_ap"]} vs climatology {v["d_ap_clim"]} (base rate {v["d_base"]}) | Real skill over climatology and persistence ({v["d_ap_pers"]}); validation F1 was {v["d_f1_valid"]} |
 | Heatwave warning (14 days) | LSTM PR-AUC {v["h_ap_lstm"]} vs climatology {v["h_ap_clim"]} on {v["h_onsets"]} pooled onsets | No skill over climatology, so the **{v["h_served"]}** probability is served |
@@ -385,7 +432,7 @@ ClimateResilience-India is a district-level decision-support system for four sou
 * The yield models are **not better than simple baselines** by a margin the data can confirm. They are useful as a weather-adjusted baseline with an honest interval, not as precise predictors.
 * The heatwave LSTM has **no skill over climatology**; the system serves climatology and says so. The drought model **does** beat climatology and persistence.
 * The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it uses less water with {v["w_even_phrase"]}. The plan's story that yield recovers while water is saved is not what the models show.
-* Satellite NDVI/soil-moisture inputs are **synthetic** (Earth Engine was not authenticated). The served models do not use them.
+* {v["sat_headline"]}
 
 ## 2. Data and scope
 
@@ -442,7 +489,7 @@ The plan's figures were hypotheses, not results; they are shown here so that nob
 
 * Yields end in 2017; nothing is validated on recent seasons. There is no live weather feed: early-warning pages replay observed history.
 * District units are reconstructed 1966 parents; results are not village-level.
-* Satellite features are synthetic; weather is IMD 1-degree temperature and 0.25-degree rain grids averaged over polygons.
+* {v["sat_limit"]}; weather is IMD 1-degree temperature and 0.25-degree rain grids averaged over polygons.
 * Translations, advice wording, crop parameters and prices are unreviewed or unverified. Data licences for redistribution (IMD, ICRISAT, geoBoundaries ODbL) must be checked before publishing the demo bundle (`scripts/check_licenses.md`).
 
 ## 10. Reproduce
@@ -485,7 +532,7 @@ def demo_script(v: dict[str, str]) -> str:
 
 *Generated by `scripts/make_report.py`; the numbers are the measured ones. Say the cautions out loud: they are part of the story. Start with `make dashboards` (or `docker compose up app`) and open http://localhost:8501.*
 
-**0:00 Home.** "This covers {v["n_districts"]} district units in four southern states, built from IMD weather and ICRISAT yields. Two things to know up front: the satellite table is synthetic and the served models do not use it, and there is no live weather feed, so everything replays observed history." Point at the yellow banner and the **Measured results** tiles.
+**0:00 Home.** "This covers {v["n_districts"]} district units in four southern states, built from IMD weather and ICRISAT yields. Two things to know up front: {v["sat_intro"]}, and there is no live weather feed, so everything replays observed history." Point at {v["sat_banner"]}the **Measured results** tiles.
 
 **0:45 Weather and early warning** (district Thanjavur, date 2024-06-15, then move to a drought year such as 2003-06-15 for Warangal). "Two hazards. Drought next month uses a model that beats climatology: PR-AUC {v["d_ap"]} against {v["d_ap_clim"]}, F1 {v["d_f1"]} on 2020-24. Heatwave uses plain climatology, because my LSTM did not beat it ({v["h_ap_lstm"]} against {v["h_ap_clim"]} PR-AUC): I serve what works." Show the probability bars and the 60-day weather.
 
@@ -497,7 +544,7 @@ def demo_script(v: dict[str, str]) -> str:
 
 **4:15 Farmer advisory.** Show the same district in English and Tamil. "Fixed templates, no language model, 320 characters; the WhatsApp bot asks before using an uncertain district name and honours STOP. Sending is a dry run by default. The translations are drafts: {v["translation_review"]}."
 
-**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: {v["tests"]}; browser checks: {v["dash_pages"]} dashboard addresses with {v["dash_fail"]} failures. Next steps: real satellite data, a live forecast feed, reviewed translations, field validation."
+**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: {v["tests"]}; browser checks: {v["dash_pages"]} dashboard addresses with {v["dash_fail"]} failures. Next steps: {v["sat_next"]}a live forecast feed, reviewed translations, field validation."
 
 ## Questions to be ready for
 
@@ -592,10 +639,6 @@ def verify_claims(f: Facts) -> list[str]:
         if not normal["yield_vs_baseline"] < 1.0 or normal["water_saved_pct"] <= 30:
             failed.append(
                 "the optimizer no longer saves water at a yield cost against the baseline"
-            )
-        if not qual["synthetic_share"]["satellite_16d"] > 0:
-            failed.append(
-                "the satellite table is no longer synthetic: remove the synthetic-data statements"
             )
     except (KeyError, IndexError, TypeError):
         failed.append("result files are missing or have an unexpected structure")

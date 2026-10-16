@@ -15,15 +15,15 @@
     },
     "weather+satellite|30": {
       "model": "lstm",
-      "valid_rmse_rel": 0.3475730696044131
+      "valid_rmse_rel": 0.3377836685823976
     },
     "weather+satellite|60": {
       "model": "lstm",
-      "valid_rmse_rel": 0.33681487266318316
+      "valid_rmse_rel": 0.33263326110519514
     },
     "weather+satellite|90": {
       "model": "lstm",
-      "valid_rmse_rel": 0.3330844040228189
+      "valid_rmse_rel": 0.3286787843412953
     }
   },
   "bootstrap_vs_baseline": [
@@ -138,37 +138,37 @@
     {
       "baseline": "district_trend",
       "feature_set": "weather",
-      "hi": 1.032775298459329,
+      "hi": 1.0327752991163872,
       "lead_days": 60,
-      "lo": 0.9363795441120155,
+      "lo": 0.9363795450112874,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.2945,
-      "ratio": 0.9871518978927168,
+      "ratio": 0.987151898954191,
       "selected_on_validation": false
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather",
-      "hi": 0.8637030607067381,
+      "hi": 0.8637030618210478,
       "lead_days": 60,
-      "lo": 0.7734779035528088,
+      "lo": 0.7734779055464138,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8149760458789589,
+      "ratio": 0.8149760467552942,
       "selected_on_validation": false
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather",
-      "hi": 1.0006267108938531,
+      "hi": 1.0006267122816204,
       "lead_days": 60,
-      "lo": 0.9174646861747718,
+      "lo": 0.9174646867277163,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.0255,
-      "ratio": 0.958457771685351,
+      "ratio": 0.9584577727159707,
       "selected_on_validation": false
     },
     {
@@ -246,217 +246,217 @@
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.117316909348009,
+      "hi": 1.1115766700103424,
       "lead_days": 30,
-      "lo": 1.006050285924494,
+      "lo": 0.9955584290569662,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.9845,
-      "ratio": 1.0678593397715594,
+      "p_not_better": 0.9655,
+      "ratio": 1.0609563989824544,
       "selected_on_validation": true
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.912099263733337,
+      "hi": 0.9030851583749709,
       "lead_days": 30,
-      "lo": 0.853691616525924,
+      "lo": 0.8486118167208394,
       "model": "lstm",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.881606755900218,
+      "ratio": 0.8759078037923906,
       "selected_on_validation": true
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 1.0780522308676945,
+      "hi": 1.0675816038824586,
       "lead_days": 30,
-      "lo": 0.9967669313280895,
+      "lo": 0.990416528282803,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.9675,
-      "ratio": 1.0368192427687277,
+      "p_not_better": 0.9375,
+      "ratio": 1.0301169538292794,
       "selected_on_validation": true
     },
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.0332674162645026,
+      "hi": 1.0292836154336398,
       "lead_days": 30,
-      "lo": 0.929450865162406,
+      "lo": 0.9299497745951476,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.27,
-      "ratio": 0.9854084954440624,
+      "p_not_better": 0.258,
+      "ratio": 0.9848301946321408,
       "selected_on_validation": false
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.8618401459979705,
+      "hi": 0.860565201003553,
       "lead_days": 30,
-      "lo": 0.7708421621127384,
+      "lo": 0.767384541744077,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8135367220656601,
+      "ratio": 0.8130592866172408,
       "selected_on_validation": false
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 1.0015897760727646,
+      "hi": 0.9966756125015238,
       "lead_days": 30,
-      "lo": 0.9157583383008464,
+      "lo": 0.9144717634716493,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.0295,
-      "ratio": 0.9567650457435226,
+      "p_not_better": 0.0175,
+      "ratio": 0.9562035547422477,
       "selected_on_validation": false
     },
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.1069250966169422,
+      "hi": 1.1102046518731623,
       "lead_days": 60,
-      "lo": 0.998548661701468,
+      "lo": 1.0000233196842936,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.9725,
-      "ratio": 1.0602353059297496,
+      "p_not_better": 0.975,
+      "ratio": 1.061810801906842,
       "selected_on_validation": true
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.9049629887560391,
+      "hi": 0.9087835342096963,
       "lead_days": 60,
-      "lo": 0.8432560567188554,
+      "lo": 0.8470195395310643,
       "model": "lstm",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8753124814655444,
+      "ratio": 0.8766131845128159,
       "selected_on_validation": true
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 1.06906367037834,
+      "hi": 1.0672676181457954,
       "lead_days": 60,
-      "lo": 0.987387686507711,
+      "lo": 0.994200069189853,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.9125,
-      "ratio": 1.0294168212134698,
+      "p_not_better": 0.9485,
+      "ratio": 1.0309465213201368,
       "selected_on_validation": true
     },
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.0295064334031476,
+      "hi": 1.0356837206949983,
       "lead_days": 60,
-      "lo": 0.9345503067512547,
+      "lo": 0.9315784525998255,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.277,
-      "ratio": 0.9866060495071871,
+      "p_not_better": 0.328,
+      "ratio": 0.9888336265780463,
       "selected_on_validation": false
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.8625146756614515,
+      "hi": 0.8611064796855932,
       "lead_days": 60,
-      "lo": 0.7724444966797956,
+      "lo": 0.7726048980334588,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8145254026093283,
+      "ratio": 0.8163644528679307,
       "selected_on_validation": false
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 0.997358306088056,
+      "hi": 1.001326469421706,
       "lead_days": 60,
-      "lo": 0.9187585269269914,
+      "lo": 0.9167354532720322,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.019,
-      "ratio": 0.9579277897966572,
+      "p_not_better": 0.03,
+      "ratio": 0.9600906165714936,
       "selected_on_validation": false
     },
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.109004430572296,
+      "hi": 1.115403067326188,
       "lead_days": 90,
-      "lo": 0.9974057455751942,
+      "lo": 1.0048459934537703,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.971,
-      "ratio": 1.0595823784363383,
+      "p_not_better": 0.9835,
+      "ratio": 1.0656219418480268,
       "selected_on_validation": true
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.9056964379645986,
+      "hi": 0.9148830165573218,
       "lead_days": 90,
-      "lo": 0.8426726253261426,
+      "lo": 0.8464536625700786,
       "model": "lstm",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8747734354808667,
+      "ratio": 0.8797595977104085,
       "selected_on_validation": true
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 1.0683593455048617,
+      "hi": 1.0734767887134804,
       "lead_days": 90,
-      "lo": 0.9889470050920821,
+      "lo": 0.9946767060669803,
       "model": "lstm",
       "n": 457,
-      "p_not_better": 0.9265,
-      "ratio": 1.0287828727484534,
+      "p_not_better": 0.9595,
+      "ratio": 1.0346468806097322,
       "selected_on_validation": true
     },
     {
       "baseline": "district_trend",
       "feature_set": "weather+satellite",
-      "hi": 1.0340510392394955,
+      "hi": 1.053719137910493,
       "lead_days": 90,
-      "lo": 0.9364735541833162,
+      "lo": 0.9457239834242392,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.3035,
-      "ratio": 0.9880315209001143,
+      "p_not_better": 0.4475,
+      "ratio": 0.9960058818930567,
       "selected_on_validation": false
     },
     {
       "baseline": "naive_last_year",
       "feature_set": "weather+satellite",
-      "hi": 0.8622837670225734,
+      "hi": 0.8710653737847253,
       "lead_days": 90,
-      "lo": 0.7746779205267037,
+      "lo": 0.7834250501490664,
       "model": "xgboost",
       "n": 457,
       "p_not_better": 0.0,
-      "ratio": 0.8157022478768108,
+      "ratio": 0.822285746530172,
       "selected_on_validation": false
     },
     {
       "baseline": "prior_mean_3y",
       "feature_set": "weather+satellite",
-      "hi": 1.0003283077792244,
+      "hi": 1.0207350753857471,
       "lead_days": 90,
-      "lo": 0.9204990102017143,
+      "lo": 0.9219935473913645,
       "model": "xgboost",
       "n": 457,
-      "p_not_better": 0.026,
-      "ratio": 0.9593118261721965,
+      "p_not_better": 0.1235,
+      "ratio": 0.967054391712744,
       "selected_on_validation": false
     }
   ],
@@ -576,7 +576,7 @@
       },
       {
         "feature": "rain_d30_ratio",
-        "mean_abs_shap": 0.0023106697481125593
+        "mean_abs_shap": 0.0023106704466044903
       }
     ]
   },
@@ -630,7 +630,7 @@
     "weather|30": 316.22776601683796,
     "weather|60": 316.22776601683796,
     "weather|90": 0.01,
-    "weather+satellite|30": 1000.0,
+    "weather+satellite|30": 10.0,
     "weather+satellite|60": 316.22776601683796,
     "weather+satellite|90": 316.22776601683796
   },
@@ -684,17 +684,17 @@
   },
   "xgb_valid_rmse_rel_optuna": {
     "30": 0.3522389181393305,
-    "60": 0.35656259812895863,
+    "60": 0.35656259819445785,
     "90": 0.3528647800319716
   },
-  "synthetic_satellite": true,
+  "synthetic_satellite": false,
   "meta": {
-    "generated_at": "2026-10-16T07:26:20+00:00",
-    "git_commit": "27a069f",
+    "generated_at": "2026-10-16T14:35:45+00:00",
+    "git_commit": "a049b0f",
     "seed": 42,
-    "data_source": "postgres",
+    "data_source": "parquet",
     "n_optuna_trials": 40,
-    "satellite_features_synthetic": true,
+    "satellite_features_synthetic": false,
     "labels_synthetic": false,
     "split": {
       "train_end": 2011,
@@ -728,7 +728,7 @@
         6
       ]
     },
-    "runtime_s": 204.6
+    "runtime_s": 222.3
   },
   "scenario_response": [
     {
@@ -816,7 +816,7 @@
       "crop": "all",
       "n": 468,
       "mean_change_t_ha": 0.02687350640175011,
-      "mean_change_pct": 0.9636908524099397,
+      "mean_change_pct": 0.9636908525553424,
       "share_increase": 0.7948717948717948
     },
     {
@@ -848,15 +848,15 @@
       "crop": "wheat",
       "n": 46,
       "mean_change_t_ha": 0.0074128742779608296,
-      "mean_change_pct": 0.7082885710004665,
+      "mean_change_pct": 0.7082885724797798,
       "share_increase": 0.6739130434782609
     },
     {
       "scenario": "rain x1.4",
       "crop": "all",
       "n": 468,
-      "mean_change_t_ha": 0.04942582040007691,
-      "mean_change_pct": 1.6851083794418138,
+      "mean_change_t_ha": 0.04942582051948304,
+      "mean_change_pct": 1.6851083930402135,
       "share_increase": 0.8311965811965812
     },
     {
@@ -887,8 +887,8 @@
       "scenario": "rain x1.4",
       "crop": "wheat",
       "n": 46,
-      "mean_change_t_ha": 0.014013326832402936,
-      "mean_change_pct": 1.3068203484512493,
+      "mean_change_t_ha": 0.014013328047230487,
+      "mean_change_pct": 1.3068204868001865,
       "share_increase": 0.717391304347826
     },
     {
@@ -896,7 +896,7 @@
       "crop": "all",
       "n": 468,
       "mean_change_t_ha": 0.060847224330571215,
-      "mean_change_pct": 1.873838220370721,
+      "mean_change_pct": 1.873838220680227,
       "share_increase": 0.9337606837606838
     },
     {
@@ -927,16 +927,16 @@
       "scenario": "-2 C",
       "crop": "wheat",
       "n": 46,
-      "mean_change_t_ha": 0.017291300393607503,
-      "mean_change_pct": 1.7082026721849117,
+      "mean_change_t_ha": 0.017291300393607507,
+      "mean_change_pct": 1.7082026753338004,
       "share_increase": 1.0
     },
     {
       "scenario": "+1 C",
       "crop": "all",
       "n": 468,
-      "mean_change_t_ha": -0.05028889879443102,
-      "mean_change_pct": -1.6012996423944794,
+      "mean_change_t_ha": -0.0502888986750249,
+      "mean_change_pct": -1.6012996293701696,
       "share_increase": 0.0
     },
     {
@@ -967,16 +967,16 @@
       "scenario": "+1 C",
       "crop": "wheat",
       "n": 46,
-      "mean_change_t_ha": -0.020632395641322,
-      "mean_change_pct": -2.0344872108898526,
+      "mean_change_t_ha": -0.02063239442649445,
+      "mean_change_pct": -2.034487078381657,
       "share_increase": 0.0
     },
     {
       "scenario": "+2 C",
       "crop": "all",
       "n": 468,
-      "mean_change_t_ha": -0.0723777216817957,
-      "mean_change_pct": -2.3045578296174587,
+      "mean_change_t_ha": -0.07237772156238957,
+      "mean_change_pct": -2.3045578166610325,
       "share_increase": 0.0
     },
     {
@@ -1007,16 +1007,16 @@
       "scenario": "+2 C",
       "crop": "wheat",
       "n": 46,
-      "mean_change_t_ha": -0.028208007924639487,
-      "mean_change_pct": -2.7248612431981063,
+      "mean_change_t_ha": -0.028208006709811936,
+      "mean_change_pct": -2.7248611113805574,
       "share_increase": 0.0
     },
     {
       "scenario": "+4 C",
       "crop": "all",
       "n": 468,
-      "mean_change_t_ha": -0.10181189473417387,
-      "mean_change_pct": -3.519562501336853,
+      "mean_change_t_ha": -0.10181189461476774,
+      "mean_change_pct": -3.5195624885157195,
       "share_increase": 0.0
     },
     {
@@ -1047,8 +1047,8 @@
       "scenario": "+4 C",
       "crop": "wheat",
       "n": 46,
-      "mean_change_t_ha": -0.0586271849105446,
-      "mean_change_pct": -5.706297501202421,
+      "mean_change_t_ha": -0.05862718369571706,
+      "mean_change_pct": -5.7062973707613285,
       "share_increase": 0.0
     }
   ]

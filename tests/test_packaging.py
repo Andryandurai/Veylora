@@ -200,7 +200,19 @@ def test_committed_demo_bundle_is_intact_and_complete() -> None:
         pytest.skip("no demo bundle yet: run `python -m config.bundle make`")
     assert bundle.verify() == []
     manifest = json.loads(bundle.MANIFEST.read_text(encoding="utf-8"))
-    assert "synthetic" in manifest["note"]
+    assert "satellite_16d is" in manifest["note"] and (
+        "synthetic" in manifest["note"] or "real" in manifest["note"]
+    )
     assert (
         sum(f["bytes"] for f in manifest["files"].values()) < 60e6
     )  # small enough for a plain git repository
+
+
+def test_manifest_note_degrades_gracefully_when_the_satellite_table_is_unreadable(
+    tmp_path, monkeypatch
+) -> None:
+    """A placeholder instead of a parquet table must not stop the bundle from being written."""
+    (tmp_path / "processed").mkdir()
+    (tmp_path / "processed" / "satellite_16d.parquet").write_bytes(b"not a parquet file")
+    monkeypatch.setattr(bundle, "BUNDLE", tmp_path)
+    assert bundle._note().endswith("satellite_16d provenance not checked")

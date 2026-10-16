@@ -10,7 +10,8 @@ models and the self-contained 3D simulator page, with a manifest of sizes and SH
   (never overwrites; ``--force`` does) after verifying the hashes;
 * ``python -m config.bundle verify``  check the bundle against its manifest.
 
-The tables contain a synthetic satellite table (flagged ``is_synthetic``) and real weather and yield aggregates. Check the
+The tables are derived district-level aggregates; the manifest note says whether the satellite table is real or synthetic
+(flagged ``is_synthetic``). Check the
 data licences in ``scripts/check_licenses.md`` before publishing the repository with the bundle.
 """
 
@@ -65,6 +66,28 @@ def entries() -> list[tuple[str, Path, Path]]:
     return items
 
 
+def _note() -> str:
+    """The manifest note, stating whether the bundled satellite table is synthetic (read from the bundled data)."""
+    import pandas as pd
+
+    base = "derived district-level tables and serving models; "
+    try:
+        satellite = pd.read_parquet(
+            BUNDLE / "processed" / "satellite_16d.parquet", columns=["is_synthetic"]
+        )
+    except (
+        Exception
+    ) as exc:  # not a readable parquet table (for example a placeholder in a test layout)
+        LOG.warning("satellite_16d provenance not read for the manifest note: %s", exc)
+        return base + "satellite_16d provenance not checked"
+    if bool(satellite["is_synthetic"].any()):
+        return base + "satellite_16d is synthetic (is_synthetic=True)"
+    return (
+        base
+        + "satellite_16d is real (MODIS NDVI and ERA5-Land soil moisture from Google Earth Engine)"
+    )
+
+
 def make() -> dict[str, dict[str, object]]:
     """Copy the pipeline outputs into the bundle and write ``MANIFEST.json``; raises if an output is missing."""
     missing = [str(dest) for _, _, dest in entries() if not dest.exists()]
@@ -77,7 +100,7 @@ def make() -> dict[str, dict[str, object]]:
         files[name] = {"bytes": bundled.stat().st_size, "sha256": _sha256(bundled)}
     manifest = {
         "created": datetime.now(UTC).isoformat(timespec="seconds"),
-        "note": "derived district-level tables and serving models; satellite_16d is synthetic (is_synthetic=True)",
+        "note": _note(),
         "files": files,
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2), encoding="utf-8")

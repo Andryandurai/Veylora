@@ -1,9 +1,8 @@
 > Yield labels: real (ICRISAT District Level Database, 1991-2017), weather: IMD / NASA POWER (see docs/DATA_QUALITY.md).
-> **Satellite features (NDVI, soil moisture) are SYNTHETIC** (Google Earth Engine not authenticated): they are derived from rainfall, so the `weather+satellite` rows below cannot show whether real satellite data would help.
 
 # Yield model comparison
 
-Generated 2026-10-16T07:26:20+00:00 (commit `27a069f`, seed 42, data from postgres, 40 Optuna trials, 205 s).
+Generated 2026-10-16T14:35:45+00:00 (commit `a049b0f`, seed 42, data from parquet, 40 Optuna trials, 222 s).
 
 ## Setup
 
@@ -75,27 +74,27 @@ Relative RMSE at this lead, validation vs test years (a large gap means validati
 | 30 | naive (last year) | 457 | 0.496 | 1.184 | 0.673 | 0.882 | 30.382 |
 | 30 | district linear trend | 457 | 0.409 | 1.271 | 0.743 | 0.864 | 25.927 |
 | 30 | mean of previous 3 years | 457 | 0.421 | 0.965 | 0.586 | 0.921 | 27.189 |
-| 30 | ridge | 457 | 0.406 | 1.016 | 0.613 | 0.913 | 24.746 |
-| 30 | random forest | 457 | 0.407 | 1.031 | 0.595 | 0.910 | 25.449 |
-| 30 | XGBoost (temperature-monotone) | 457 | 0.403 | 0.989 | 0.577 | 0.918 | 24.379 |
-| 30 | XGBoost (unconstrained) | 457 | 0.407 | 1.033 | 0.612 | 0.910 | 24.947 |
-| 30 | LSTM | 457 | 0.437 | 1.093 | 0.641 | 0.899 | 27.926 |
+| 30 | ridge | 457 | 0.420 | 1.021 | 0.606 | 0.912 | 25.794 |
+| 30 | random forest | 457 | 0.401 | 1.042 | 0.600 | 0.909 | 25.175 |
+| 30 | XGBoost (temperature-monotone) | 457 | 0.403 | 0.991 | 0.583 | 0.917 | 24.514 |
+| 30 | XGBoost (unconstrained) | 457 | 0.405 | 1.004 | 0.594 | 0.915 | 24.550 |
+| 30 | LSTM | 457 | 0.434 | 1.063 | 0.621 | 0.905 | 27.740 |
 | 60 | naive (last year) | 457 | 0.496 | 1.184 | 0.673 | 0.882 | 30.382 |
 | 60 | district linear trend | 457 | 0.409 | 1.271 | 0.743 | 0.864 | 25.927 |
 | 60 | mean of previous 3 years | 457 | 0.421 | 0.965 | 0.586 | 0.921 | 27.189 |
-| 60 | ridge | 457 | 0.417 | 1.081 | 0.646 | 0.901 | 25.371 |
-| 60 | random forest | 457 | 0.406 | 1.032 | 0.597 | 0.910 | 25.031 |
-| 60 | XGBoost (temperature-monotone) | 457 | 0.404 | 1.032 | 0.613 | 0.910 | 24.605 |
-| 60 | XGBoost (unconstrained) | 457 | 0.407 | 1.013 | 0.603 | 0.914 | 24.925 |
-| 60 | LSTM | 457 | 0.434 | 1.081 | 0.632 | 0.901 | 27.371 |
+| 60 | ridge | 457 | 0.413 | 1.057 | 0.630 | 0.906 | 25.247 |
+| 60 | random forest | 457 | 0.408 | 1.065 | 0.609 | 0.904 | 25.480 |
+| 60 | XGBoost (temperature-monotone) | 457 | 0.405 | 1.013 | 0.601 | 0.914 | 24.918 |
+| 60 | XGBoost (unconstrained) | 457 | 0.402 | 1.055 | 0.624 | 0.906 | 25.123 |
+| 60 | LSTM | 457 | 0.434 | 1.084 | 0.635 | 0.901 | 27.764 |
 | 90 | naive (last year) | 457 | 0.496 | 1.184 | 0.673 | 0.882 | 30.382 |
 | 90 | district linear trend | 457 | 0.409 | 1.271 | 0.743 | 0.864 | 25.927 |
 | 90 | mean of previous 3 years | 457 | 0.421 | 0.965 | 0.586 | 0.921 | 27.189 |
-| 90 | ridge | 457 | 0.417 | 1.073 | 0.641 | 0.903 | 25.361 |
-| 90 | random forest | 457 | 0.406 | 1.047 | 0.608 | 0.908 | 24.921 |
-| 90 | XGBoost (temperature-monotone) | 457 | 0.404 | 1.012 | 0.600 | 0.914 | 24.596 |
-| 90 | XGBoost (unconstrained) | 457 | 0.404 | 1.023 | 0.606 | 0.912 | 24.599 |
-| 90 | LSTM | 457 | 0.434 | 1.103 | 0.641 | 0.898 | 27.528 |
+| 90 | ridge | 457 | 0.413 | 1.055 | 0.629 | 0.906 | 25.287 |
+| 90 | random forest | 457 | 0.406 | 1.075 | 0.616 | 0.903 | 25.248 |
+| 90 | XGBoost (temperature-monotone) | 457 | 0.408 | 1.081 | 0.635 | 0.902 | 24.868 |
+| 90 | XGBoost (unconstrained) | 457 | 0.405 | 1.008 | 0.592 | 0.914 | 24.605 |
+| 90 | LSTM | 457 | 0.436 | 1.138 | 0.667 | 0.891 | 27.915 |
 
 ## Test-set results by crop (weather, lead 60 d)
 
@@ -136,34 +135,34 @@ Relative RMSE at this lead, validation vs test years (a large gap means validati
 
 ## Does the satellite feature set help?
 
-Test `rmse_rel`; negative change = satellite helps. **Satellite data is synthetic, so this is not evidence about real NDVI.**
+Test `rmse_rel`; negative change = satellite helps.
 
 | lead_days | model | weather | weather+satellite | change_with_satellite |
 | --- | --- | --- | --- | --- |
 | 30 | naive (last year) | 0.496 | 0.496 | 0.000 |
 | 30 | district linear trend | 0.409 | 0.409 | 0.000 |
 | 30 | mean of previous 3 years | 0.421 | 0.421 | 0.000 |
-| 30 | ridge | 0.411 | 0.406 | -0.006 |
-| 30 | random forest | 0.401 | 0.407 | 0.006 |
-| 30 | XGBoost (temperature-monotone) | 0.405 | 0.403 | -0.001 |
-| 30 | XGBoost (unconstrained) | 0.400 | 0.407 | 0.007 |
-| 30 | LSTM | 0.426 | 0.437 | 0.011 |
+| 30 | ridge | 0.411 | 0.420 | 0.009 |
+| 30 | random forest | 0.401 | 0.401 | -0.000 |
+| 30 | XGBoost (temperature-monotone) | 0.405 | 0.403 | -0.002 |
+| 30 | XGBoost (unconstrained) | 0.400 | 0.405 | 0.005 |
+| 30 | LSTM | 0.426 | 0.434 | 0.009 |
 | 60 | naive (last year) | 0.496 | 0.496 | 0.000 |
 | 60 | district linear trend | 0.409 | 0.409 | 0.000 |
 | 60 | mean of previous 3 years | 0.421 | 0.421 | 0.000 |
-| 60 | ridge | 0.415 | 0.417 | 0.002 |
-| 60 | random forest | 0.408 | 0.406 | -0.002 |
-| 60 | XGBoost (temperature-monotone) | 0.404 | 0.404 | -0.000 |
-| 60 | XGBoost (unconstrained) | 0.403 | 0.407 | 0.004 |
+| 60 | ridge | 0.415 | 0.413 | -0.002 |
+| 60 | random forest | 0.408 | 0.408 | -0.000 |
+| 60 | XGBoost (temperature-monotone) | 0.404 | 0.405 | 0.001 |
+| 60 | XGBoost (unconstrained) | 0.403 | 0.402 | -0.001 |
 | 60 | LSTM | 0.428 | 0.434 | 0.006 |
 | 90 | naive (last year) | 0.496 | 0.496 | 0.000 |
 | 90 | district linear trend | 0.409 | 0.409 | 0.000 |
 | 90 | mean of previous 3 years | 0.421 | 0.421 | 0.000 |
-| 90 | ridge | 0.425 | 0.417 | -0.009 |
+| 90 | ridge | 0.425 | 0.413 | -0.012 |
 | 90 | random forest | 0.407 | 0.406 | -0.001 |
-| 90 | XGBoost (temperature-monotone) | 0.405 | 0.404 | -0.000 |
-| 90 | XGBoost (unconstrained) | 0.404 | 0.404 | -0.000 |
-| 90 | LSTM | 0.430 | 0.434 | 0.004 |
+| 90 | XGBoost (temperature-monotone) | 0.405 | 0.408 | 0.003 |
+| 90 | XGBoost (unconstrained) | 0.404 | 0.405 | 0.001 |
+| 90 | LSTM | 0.430 | 0.436 | 0.006 |
 
 ## Paired cluster bootstrap against the baselines (test years)
 
@@ -303,7 +302,7 @@ Top features by mean |SHAP| (relative-yield units):
   "weather|30": 316.22776601683796,
   "weather|60": 316.22776601683796,
   "weather|90": 0.01,
-  "weather+satellite|30": 1000.0,
+  "weather+satellite|30": 10.0,
   "weather+satellite|60": 316.22776601683796,
   "weather+satellite|90": 316.22776601683796
  },

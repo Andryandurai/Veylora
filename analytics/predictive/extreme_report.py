@@ -117,6 +117,10 @@ def write_report(results: dict[str, Any], figs: dict[str, np.ndarray]) -> None:
         lines.append(
             "> **Soil moisture and NDVI anomaly features are SYNTHETIC** (derived from rainfall; Google Earth Engine not authenticated). The shipped drought model therefore uses weather-derived features only."
         )
+    else:
+        lines.append(
+            "> Satellite features (MODIS NDVI anomaly, ERA5-Land soil moisture through Google Earth Engine): real."
+        )
     folds = pd.DataFrame(heat["folds"])
     plan = folds[folds["plan_split"]].iloc[0]
     lines += [
@@ -314,7 +318,7 @@ def write_report(results: dict[str, Any], figs: dict[str, np.ndarray]) -> None:
     ]
     served = drought["served_feature_set"]
     lines += [
-        f"Shipped drought model: **XGBoost, {served} features** ({'forced to weather-only because the satellite features are synthetic' if drought['satellite_features_synthetic'] else 'best validation PR-AUC'}).",
+        f"Shipped drought model: **XGBoost, {served} features** ({_served_reason(drought)}).",
         "",
     ]
     lines += [
@@ -355,9 +359,36 @@ def write_report(results: dict[str, Any], figs: dict[str, np.ndarray]) -> None:
         "- **Drought predictability is partly structural.** Next month's SPI-3 window shares two of its three months with the current SPI-3, so part of the skill is arithmetic persistence of observed rainfall; it is a one-month outlook, not a seasonal forecast, and the skill measured against persistence (above) is the more informative number.",
         "- **Calibration on small samples.** With fewer than 50 validation positives a logistic calibrator replaces isotonic regression; probabilities are then smoother but less flexible.",
         "- **Lead times** above are what the evaluation supports, not what the plan hoped for; the 14-day output is only as good as the horizon verdicts above.",
-        "- **Synthetic inputs** are flagged at the top; drought features from satellite are not used in the shipped model while they are synthetic.",
+        _satellite_limitation(drought),
         "",
     ]
     path = ROOT / "reports" / "extreme_weather_report.md"
     path.write_text("\n".join(lines), encoding="utf-8")
     LOG.info("wrote %s", path)
+
+
+def _served_reason(drought: dict) -> str:
+    """Why this feature set is served, from the stored validation comparison."""
+    if drought["satellite_features_synthetic"]:
+        return "forced to weather-only because the satellite features are synthetic"
+    gain, need = drought["satellite_gain_valid"], drought["satellite_min_gain"]
+    if drought["served_feature_set"] == "weather":
+        return (
+            f"adding the real satellite features changed validation PR-AUC by {gain:+.3f}, below the {need:.2f} "
+            "needed to serve them; they also cannot be recomputed under the simulator's what-if scenarios"
+        )
+    return f"the real satellite features raised validation PR-AUC by {gain:+.3f}, at least the {need:.2f} required"
+
+
+def _satellite_limitation(drought: dict) -> str:
+    """The limitation bullet about satellite inputs, worded for the data actually used."""
+    if drought["satellite_features_synthetic"]:
+        return "- **Synthetic inputs** are flagged at the top; drought features from satellite are not used in the shipped model while they are synthetic."
+    sets = drought["feature_sets"]
+    test_gain = sets["weather+satellite"]["test"]["pr_auc"] - sets["weather"]["test"]["pr_auc"]
+    return (
+        "- **Satellite features** are real. Their effect on drought skill is small (validation PR-AUC "
+        f"{drought['satellite_gain_valid']:+.3f}, test {test_gain:+.3f}), so the shipped model does not use them."
+        if drought["served_feature_set"] == "weather"
+        else f"- **Satellite features** are real and are used by the shipped model (validation PR-AUC {drought['satellite_gain_valid']:+.3f}, test {test_gain:+.3f})."
+    )

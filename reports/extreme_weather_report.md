@@ -1,9 +1,9 @@
 > Weather: real (IMD gridded rain, Tmax, Tmin; NASA POWER humidity, wind, solar).
-> **Soil moisture and NDVI anomaly features are SYNTHETIC** (derived from rainfall; Google Earth Engine not authenticated). The shipped drought model therefore uses weather-derived features only.
+> Satellite features (MODIS NDVI anomaly, ERA5-Land soil moisture through Google Earth Engine): real.
 
 # Extreme-weather early warning: heatwave and drought
 
-Generated 2026-10-16T07:29:40+00:00 (seed 42, 170 s).
+Generated 2026-10-16T14:47:29+00:00 (seed 42, 243 s).
 
 ## Definitions and setup
 
@@ -90,7 +90,7 @@ Base rate of next-month drought: train 0.158, validation 0.209, **test 0.075**. 
 | forecast | n | n_positive | base_rate | precision | recall | f1 | pr_auc | roc_auc | brier | brier_skill_vs_climatology | mean_predicted |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | XGBoost (weather) | 3009 | 225 | 0.0748 | 0.4091 | 0.6400 | 0.4991 | 0.3779 | 0.9188 | 0.0559 | 0.2741 | 0.1024 |
-| XGBoost (weather+satellite) | 3009 | 225 | 0.0748 | 0.3911 | 0.6622 | 0.4917 | 0.3672 | 0.9152 | 0.0571 | 0.2587 | 0.1017 |
+| XGBoost (weather+satellite) | 3009 | 225 | 0.0748 | 0.4058 | 0.6889 | 0.5107 | 0.3817 | 0.9196 | 0.0550 | 0.2860 | 0.0985 |
 | climatology | 3009 | 225 | 0.0748 | 0.0883 | 0.2578 | 0.1315 | 0.0894 | 0.5601 | 0.0770 |  |  |
 | persistence | 3009 | 225 | 0.0748 | 0.2696 | 0.2756 | 0.2725 | 0.1285 | 0.6076 | 0.1100 |  |  |
 
@@ -99,7 +99,7 @@ Block bootstrap (district-years) of PR-AUC on the test years:
 - XGBoost (weather): 0.378; skill over climatology: PR-AUC +0.289 (CI +0.242 to +0.337).
 - persistence: 0.162; skill over climatology: PR-AUC +0.072 (CI +0.046 to +0.106).
 
-Shipped drought model: **XGBoost, weather features** (forced to weather-only because the satellite features are synthetic).
+Shipped drought model: **XGBoost, weather features** (adding the real satellite features changed validation PR-AUC by +0.001, below the 0.01 needed to serve them; they also cannot be recomputed under the simulator's what-if scenarios).
 
 ![Reliability](figures/extreme_reliability.png)
 
@@ -129,4 +129,4 @@ Share of forecasts falling in each level:
 - **Drought predictability is partly structural.** Next month's SPI-3 window shares two of its three months with the current SPI-3, so part of the skill is arithmetic persistence of observed rainfall; it is a one-month outlook, not a seasonal forecast, and the skill measured against persistence (above) is the more informative number.
 - **Calibration on small samples.** With fewer than 50 validation positives a logistic calibrator replaces isotonic regression; probabilities are then smoother but less flexible.
 - **Lead times** above are what the evaluation supports, not what the plan hoped for; the 14-day output is only as good as the horizon verdicts above.
-- **Synthetic inputs** are flagged at the top; drought features from satellite are not used in the shipped model while they are synthetic.
+- **Satellite features** are real. Their effect on drought skill is small (validation PR-AUC +0.001, test +0.004), so the shipped model does not use them.

@@ -10,24 +10,24 @@ ClimateResilience-India is a district-level decision-support system for four sou
 
 | Area | Measured result (held-out years) | What it means |
 |---|---|---|
-| Data | 51 district units, 633,369 daily weather rows, 4,286 yield records; satellite table 100% synthetic | all data-quality checks passed; satellite features are not used by the served models |
+| Data | 51 district units, 633,369 daily weather rows, 4,286 yield records; satellite table 0% synthetic | all data-quality checks passed; the served yield model uses weather features only and the served drought model uses weather features |
 | Yield forecast (2015-17, 60-day lead) | relative RMSE 40.4% (pooled RMSE 1.04 t/ha, R² 0.91); best simple baseline (district trend) 40.9% | Level with the best baselines: ratio vs district trend 0.99 (95% interval 0.94 to 1.03); clearly better than last year's yield (0.81). 80% interval covers 80% of test cases |
 | Drought warning (2020-24) | F1 0.50, PR-AUC 0.38 vs climatology 0.09 (base rate 7.5%) | Real skill over climatology and persistence (0.13); validation F1 was 0.70 |
 | Heatwave warning (14 days) | LSTM PR-AUC 0.014 vs climatology 0.064 on 37 pooled onsets | No skill over climatology, so the **climatology** probability is served |
 | Irrigation optimizer (normal rain) | saves 61% of the 600 mm baseline water; keeps 98% of baseline yield | Modelled, not field-tested. Vs an even split: 161 mm less water, yield difference +0.013 (interval +0.0005 to +0.0268), worse in 7 of 20 cases |
-| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.4-3.0 s | Headless Chromium with software rendering |
+| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.6-3.0 s | Headless Chromium with software rendering |
 | Advisory bot | 7 of 7 smoke checks passed | Dry run by default; translations unreviewed |
-| Tests | 352 automated tests | `make test`; in a clean Linux container: 327 passed, 9 skipped in 71.21s (0:01:11) |
+| Tests | 358 automated tests | `make test`; in a clean Linux container: 327 passed, 9 skipped in 71.21s (0:01:11) |
 
 
 * The yield models are **not better than simple baselines** by a margin the data can confirm. They are useful as a weather-adjusted baseline with an honest interval, not as precise predictors.
 * The heatwave LSTM has **no skill over climatology**; the system serves climatology and says so. The drought model **does** beat climatology and persistence.
 * The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it uses less water with a clear but small yield gain. The plan's story that yield recovers while water is saved is not what the models show.
-* Satellite NDVI/soil-moisture inputs are **synthetic** (Earth Engine was not authenticated). The served models do not use them.
+* Satellite NDVI and soil moisture are **real** (MODIS and ERA5-Land through Google Earth Engine); the served yield model uses weather features only and the served drought model uses weather features.
 
 ## 2. Data and scope
 
-Units are the 51 yield-reporting district groups that ICRISAT publishes (1966 boundaries, reconstructed from 2021 polygons), not villages. Sources: IMD gridded rainfall and temperature, NASA POWER (humidity, wind, solar), ICRISAT district yields (2000-2017), geoBoundaries polygons. Rows: 633,369 daily weather, 4,286 yield records, 29,325 satellite rows (100% synthetic, flagged `is_synthetic`). Data-quality verdict: all data-quality checks passed (`docs/DATA_QUALITY.md`). Decisions that shape the results are logged in `docs/DECISIONS.md`.
+Units are the 51 yield-reporting district groups that ICRISAT publishes (1966 boundaries, reconstructed from 2021 polygons), not villages. Sources: IMD gridded rainfall and temperature, NASA POWER (humidity, wind, solar), ICRISAT district yields (2000-2017), geoBoundaries polygons. Rows: 633,369 daily weather, 4,286 yield records, 29,172 satellite rows (0% synthetic, flagged `is_synthetic`). Data-quality verdict: all data-quality checks passed (`docs/DATA_QUALITY.md`). Decisions that shape the results are logged in `docs/DECISIONS.md`.
 
 ## 3. Climate findings (descriptive and diagnostic)
 
@@ -66,10 +66,10 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 ## 7. Simulator, dashboards, advisory
 
 * **3D simulator** (Three.js, one self-contained page): crop-specific plant models that grow over the season, flooded and terraced paddies, soil that darkens when wet and cracks when dry, daily weather with dates, a time-of-day control, an uncertainty view and a by-stage stress panel; the relief is real (open terrain tiles) but fields, plants and soil classes are schematic. Checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 12 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
-* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.4-3.0 s.
+* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.6-3.0 s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; 7 of 7 bot smoke checks passed. Translation review: MISSING (no native-speaker review done).
 * **Container:** 7 of 7 checks passed (serving image 3,525 MB, non-root, health check answers, models run from the demo bundle, memory 172.5MiB / 8.729GiB); the full test suite inside a container built from `requirements.lock`: 327 passed, 9 skipped in 71.21s (0:01:11) (browser tests skip there: no Chromium or node in the image).
-* **Automated tests:** 352 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
+* **Automated tests:** 358 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
 * **Deployed URL:** MISSING (deployment is a manual step, see docs/DEPLOY.md).
 
 ## 8. The plan's targets against what was measured
@@ -86,7 +86,7 @@ The plan's figures were hypotheses, not results; they are shown here so that nob
 
 * Yields end in 2017; nothing is validated on recent seasons. There is no live weather feed: early-warning pages replay observed history.
 * District units are reconstructed 1966 parents; results are not village-level.
-* Satellite features are synthetic; weather is IMD 1-degree temperature and 0.25-degree rain grids averaged over polygons.
+* Satellite features are district averages of coarse grids (250 m vegetation index, about 9 km soil moisture), so clouds and mixed land use blur them; weather is IMD 1-degree temperature and 0.25-degree rain grids averaged over polygons.
 * Translations, advice wording, crop parameters and prices are unreviewed or unverified. Data licences for redistribution (IMD, ICRISAT, geoBoundaries ODbL) must be checked before publishing the demo bundle (`scripts/check_licenses.md`).
 
 ## 10. Reproduce

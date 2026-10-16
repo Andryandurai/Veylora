@@ -60,9 +60,22 @@ def test_page_runs_without_exception(page):
     assert not at.error, [e.value for e in at.error]
 
 
-def test_every_page_warns_about_synthetic_satellite_data():
+def _synthetic_share() -> dict[str, float]:
+    """The synthetic share of every table, from the data-quality report the pages themselves read."""
+    import json
+
+    path = ROOT / "reports" / "data_quality.json"
+    return json.loads(path.read_text(encoding="utf-8"))["synthetic_share"]
+
+
+def _satellite_is_synthetic() -> bool:
+    return _synthetic_share()["satellite_16d"] > 0
+
+
+def test_pages_show_the_synthetic_data_note_exactly_when_the_report_says_so():
+    expected = any(share > 0 for share in _synthetic_share().values())
     for page in ("home", "weather", "yield", "map", "advisory", "methodology"):
-        assert "Synthetic data in use" in text_of(run(page)), page
+        assert ("Synthetic data in use" in text_of(run(page))) == expected, page
 
 
 def test_home_lists_scope_and_reads_measured_results():
@@ -153,7 +166,8 @@ def test_methodology_reads_the_reports_and_states_the_limits():
         "Limitations",
     ]
     text = text_of(at)
-    assert "SYNTHETIC" in "".join(df.value.to_csv() for df in at.dataframe)
+    table = "".join(df.value.to_csv() for df in at.dataframe)
+    assert ("SYNTHETIC" in table) == _satellite_is_synthetic()
     assert "do not clearly beat" in text and "Served heatwave probability" in text
 
 

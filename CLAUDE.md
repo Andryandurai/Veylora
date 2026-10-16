@@ -83,7 +83,9 @@ All tables except `districts` carry `is_synthetic: bool` (True for any row produ
 district reconstructed from 2021 polygons, see docs/DECISIONS.md D-006), 51 units in the 4 study states.
 **Windows (settings.yaml):** crop years 2000-2017 (real yields end 2017; history from 1991 for lags),
 weather 1991-2024, satellite 2000-2024. **Crop year Y** = the season starting in calendar year Y.
-Current data status: weather real (IMD + NASA POWER), crops real (ICRISAT), **satellite SYNTHETIC until GEE is authenticated**.
+Current data status: weather real (IMD + NASA POWER), crops real (ICRISAT), satellite real (MODIS NDVI + ERA5-Land soil moisture
+via Google Earth Engine, project `veylora-ee`, non-commercial Community tier). If Earth Engine is unavailable the ETL falls back to the
+flagged synthetic generator, and every page, report and the manifest then say so automatically.
 
 ### districts
 | column | dtype | notes |

@@ -25,6 +25,7 @@ from playwright.sync_api import Page, sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "simulator" / "index_embedded.html"
 FIGURES = ROOT / "reports" / "figures"
+PAGE_LOAD_MS = 120_000  # the 12 MB page can load slowly on a busy machine (software rendering)
 LAUNCH_ARGS = [
     "--use-gl=angle",
     "--use-angle=swiftshader",
@@ -251,6 +252,15 @@ def scene_checks(page: Page, failures: list[str], report: dict[str, object]) -> 
         failures.append(
             "the satellite NDVI legend does not say whether the data are synthetic or observed"
         )
+    own = json.loads((ROOT / "simulator" / "sim_data.json").read_text(encoding="utf-8"))
+    satellite_synthetic = own["meta"]["is_synthetic_inputs"]["satellite_dataset"]
+    offered = not page.is_hidden("#fs-green")
+    report["observed_greenness_offered"] = offered
+    if offered == satellite_synthetic:
+        failures.append(
+            "the observed-greenness choice should be offered exactly when the satellite data are real "
+            f"(synthetic={satellite_synthetic}, offered={offered})"
+        )
     page.select_option("#sel-crop", "wheat")
     settle(page, 2)
     if not page.is_hidden("#card-pond"):
@@ -262,8 +272,8 @@ def scene_checks(page: Page, failures: list[str], report: dict[str, object]) -> 
 def observed_ndvi_check(browser, failures: list[str], report: dict[str, object]) -> None:
     """With real (non-synthetic) satellite data the page offers observed greenness; test it on a modified copy of the data.
 
-    The real data set is synthetic today, so the one district-crop below is *declared* observed in a temporary copy
-    (greenness 0.25 all season) purely to exercise the code path; nothing is written to the project files.
+    The copy declares one district-crop observed (greenness 0.25 all season) and another synthetic, so the check does
+    not depend on whether the project's own satellite data is real; nothing is written to the project files.
     """
     import tempfile
 
@@ -272,6 +282,7 @@ def observed_ndvi_check(browser, failures: list[str], report: dict[str, object])
     data = json.loads((ROOT / "simulator" / "sim_data.json").read_text(encoding="utf-8"))
     district = data["districts"][0]
     district["reference_ndvi"]["rice"] = {"weekly": [0.25] * 16, "is_synthetic": False}
+    district["reference_ndvi"]["wheat"] = {"weekly": [0.25] * 16, "is_synthetic": True}
     with tempfile.TemporaryDirectory() as tmp:
         source = Path(tmp) / "data.json"
         source.write_text(json.dumps(data), encoding="utf-8")
@@ -279,7 +290,10 @@ def observed_ndvi_check(browser, failures: list[str], report: dict[str, object])
             vendor=True, data_path=source, out_path=Path(tmp) / "page.html"
         )
         page = browser.new_page(viewport={"width": 1500, "height": 900})
-        page.goto(page_file.as_uri() + f"?quality=high&district={district['id']}&crop=rice")
+        page.goto(
+            page_file.as_uri() + f"?quality=high&district={district['id']}&crop=rice",
+            timeout=PAGE_LOAD_MS,
+        )
         page.wait_for_function("window.__sim && window.__sim.ready", timeout=120000)
         set_range(page, "#rng-week", 12)
         settle(page, 3)
@@ -328,7 +342,7 @@ def run() -> int:
             ),
         )
         page.on("pageerror", lambda exc: errors.append(f"pageerror: {exc}"))
-        page.goto(PAGE.as_uri())
+        page.goto(PAGE.as_uri(), timeout=PAGE_LOAD_MS)
         page.wait_for_function("window.__sim && window.__sim.ready", timeout=120000)
         settle(page, 5)
         report["title"] = page.title()

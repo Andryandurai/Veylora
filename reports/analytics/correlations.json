@@ -4,7 +4,7 @@
     2017
   ],
   "n_bootstrap": 1000,
-  "satellite_features_synthetic": true,
+  "satellite_features_synthetic": false,
   "morans_i_district_mean_yield": {
     "rice": {
       "I": 0.17649678698964225,

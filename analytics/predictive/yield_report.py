@@ -67,6 +67,10 @@ def write_report(results: dict[str, Any], metrics: pd.DataFrame) -> None:
             "> **Satellite features (NDVI, soil moisture) are SYNTHETIC** (Google Earth Engine not authenticated): they are derived from rainfall, "
             "so the `weather+satellite` rows below cannot show whether real satellite data would help."
         )
+    else:
+        lines.append(
+            "> Satellite features (MODIS NDVI, ERA5-Land soil moisture through Google Earth Engine) are real; the `weather+satellite` rows below show their effect."
+        )
     lines += [
         "",
         "# Yield model comparison",
@@ -349,7 +353,7 @@ def write_report(results: dict[str, Any], metrics: pd.DataFrame) -> None:
         "- **District aggregates, not fields.** Predictions are district-level averages; they do not describe individual farms (ecological fallacy). District units are reconstructed (D-006).",
         "- **Three test years.** The test period 2015-2017 is short; the bootstrap intervals above reflect resampling districts, not additional years, so they understate year-to-year uncertainty. Models that look better on the validation years than on the test years should be read with that in mind.",
         "- **Weather explains little beyond history.** Phase 3 found that weather adds only a small share of variance beyond district and year effects (see docs/FINDINGS.md), so models gain mostly from yield history. Skill claims must be read against the district-trend baseline.",
-        "- **Satellite features** are synthetic until Earth Engine is authenticated; serving models therefore use weather only (D-013).",
+        "- **Satellite features**: whether real satellite data helps is in the table 'Does the satellite feature set help?'; the serving models use weather only (D-013, D-036).",
         "- **Interventions are not modelled.** Irrigation, varieties and prices drive yields but are not features; what-if answers describe weather sensitivity under the fitted statistical relationship, not agronomic causation.",
         "- **Season attribution and sugarcane units** (D-007) limit comparisons across crops.",
         "- Shipped models are fitted on train years only (the ones evaluated here), not refit on validation or test years.",

@@ -106,7 +106,8 @@ def test_claims_check_catches_prose_that_the_numbers_no_longer_support(monkeypat
     assert any("district_trend" in c for c in with_changes(beats_trend))
     assert any("heatwave" in c for c in with_changes(lstm_wins))
     assert any("optimizer" in c for c in with_changes(optimizer_keeps_yield))
-    assert any("satellite" in c for c in with_changes(real_satellite))
+    # the satellite sentences are generated from the data-quality report, so real data is not a stale claim
+    assert with_changes(real_satellite) == []
     empty = R.Facts()
     empty._json.update({name: None for name in originals})
     assert R.verify_claims(empty) == ["result files are missing or have an unexpected structure"]
@@ -138,3 +139,21 @@ def test_the_repository_readme_has_the_markers_and_no_unfilled_missing_figures()
             and "MISSING (drought" not in block
             and "MISSING (water" not in block
         )
+
+
+@reports_exist
+def test_satellite_sentences_follow_the_data_quality_report() -> None:
+    def values(share: float) -> dict[str, str]:
+        facts = R.Facts()
+        facts.json("data_quality.json")["synthetic_share"]["satellite_16d"] = share
+        return R.collect(facts, count_tests=False)
+
+    synthetic, real = values(1.0), values(0.0)
+    assert (
+        "synthetic" in synthetic["sat_headline"]
+        and synthetic["sat_next"] == "real satellite data, "
+    )
+    assert "yellow banner" in synthetic["sat_banner"]
+    assert "real" in real["sat_headline"] and "synthetic" not in real["sat_headline"]
+    assert real["sat_next"] == "" and real["sat_banner"] == ""
+    assert "MISSING" not in real["sat_use"]
