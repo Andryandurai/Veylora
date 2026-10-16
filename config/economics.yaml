@@ -1,0 +1,39 @@
+# Prices and costs for the crop-switch decision-support estimate (Phase 6). ALL VALUES ARE ILLUSTRATIVE.
+#
+# Provenance: the prices are rounded values of the order of the Government of India Minimum Support Prices (MSP) /
+# Fair and Remunerative Price (FRP) for the 2023-24 marketing season, entered from memory of the public
+# announcements (Department of Agriculture & Farmers Welfare / CACP). Costs of cultivation are rough orders of
+# magnitude in the range CACP cost studies report. NEITHER HAS BEEN VERIFIED here: replace them with the current
+# notified MSP and a local cost of cultivation before using the output, and never present it as financial advice.
+#
+# Unit conversions matter because the yield data are not in marketed units:
+#  - ICRISAT 'rice' is milled rice, MSP is for paddy      -> paddy = rice / paddy_to_rice_ratio
+#  - ICRISAT 'cotton' is lint, MSP is for seed cotton     -> kapas = lint / ginning_outturn
+#  - ICRISAT 'sugarcane' looks jaggery-equivalent (D-007) -> excluded from the comparison by default
+
+price_year: "2023-24 (approximate, unverified)"
+currency: INR
+
+crops:
+  rice:
+    price_per_quintal: 2183         # paddy (common), MSP order of magnitude
+    marketed_unit_per_yield_unit: 1.4925   # paddy tonnes per tonne of milled rice = 1 / 0.67
+    cost_per_ha: 55000
+    note: paddy MSP applied to paddy-equivalent yield (rice / 0.67)
+  cotton:
+    price_per_quintal: 6620         # medium-staple seed cotton (kapas), MSP order of magnitude
+    marketed_unit_per_yield_unit: 2.9412   # kapas tonnes per tonne of lint = 1 / 0.34
+    cost_per_ha: 60000
+    note: kapas MSP applied to kapas-equivalent yield (lint / 0.34 ginning outturn)
+  wheat:
+    price_per_quintal: 2125         # wheat MSP order of magnitude
+    marketed_unit_per_yield_unit: 1.0
+    cost_per_ha: 35000
+    note: ""
+  sugarcane:
+    price_per_quintal: 315          # FRP per quintal of CANE; yield data are not cane tonnes
+    marketed_unit_per_yield_unit: 1.0
+    cost_per_ha: 100000
+    note: not comparable, see include_sugarcane
+
+include_sugarcane: false

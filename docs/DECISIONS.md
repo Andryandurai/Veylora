@@ -166,3 +166,27 @@ Brier skill); the 14-day lead is therefore not supported. `risk_forecast` return
 (flagged `heatwave_source="climatology"`) and switches to the LSTM automatically only if its 14-day PR-AUC advantage has a
 95 percent bootstrap interval above zero when retrained. The drought model does beat climatology and persistence (PR-AUC 0.38 vs
 0.09 / 0.16 on the test years). Per-hazard risk thresholds replace the single shared set because base rates differ by ~20x.
+
+## 2026-10-16 - Phase 6 (prescriptive optimization)
+
+### D-020: How the ML yield and the water balance are combined (no double counting)
+The ML yield model already responds to rainfall, so multiplying its output by a water-stress factor would count drought twice.
+`scenario.strategy_yields` therefore uses the ML prediction at **normal rainfall** (scenario temperature only) and scales it by
+`RYF(strategy, scenario) / RYF(farmer baseline, normal rainfall)`, so the farmer baseline at normal rainfall reproduces the ML
+yield, droughts lower it, better irrigation raises it, and the gain is capped at +50 percent. This is a modelling convention,
+not an estimate validated against irrigated-yield data; the plan's "ML potential x relative yield factor" is followed in spirit.
+
+### D-021: Weekly LP linearisation and its limits
+The LP uses a piecewise-linear stress constraint. The first version (start-of-week storage) ignored depletion *inside* a
+week and under-irrigated: scored by the daily simulator it lost to an even split. Judged on 42 simulated scenarios (not real
+labels) the **end-of-week storage basis** was best (optimized relative yield 0.860 vs even split 0.812 with less water; optimized >=
+even split in 76 percent of scenarios vs 57 percent for the start basis), so it is the default. The guarantee "LP never worse than the
+even split" holds under the LP's own model (tested via its penalised optimum), **not** under the daily simulator: in the 20-case
+report the optimized schedule is worse than the even split in 8 (normal rain) and 10 (dry) cases while using ~40 percent less water.
+Parameters in `config/crop_params.yaml` are approximate and flagged as such; rice is not modelled as a ponded system.
+
+### D-022: Economics inputs are illustrative; sugarcane excluded
+MSP/FRP-order prices and costs in `config/economics.yaml` were entered from memory of public notices and are unverified. Source
+data units need conversion (ICRISAT rice is milled rice, MSP is for paddy: /0.67; cotton is lint, MSP is for seed cotton: /0.34).
+Sugarcane is excluded from the comparison because its yield unit looks like jaggery equivalent (D-007). Outputs carry a
+"decision-support estimate, not financial advice" disclaimer.

@@ -1,0 +1,65 @@
+# Agronomic parameters for the FAO-56 style water balance and the irrigation LP (Phase 6).
+#
+# IMPORTANT - provenance. The *structure* follows FAO Irrigation and Drainage Paper 56 (Allen et al., 1998:
+# single crop coefficient, root-zone depletion, stress coefficient Ks) and FAO Paper 33 (Doorenbos & Kassam, 1979:
+# yield response factor Ky). The numeric values below are APPROXIMATE, rounded values of the magnitude those
+# publications report; they were NOT transcribed from the tables and must be checked against the published
+# tables / local agronomic advice before any real-world use. They are inputs to a decision-support model, and
+# every result that depends on them is conditional on them.
+#
+# Simulation window: all crops are simulated for the same 16 weeks (112 days) from the start of the season, the
+# horizon of the 3D simulator and of the forecast features. Stage lengths are therefore compressed/truncated
+# versions of real crop cycles (cotton and sugarcane in particular run longer than 112 days).
+
+season_days: 112            # 16 weeks
+weekly_cap_mm: 80           # maximum irrigation that can be applied in one week (pump / canal limit), editable
+rain_efficiency: 0.85       # share of rainfall that enters the root zone (rest lost to runoff / interception)
+initial_depletion_fraction: 0.40   # share of total available water already depleted at sowing
+irrigation_efficiency: 1.0  # irrigation values are NET depths reaching the root zone (no conveyance/application loss)
+
+# Total available water per metre of root zone (field capacity minus wilting point), mm/m. Approximate ranges for
+# the texture classes in FAO-56 Table 19 (sandy loam ~ 100, loam ~ 140, clay loam ~ 160, clay ~ 180).
+soil_classes:
+  sandy_loam: 100
+  loam: 140
+  clay_loam: 160
+  clay: 180
+default_soil_class: clay_loam
+
+crops:
+  # kc: crop coefficients at initial / mid / end (FAO-56 single Kc approach). stage_days: initial, development, mid,
+  # late (sum = season_days). root_depth_m: effective root depth. p: fraction of TAW that can be depleted before
+  # stress starts. ky: yield response factor per stage (initial, development, mid, late): the qualitative FAO-33
+  # pattern (flowering / yield formation most sensitive), illustrative magnitudes.
+  rice:
+    kc: {ini: 1.05, mid: 1.20, end: 0.90}
+    stage_days: [20, 30, 40, 22]
+    root_depth_m: 0.5
+    p: 0.20
+    ky: [0.5, 0.8, 1.3, 0.6]
+    default_budget_mm: 350
+    note: Puddled paddy is flooded; this model treats it as a saturated-soil crop with a small depletion store, so seepage and ponding are NOT modelled.
+  wheat:
+    kc: {ini: 0.30, mid: 1.15, end: 0.35}
+    stage_days: [18, 27, 40, 27]
+    root_depth_m: 1.0
+    p: 0.55
+    ky: [0.2, 0.6, 0.8, 0.4]
+    default_budget_mm: 250
+    note: Rabi crop; the 112-day window starts on 1 November.
+  cotton:
+    kc: {ini: 0.35, mid: 1.15, end: 0.70}
+    stage_days: [25, 30, 35, 22]
+    root_depth_m: 1.2
+    p: 0.65
+    ky: [0.2, 0.5, 0.9, 0.4]
+    default_budget_mm: 300
+    note: A real cotton cycle is 150-180 days; the window covers the first 16 weeks only.
+  sugarcane:
+    kc: {ini: 0.40, mid: 1.25, end: 0.75}
+    stage_days: [20, 25, 42, 25]
+    root_depth_m: 1.2
+    p: 0.65
+    ky: [0.6, 0.9, 1.0, 0.4]
+    default_budget_mm: 400
+    note: Sugarcane is a 12-18 month crop; only 16 weeks of its cycle are simulated and the yield unit in the data is unclear (D-007).
