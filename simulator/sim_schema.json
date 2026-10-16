@@ -6,9 +6,9 @@
   "properties": {
     "meta": {
       "type": "object",
-      "required": ["schema_version", "generated_at", "git_commit", "is_synthetic_inputs", "model_versions", "weeks", "risk_levels", "grid", "definitions", "disclaimer"],
+      "required": ["schema_version", "generated_at", "git_commit", "is_synthetic_inputs", "model_versions", "weeks", "risk_levels", "grid", "definitions", "disclaimer", "attribution"],
       "properties": {
-        "schema_version": {"const": 1},
+        "schema_version": {"const": 2},
         "generated_at": {"type": "string"},
         "git_commit": {"type": "string"},
         "is_synthetic_inputs": {
@@ -34,6 +34,7 @@
         },
         "definitions": {"type": "object", "additionalProperties": {"type": "string"}},
         "risk_levels": {"type": "object"},
+        "attribution": {"type": "array", "items": {"type": "string"}, "minItems": 1},
         "disclaimer": {"type": "string"}
       }
     },
@@ -41,10 +42,17 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["season", "note", "stage_days"],
+        "required": ["season", "note", "stage_days", "season_start", "ponded", "pond_max_mm", "percolation_mm_day", "initial_pond_mm", "development", "senescence"],
         "properties": {
           "season": {"enum": ["kharif", "rabi"]},
           "note": {"type": "string"},
+          "season_start": {"type": "string", "pattern": "^[0-9]{2}-[0-9]{2}$"},
+          "ponded": {"type": "boolean"},
+          "pond_max_mm": {"type": "number", "minimum": 0},
+          "percolation_mm_day": {"type": "number", "minimum": 0},
+          "initial_pond_mm": {"type": "number", "minimum": 0},
+          "development": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 16, "maxItems": 16},
+          "senescence": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 16, "maxItems": 16},
           "stage_days": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 4, "maxItems": 4}
         }
       }
@@ -54,7 +62,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "state", "cluster", "cluster_label", "lat", "lon", "area_km2", "elevation_proxy", "tiles", "crops", "reference_year", "budget_mm", "taw_mm", "early_warning"],
+        "required": ["id", "name", "state", "cluster", "cluster_label", "lat", "lon", "area_km2", "elevation_proxy", "elevation_source", "tiles", "crops", "reference_year", "reference_daily", "reference_ndvi", "budget_mm", "taw_mm", "early_warning"],
         "properties": {
           "id": {"type": "string"},
           "name": {"type": "string"},
@@ -67,6 +75,41 @@
           "elevation_proxy": {
             "type": "array", "minItems": 32, "maxItems": 32,
             "items": {"type": "array", "minItems": 32, "maxItems": 32, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+          },
+          "elevation_source": {"type": "string"},
+          "elevation_m": {
+            "type": "array", "minItems": 32, "maxItems": 32,
+            "items": {"type": "array", "minItems": 32, "maxItems": 32, "items": {"type": "number", "minimum": -500, "maximum": 9000}}
+          },
+          "mean_elevation_m": {"type": "number"},
+          "relief_m": {"type": "number", "minimum": 0},
+          "reference_daily": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["rain_mm", "tmax_c", "tmin_c"],
+              "properties": {
+                "rain_mm": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 112, "maxItems": 112},
+                "tmax_c": {"type": "array", "items": {"type": "number"}, "minItems": 112, "maxItems": 112},
+                "tmin_c": {"type": "array", "items": {"type": "number"}, "minItems": 112, "maxItems": 112}
+              }
+            }
+          },
+          "reference_ndvi": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {"type": "null"},
+                {
+                  "type": "object",
+                  "required": ["weekly", "is_synthetic"],
+                  "properties": {
+                    "weekly": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"type": ["number", "null"], "minimum": 0, "maximum": 1}},
+                    "is_synthetic": {"type": "boolean"}
+                  }
+                }
+              ]
+            }
           },
           "tiles": {
             "type": "array", "minItems": 8, "maxItems": 8,
@@ -86,7 +129,7 @@
       "patternProperties": {
         "^[a-z_]+__[a-z0-9_]+\\|[a-z]+\\|[0-9.]+\\|-?[0-9.]+\\|(rainfed|baseline|optimized)$": {
           "type": "object",
-          "required": ["yield", "water_used_mm", "weekly"],
+          "required": ["yield", "water_used_mm", "stage_rel", "weekly"],
           "properties": {
             "yield": {
               "type": "object",
@@ -94,11 +137,13 @@
               "properties": {"mean": {"type": "number", "minimum": 0}, "lo": {"type": "number", "minimum": 0}, "hi": {"type": "number", "minimum": 0}}
             },
             "water_used_mm": {"type": "number", "minimum": 0},
+            "stage_rel": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 4, "maxItems": 4},
+            "pond_daily": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 112, "maxItems": 112},
             "weekly": {
               "type": "array", "minItems": 16, "maxItems": 16,
               "items": {
                 "type": "object",
-                "required": ["week", "rain_mm", "tmax_c", "soil_moisture_0_1", "ndvi", "etc_mm", "eta_mm", "irrigation_mm", "excess_mm", "stress_0_1", "drought_p", "heat_p"],
+                "required": ["week", "rain_mm", "tmax_c", "soil_moisture_0_1", "ndvi", "etc_mm", "eta_mm", "irrigation_mm", "excess_mm", "stress_0_1", "pond_mm", "seepage_mm", "drought_p", "heat_p"],
                 "properties": {
                   "week": {"type": "integer", "minimum": 1, "maximum": 16},
                   "rain_mm": {"type": "number", "minimum": 0},
@@ -110,6 +155,8 @@
                   "irrigation_mm": {"type": "number", "minimum": 0},
                   "excess_mm": {"type": "number", "minimum": 0},
                   "stress_0_1": {"type": "number", "minimum": 0, "maximum": 1},
+                  "pond_mm": {"type": "number", "minimum": 0},
+                  "seepage_mm": {"type": "number", "minimum": 0},
                   "drought_p": {"type": "number", "minimum": 0, "maximum": 1},
                   "heat_p": {"type": "number", "minimum": 0, "maximum": 1}
                 }

@@ -142,7 +142,7 @@ def lp_inputs(inputs: SeasonInputs) -> lp.LPInputs:
         etc,
         peff,
         inputs.taw,
-        inputs.glob.initial_depletion_fraction * inputs.taw,
+        inputs.crop_params.initial_depletion_mm(inputs.taw, inputs.glob.initial_depletion_fraction),
     )
 
 
@@ -157,7 +157,12 @@ def simulate_schedules(inputs: SeasonInputs, daily_irrigation: np.ndarray) -> wb
         kc,
         inputs.taw,
         inputs.crop_params.p,
+        initial_depletion=inputs.crop_params.initial_depletion_mm(
+            inputs.taw, inputs.glob.initial_depletion_fraction
+        ),
         glob=inputs.glob,
+        pond_max=inputs.crop_params.pond_max_mm,
+        percolation=inputs.crop_params.percolation_mm_day,
     )
 
 

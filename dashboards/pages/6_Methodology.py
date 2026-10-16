@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import pandas as pd
 import streamlit as st
 
+from analytics.prescriptive.wording import paired_phrase
 from dashboards.components import data, guards, layout
 
 
@@ -205,7 +206,7 @@ def prescriptive_section() -> None:
         st.info("Run `make prescriptive-report` to produce the optimization results.")
         return
     st.markdown(
-        "Daily FAO-56 soil-water balance (Hargreaves ET0, crop coefficients, stress factor Ks) with an FAO-33 yield response, and a weekly linear programme (PuLP/CBC) that allocates a seasonal water budget. "
+        "Daily FAO-56 soil-water balance (Hargreaves ET0, crop coefficients, stress factor Ks; paddy rice as a ponded field with seepage, approximate parameters) with an FAO-33 yield response, and a weekly linear programme (PuLP/CBC) that allocates a seasonal water budget. "
         f"Evaluated on {report['summary'][0]['n_cases']} district-season cases per rainfall scenario; the baseline is a farmer applying 600 mm."
     )
     summary = pd.DataFrame(report["summary"])
@@ -236,10 +237,18 @@ def prescriptive_section() -> None:
         (summary["scenario"] == "normal rainfall") & (summary["strategy"] == "optimized")
     ].iloc[0]
     paired = pd.DataFrame(report["paired_optimized_vs_even"]).iloc[0]
+    verdict = paired_phrase(
+        paired["delta_rel_yield"],
+        paired["delta_rel_yield_lo"],
+        paired["delta_rel_yield_hi"],
+        "yield gain",
+        "yield loss",
+        "no clear yield difference",
+    )
     st.info(
         f"Plain reading (normal rainfall): against the 600 mm baseline the optimized schedule saves {normal['water_saved_pct']:.0f}% of the water "
         f"but keeps only {normal['yield_vs_baseline']:.0%} of the baseline yield. Against an even split it uses {-paired['delta_water_mm']:.0f} mm less water "
-        f"with a yield difference that is not statistically clear ({paired['delta_rel_yield']:+.3f}, interval {paired['delta_rel_yield_lo']:+.3f} to {paired['delta_rel_yield_hi']:+.3f}; "
+        f"with {verdict} ({paired['delta_rel_yield']:+.3f}, interval {paired['delta_rel_yield_lo']:+.4f} to {paired['delta_rel_yield_hi']:+.4f}; "
         f"the optimized schedule is worse in {int(paired['cases_optimized_worse'])} of {int(paired['cases'])} cases). "
         "Whether the yield trade-off is acceptable is a decision for agronomists and farmers."
     )

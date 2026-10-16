@@ -1,20 +1,104 @@
 {
  "title": "Crop-Climate Simulator",
- "scenarios_chip": "6 districts, 2772 scenarios, built 2026-10-16 (27a069f)",
+ "scenarios_chip": "6 districts, 2772 scenarios, built 2026-10-16 (bd4998c)",
  "drought_gauge_normal_rain": 0.043,
  "drought_gauge_rain_0.4": 0.816,
  "heat_gauge_dT0_week3": 0.0,
  "heat_gauge_max_dT+4": 0.0,
  "compare_water_baseline_mm": 600.0,
- "compare_water_optimized_mm": 296.822,
- "average_fps_5s_headless_software_gl": 12.8,
+ "compare_water_optimized_mm": 409.604,
+ "average_fps_5s_headless_software_gl": 8.6,
  "yield_shown_vs_file_optimized": [
-  2.66,
-  2.66
+  2.677,
+  2.677
  ],
  "yield_shown_vs_file_baseline": [
-  2.484,
-  2.484
+  2.598,
+  2.598
  ],
+ "plant_models": {
+  "rice": {
+   "plants": 3481,
+   "drawn": 3481,
+   "heads": 3481,
+   "ponded": true
+  },
+  "wheat": {
+   "plants": 3599,
+   "drawn": 3599,
+   "heads": 3599,
+   "ponded": false
+  },
+  "cotton": {
+   "plants": 2256,
+   "drawn": 2256,
+   "heads": 2256,
+   "ponded": false
+  },
+  "sugarcane": {
+   "plants": 3481,
+   "drawn": 3481,
+   "heads": 0,
+   "ponded": false
+  }
+ },
+ "rice_mean_plant_height_by_week": {
+  "1": 0.0217,
+  "5": 0.1398,
+  "12": 0.33
+ },
+ "paddy_pond_scale_baseline_week1": 1.9761773347854614,
+ "paddy_pond_scale_rainfed_dry_week12": 9.999999747378752e-05,
+ "stress": {
+  "height_stressed": 0.22620899362378102,
+  "height_healthy": 0.322598081780932,
+  "green_share_stressed": 1.191192167773765,
+  "green_share_healthy": 3.828591967285861,
+  "stage_factors_dry_rainfed": [
+   0.878,
+   0.498,
+   0.057,
+   0.565
+  ],
+  "stage_factors_baseline": [
+   1,
+   1,
+   1,
+   1
+  ]
+ },
+ "daily_playback": {
+  "day_index": [
+   7,
+   9,
+   14
+  ],
+  "dates": [
+   "2000-06-08",
+   "2000-06-10",
+   "2000-06-15"
+  ],
+  "label": "Day 15 of 112, 2000-06-15 (weather of reference year 2000): rain 0.0 mm, Tmax 35.3 C"
+ },
+ "sun_height_07h_12h": [
+  0.328,
+  0.875
+ ],
+ "uncertainty_strip_heights": [
+  0.2351,
+  0.3088,
+  0.3701
+ ],
+ "low_detail_plants_drawn": [
+  1218,
+  3481
+ ],
+ "terrain_note": "Terrain: real relief of a 10 km window (38 m, drawn 3x exaggerated)",
+ "observed_ndvi_test": {
+  "proxy_height": 0.3300214220620681,
+  "observed_height": 0.2310149954657074,
+  "proxy_green_share": 3.8298693295122406,
+  "observed_green_share": 0.8840638931580644
+ },
  "failures": []
 }

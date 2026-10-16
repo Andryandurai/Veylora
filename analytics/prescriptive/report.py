@@ -198,6 +198,7 @@ def write_report(results: pd.DataFrame) -> dict[str, Any]:
         common.markdown_table(paired, 3),
         "",
     ]
+    rice = load_crop("rice")
     total_cases = len(results[["district_id", "crop", "season", "scenario"]].drop_duplicates())
     solved = results.groupby(["district_id", "crop", "season", "scenario"])["case_seconds"].first()
     lines += [
@@ -209,7 +210,7 @@ def write_report(results: pd.DataFrame) -> dict[str, Any]:
         "",
         "- **Parameters are approximate.** Kc, root depth, depletion fraction, Ky, soil water capacity and prices are rounded values of the right order of magnitude, not table lookups (see the provenance notes in `config/crop_params.yaml` and `config/economics.yaml`). Changing them changes the results.",
         f"- **16-week window.** Every crop is simulated for {glob.season_days} days from the season start with compressed stage lengths; cotton and sugarcane cycles are longer in reality.",
-        "- **Rice** is treated as a saturated-soil crop with a small depletion store: ponding, puddling and seepage are not modelled, so absolute rice water use is understated and the 600 mm baseline is not a recommendation.",
+        f"- **Rice** is a ponded field (D-029): standing water up to a {rice.pond_max_mm:.0f} mm bund height on top of the root zone, seepage and percolation of {rice.percolation_mm_day:g} mm/day while water stands, a {rice.initial_pond_mm:.0f} mm pond at the start. These values are approximate and unverified; land-preparation (puddling) water, the nursery and bund leakage are not modelled, so absolute rice water use is still understated and the 600 mm baseline is not a recommendation.",
         f"- **Irrigation depths are net** (efficiency {glob.irrigation_efficiency:.2f}); each week's irrigation is applied as one event on the first day of the week; rainfall efficiency {glob.rain_efficiency:.2f}.",
         "- **Hargreaves ET0** from district-mean IMD Tmax/Tmin (1-degree grid) and the 'typical year' weather; real fields differ in soil, timing and sowing date (sowing is assumed on the first day of the season).",
         "- **LP vs simulator.** The LP is a weekly linearisation; the table scores its schedule with the daily nonlinear simulator, where it can be worse than an even split in individual cases (counted above).",

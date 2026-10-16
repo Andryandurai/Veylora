@@ -87,11 +87,185 @@ def test_water_balance_conserves_mass_and_respects_bounds(crop_name: str) -> Non
     crop = P.load_crop(crop_name)
     taw = P.taw_mm(crop)
     et0, rain, irrigation = _random_scenarios()
-    sim = wb.simulate(et0, rain, irrigation, wb.kc_curve(crop), taw, crop.p)
+    sim = wb.simulate(
+        et0, rain, irrigation, wb.kc_curve(crop), taw, crop.p,
+        initial_depletion=crop.initial_depletion_mm(taw, GLOB.initial_depletion_fraction),
+        pond_max=crop.pond_max_mm, percolation=crop.percolation_mm_day,
+    )  # fmt: skip
     assert np.abs(sim.mass_balance_residual()).max() < 1e-9
-    assert (sim.depletion >= -1e-12).all() and (sim.depletion <= taw + 1e-12).all()
+    assert (sim.depletion >= -crop.pond_max_mm - 1e-12).all() and (
+        sim.depletion <= taw + 1e-12
+    ).all()
     assert (sim.eta <= sim.etc + 1e-12).all() and (sim.eta >= 0).all() and (sim.drainage >= 0).all()
     assert ((sim.ks >= 0) & (sim.ks <= 1)).all()
+
+
+# ---------------------------------------------------------------- ponded paddy (D-029)
+def test_only_rice_is_ponded_and_initial_depletion_is_standing_water() -> None:
+    rice = P.load_crop("rice")
+    assert (
+        rice.ponded and rice.pond_max_mm > rice.initial_pond_mm > 0 and rice.percolation_mm_day > 0
+    )
+    taw = P.taw_mm(rice)
+    assert (
+        rice.initial_depletion_mm(taw, 0.4) == -rice.initial_pond_mm
+    )  # starts flooded, not 40% depleted
+    for name in ("wheat", "cotton", "sugarcane"):
+        crop = P.load_crop(name)
+        assert not crop.ponded and crop.percolation_mm_day == 0.0
+        assert crop.initial_depletion_mm(100.0, 0.4) == pytest.approx(40.0)
+
+
+def test_paddy_configuration_is_validated(monkeypatch) -> None:
+    raw = P._raw()
+    broken = {
+        **raw,
+        "crops": {
+            **raw["crops"],
+            "rice": {**raw["crops"]["rice"], "paddy": {"enabled": True, "pond_max_mm": 0}},
+        },
+    }
+    monkeypatch.setattr(P, "_raw", lambda: broken)
+    with pytest.raises(ValueError, match="pond_max_mm"):
+        P.load_crop("rice")
+    deep = {
+        **raw,
+        "crops": {
+            **raw["crops"],
+            "rice": {
+                **raw["crops"]["rice"],
+                "paddy": {"enabled": True, "pond_max_mm": 20, "initial_pond_mm": 30},
+            },
+        },
+    }
+    monkeypatch.setattr(P, "_raw", lambda: deep)
+    with pytest.raises(ValueError, match="initial_pond_mm"):
+        P.load_crop("rice")
+    off = {
+        **raw,
+        "crops": {
+            **raw["crops"],
+            "rice": {**raw["crops"]["rice"], "paddy": {"enabled": False, "pond_max_mm": 75}},
+        },
+    }
+    monkeypatch.setattr(P, "_raw", lambda: off)
+    assert not P.load_crop("rice").ponded  # the switch returns the earlier saturated-soil model
+
+
+def test_pond_fills_spills_and_seeps_with_exact_accounting() -> None:
+    et0 = np.full((1, 40), 4.0)
+    kc = np.full(40, 1.0)
+    rain = np.zeros((1, 40))
+    rain[0, 5] = 200.0  # a deluge far above the bund height
+    irrigation = np.zeros((1, 40))
+    sim = wb.simulate(
+        et0,
+        rain,
+        irrigation,
+        kc,
+        80.0,
+        0.2,
+        initial_depletion=-25.0,
+        glob=GLOB,
+        pond_max=75.0,
+        percolation=2.0,
+    )
+    pond = sim.pond()[0]
+    assert pond[4] < 25.0  # evaporation and seepage drain the initial pond before the rain
+    assert pond[5] == pytest.approx(75.0)  # the bund holds 75 mm
+    expected_spill = (
+        -(sim.depletion[0, 4] - 0.85 * 200.0 + sim.eta[0, 5] + sim.percolation[0, 5]) - 75.0
+    )
+    assert (
+        sim.drainage[0, 5] == pytest.approx(expected_spill) and expected_spill > 50.0
+    )  # the rest spills over the bunds
+    assert (np.diff(pond[6:14]) < 0).all()  # then it falls steadily until it is empty
+    np.testing.assert_allclose(
+        sim.percolation[0, 6:19], 2.0
+    )  # seepage at the configured rate while water stands
+    assert sim.percolation[0].sum() > 0 and np.abs(sim.mass_balance_residual()).max() < 1e-9
+    standing = sim.pond()[0] > 0
+    assert (
+        standing.sum() > 10 and (sim.eta[0, standing] == sim.etc[0, standing]).all()
+    )  # no stress while water stands
+    assert sim.eta[0, -1] < sim.etc[0, -1]  # but the soil does dry out once the pond is gone
+
+
+def test_seepage_never_exceeds_the_standing_water_and_stops_when_the_pond_is_gone() -> None:
+    et0 = np.full((1, 30), 5.0)
+    sim = wb.simulate(
+        et0,
+        np.zeros((1, 30)),
+        np.zeros((1, 30)),
+        np.ones(30),
+        80.0,
+        0.2,
+        initial_depletion=-3.0,
+        glob=GLOB,
+        pond_max=75.0,
+        percolation=2.0,
+    )
+    assert sim.percolation[0, 0] == pytest.approx(0.0 + min(2.0, 3.0))  # limited by 3 mm of water
+    assert sim.pond()[0, 1:].max() == 0.0  # the pond is gone after day 1 and the soil starts to dry
+    assert (sim.percolation[0, 1:] == 0.0).all() and sim.depletion[0, -1] > 20.0
+    assert np.abs(sim.mass_balance_residual()).max() < 1e-9
+
+
+def test_without_pond_parameters_the_model_is_the_plain_root_zone_balance() -> None:
+    et0, rain, irrigation = _random_scenarios(8, seed=3)
+    crop = P.load_crop("wheat")
+    taw = P.taw_mm(crop)
+    plain = wb.simulate(et0, rain, irrigation, wb.kc_curve(crop), taw, crop.p)
+    explicit = wb.simulate(
+        et0, rain, irrigation, wb.kc_curve(crop), taw, crop.p, pond_max=0.0, percolation=5.0
+    )
+    np.testing.assert_array_equal(
+        plain.depletion, explicit.depletion
+    )  # percolation is ignored without a pond
+    assert (plain.percolation == 0).all() and (plain.depletion >= 0).all()
+
+
+def test_seepage_shortens_how_long_a_flooded_field_lasts_and_is_a_real_loss_in_a_season() -> None:
+    et0 = np.full((2, 60), 4.0)
+    dry = np.zeros((2, 60))
+
+    def run(perc: float) -> wb.WaterBalance:
+        return wb.simulate(
+            et0,
+            dry,
+            dry,
+            np.ones(60),
+            80.0,
+            0.2,
+            initial_depletion=-60.0,
+            glob=GLOB,
+            pond_max=75.0,
+            percolation=perc,
+        )
+
+    with_seep, without = run(3.0), run(0.0)
+    days = lambda sim: int((sim.pond()[0] > 0).sum())  # noqa: E731
+    assert (
+        days(with_seep) < days(without) and days(without) == 14
+    )  # 60 mm at 4 mm per day lasts 14 full days
+    inputs = S.load_season_inputs("telangana__nizamabad", "rice", "kharif", 2001)
+    ponded = S.simulate_schedules(inputs, lp.fixed_interval_daily(inputs.n_days, 40.0, 7))
+    assert ponded.percolation.sum() > 100.0 and np.abs(ponded.mass_balance_residual()).max() < 1e-9
+    assert ponded.depletion.min() < 0  # water really stands in the field at times
+
+
+def test_stage_factors_multiply_to_the_relative_yield_and_locate_the_loss() -> None:
+    crop = P.load_crop("rice")
+    etc = np.tile(wb.kc_curve(crop) * 5.0, (3, 1))
+    eta = etc.copy()
+    eta[1, wb.stage_index(crop) == 2] *= 0.6  # a drought at flowering only
+    eta[2] *= 0.8  # a uniform shortfall
+    factors = wb.stage_factors(eta, etc, crop)
+    assert factors.shape == (3, 4) and ((factors >= 0) & (factors <= 1)).all()
+    np.testing.assert_allclose(factors.prod(axis=1), wb.relative_yield(eta, etc, crop))
+    assert (factors[0] == 1.0).all()
+    assert factors[1].argmin() == 2 and (factors[1][[0, 1, 3]] == 1.0).all()
+    assert factors[1, 2] == pytest.approx(1.0 - crop.ky[2] * 0.4)
 
 
 def test_no_stress_when_water_is_plentiful_and_severe_stress_when_it_is_absent() -> None:
@@ -153,7 +327,7 @@ def test_lp_respects_budget_and_weekly_cap_and_solves_fast(budget: float) -> Non
         result.schedule_mm >= -1e-9
     ).all()
     assert len(result.schedule_mm) == T // 7
-    assert (result.storage >= -1e-6).all() and (result.storage <= inputs.taw + 1e-6).all()
+    assert (result.storage >= -1e-6).all() and (result.storage <= inputs.storage_cap + 1e-6).all()
 
 
 def test_zero_budget_gives_zero_irrigation_and_more_budget_never_hurts() -> None:

@@ -29,8 +29,8 @@
     "detail": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Thanjavur के लिए 2024-12-31 को कोई मौसम चेतावनी नहीं है। अपनी धान की सामान्य देखभाल जारी रखें।</Message></Response>"
   },
   "seconds": {
-    "first_advisory_incl_model_load": 11.47,
-    "second_advisory": 0.42
+    "first_advisory_incl_model_load": 10.65,
+    "second_advisory": 0.36
   },
   "unconfigured_bot_refuses": {
     "ok": true,

@@ -57,6 +57,7 @@
   .view canvas { width: 100%; height: 100%; display: block; touch-action: none; }
   .view .badge { position: absolute; top: 8px; left: 8px; background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
   #weekbadge { position: absolute; right: 10px; bottom: 8px; background: var(--surface); border: 1px solid var(--border); padding: 2px 10px; border-radius: 8px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  #scenebadge { position: absolute; left: 10px; bottom: 8px; max-width: 62%; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--border); padding: 3px 9px; border-radius: 8px; font-size: 11px; color: var(--ink-2); }
   .big { font-size: 34px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .unit { font-size: 13px; color: var(--ink-2); font-weight: 500; }
   .bar { position: relative; height: 10px; background: var(--grid); border-radius: 5px; margin: 8px 0 2px; }
@@ -73,6 +74,13 @@
   #explain { font-size: 13px; }
   .delta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-variant-numeric: tabular-nums; }
   .pos { color: var(--good); font-weight: 650; } .neg { color: var(--bad); font-weight: 650; }
+  .stagerow { display: grid; grid-template-columns: 7.2em minmax(0, 1fr) 3.4em; gap: 6px; align-items: center; margin: 4px 0; font-size: 12px; }
+  .stagerow .track { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+  .stagerow .fill { height: 100%; background: var(--s3); border-radius: 4px; }
+  .stagerow.now { font-weight: 650; }
+  .stagerow .loss { text-align: right; font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+  .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 4px; }
   footer { grid-column: 1 / -1; font-size: 12px; color: var(--ink-2); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
   #banner { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 20; background: var(--surface); border: 1px solid var(--bad); color: var(--bad); padding: 8px 14px; border-radius: 10px; max-width: 80vw; display: none; }
   #dropzone { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: color-mix(in srgb, var(--page) 92%, transparent); z-index: 30; }
@@ -80,7 +88,7 @@
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   @media (max-width: 1100px) {
     #app { height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; }
-    #stage { height: 62vh; } #controls, #hud { overflow: visible; }
+    #stage { height: 62vh; min-height: 360px; order: 1; } #controls { order: 2; } #hud { order: 3; } footer { order: 4; } #controls, #hud { overflow: visible; }
   }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
@@ -92,8 +100,9 @@
     <span class="chip" id="chip-data">loading data...</span>
     <span class="chip warn" id="chip-synthetic" hidden></span>
     <span class="spacer"></span>
+    <button id="btn-uncertainty" aria-pressed="false" aria-label="Show the 80 percent yield interval as three strips of the field" title="Uncertainty view (U)">Uncertainty</button>
     <button id="btn-compare" aria-pressed="false" aria-label="Compare baseline and optimized irrigation side by side" title="Compare (C)">Compare</button>
-    <button id="btn-palette" aria-pressed="false" aria-label="Use the colour-blind safe palette for soil moisture" title="Colour-blind safe soil palette">Colour-blind palette</button>
+    <button id="btn-palette" aria-pressed="false" aria-label="Use the colour-blind safe palette for soil moisture" title="Colour-blind safe soil palette">Colour-blind</button>
     <button id="btn-shot" aria-label="Save a screenshot" title="Screenshot (S)">Screenshot</button>
   </header>
 
@@ -130,7 +139,21 @@
       </div>
       <label for="rng-week">Week of the season (1-16)</label>
       <input id="rng-week" type="range" min="1" max="16" step="any" value="1" style="width:100%" aria-label="Week of the season">
-      <div class="small" style="margin-top:6px">Keys: <b>Space</b> play, <b>&larr; &rarr;</b> step a week, <b>C</b> compare, <b>S</b> screenshot. Drag to orbit, scroll to zoom, right-drag to pan.</div>
+      <div class="small" id="val-day" style="margin-top:4px">-</div>
+      <div class="small" style="margin-top:6px">Keys: <b>Space</b> play, <b>&larr; &rarr;</b> step a week, <b>C</b> compare, <b>U</b> uncertainty, <b>S</b> screenshot. Drag to orbit, scroll to zoom, right-drag to pan.</div>
+    </div>
+    <div class="card">
+      <h2>Scene</h2>
+      <label for="rng-hour">Time of day</label>
+      <div class="row"><input id="rng-hour" type="range" min="6" max="19" step="0.25" value="12" aria-label="Time of day in hours"><span class="val" id="val-hour">12:00</span></div>
+      <label for="sel-quality">Detail</label>
+      <select id="sel-quality" aria-label="Level of detail"><option value="auto" selected>Automatic</option><option value="high">High</option><option value="low">Low (fast)</option></select>
+      <fieldset id="fs-green" hidden>
+        <legend>Greenness shown in the scene</legend>
+        <label class="radio"><input type="radio" name="green" value="proxy" checked> Model proxy (follows the sliders)</label>
+        <label class="radio"><input type="radio" name="green" value="observed"> Observed NDVI of the reference year</label>
+      </fieldset>
+      <div class="small" style="margin-top:6px">Plants, plots and the time of day are illustrations: plants are enlarged and the plots are schematic.</div>
     </div>
     <div class="card">
       <h2>Early warning</h2>
@@ -141,6 +164,7 @@
   <main id="stage" aria-label="3D landscape">
     <div class="view" id="view-a"><canvas aria-label="3D view of the district landscape for the selected scenario"></canvas><div class="badge" id="badge-a"></div></div>
     <div class="view" id="view-b" hidden><canvas aria-label="3D view of the optimized irrigation scenario"></canvas><div class="badge" id="badge-b"></div></div>
+    <div id="scenebadge" aria-hidden="true">-</div>
     <div id="weekbadge" aria-hidden="true">Week 1</div>
   </main>
 
@@ -151,11 +175,20 @@
       <div class="bar" aria-hidden="true"><div class="range" id="yield-range"></div><div class="point" id="yield-point"></div></div>
       <div class="small" id="yield-interval">80% interval</div>
       <div class="small" id="yield-note" style="margin-top:4px"></div>
+      <div class="small" id="uncertainty-note" style="margin-top:4px" hidden></div>
     </div>
     <div class="card" id="card-water">
       <h2>Irrigation water</h2>
       <div><span class="big" id="water-used" data-value="0">-</span> <span class="unit">mm per season</span></div>
       <div class="small" id="water-todate"></div>
+    </div>
+    <div class="card" id="card-pond" hidden>
+      <h2>Paddy water</h2>
+      <div class="gauges">
+        <div><span class="big" id="pond-mm" data-value="0" style="font-size:26px">-</span> <span class="unit">mm standing today</span></div>
+        <div><span class="big" id="seep-mm" data-value="0" style="font-size:26px">-</span> <span class="unit">mm seeped this week</span></div>
+      </div>
+      <div class="small" id="pond-note" style="margin-top:4px"></div>
     </div>
     <div class="card" id="card-compare" hidden>
       <h2>Baseline vs optimized</h2>
@@ -176,17 +209,25 @@
       </div>
       <div class="small" id="stress-line" style="margin-top:6px"></div>
     </div>
+    <div class="card" id="card-stage">
+      <h2>Water stress by growth stage</h2>
+      <div id="stage-bars"></div>
+      <div class="small" id="stage-note" style="margin-top:4px"></div>
+    </div>
     <div class="card"><h2>What is happening</h2><div id="explain" aria-live="polite">-</div></div>
     <div class="card charts">
       <h2>Season at a glance</h2>
       <div class="chart-title"><span>Rainfall, mm per week</span><span id="ct-rain"></span></div><canvas id="chart-rain" aria-label="Weekly rainfall chart"></canvas>
       <div class="chart-title"><span>Soil moisture, fraction of capacity</span><span id="ct-soil"></span></div><canvas id="chart-soil" aria-label="Weekly soil moisture chart"></canvas>
-      <div class="chart-title"><span>Greenness proxy (not satellite NDVI)</span><span id="ct-ndvi"></span></div><canvas id="chart-ndvi" aria-label="Weekly greenness proxy chart"></canvas>
+      <div id="wrap-pond" hidden><div class="chart-title"><span>Standing water in the paddy at the end of each week, mm</span><span id="ct-pond"></span></div><canvas id="chart-pond" aria-label="Weekly standing water chart"></canvas></div>
+      <div class="chart-title"><span>Greenness: model proxy (not satellite NDVI)</span><span id="ct-ndvi"></span></div><canvas id="chart-ndvi" aria-label="Weekly greenness chart"></canvas>
+      <div class="legend" id="ndvi-legend"></div>
     </div>
   </aside>
 
   <footer>
     <span id="foot-disclaimer">Explanation tool: it visualises model outputs and what-if scenarios. It is not a physical crop-growth simulation.</span>
+    <span id="foot-attribution"></span>
     <span id="foot-meta"></span>
   </footer>
 </div>
@@ -197,12 +238,13 @@
 // ===================================================================================== helpers
 const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (t) => { t = clamp(t); return t * t * (3 - 2 * t); };
+const TAU = Math.PI * 2;
 const $ = (id) => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FIELDS = ['rain_mm', 'tmax_c', 'soil_moisture_0_1', 'ndvi', 'etc_mm', 'eta_mm', 'irrigation_mm', 'excess_mm', 'stress_0_1', 'drought_p', 'heat_p'];
+const FIELDS = ['rain_mm', 'tmax_c', 'soil_moisture_0_1', 'ndvi', 'etc_mm', 'eta_mm', 'irrigation_mm', 'excess_mm', 'stress_0_1', 'pond_mm', 'seepage_mm', 'drought_p', 'heat_p'];
 const STAGE_NAMES = ['establishment', 'vegetative growth', 'flowering / mid-season', 'ripening'];
-// Visual styling only (not data): relative plant height and leaf colour per crop.
-const CROP_STYLE = { rice: { h: 0.36, w: 0.045, leaf: 0x7bc043 }, wheat: { h: 0.34, w: 0.035, leaf: 0xa9c244 }, cotton: { h: 0.42, w: 0.07, leaf: 0x5fb85f }, sugarcane: { h: 0.78, w: 0.04, leaf: 0x6bbf4e } };
+const STAGE_SHORT = ['Establishment', 'Vegetative', 'Flowering', 'Ripening'];
 
 function showError(message) {
   const b = $('banner'); b.textContent = message; b.style.display = 'block';
@@ -233,15 +275,19 @@ function scenarioAt(districtId, crop, rain, temp, strategy) {
   const [r0, r1, rt] = bracket(GRID.rain_mult, rain);
   const [t0, t1, tt] = bracket(GRID.temp_delta, temp);
   const corners = [[r0, t0, (1 - rt) * (1 - tt)], [r1, t0, rt * (1 - tt)], [r0, t1, (1 - rt) * tt], [r1, t1, rt * tt]];
-  const out = { yield: { mean: 0, lo: 0, hi: 0 }, water_used_mm: 0, weekly: Array.from({ length: DATA.meta.weeks }, (_, i) => Object.assign({ week: i + 1 }, ...FIELDS.map((f) => ({ [f]: 0 })))) };
+  const out = { yield: { mean: 0, lo: 0, hi: 0 }, water_used_mm: 0, stage_rel: [0, 0, 0, 0], weekly: Array.from({ length: DATA.meta.weeks }, (_, i) => Object.assign({ week: i + 1 }, ...FIELDS.map((f) => ({ [f]: 0 })))) };
+  let pondDaily = null;
   for (const [ri, ti, w] of corners) {
     if (w <= 0) continue;
     const sc = DATA.scenarios[key(districtId, crop, GRID.rain_mult[ri], GRID.temp_delta[ti], strategy)];
     if (!sc) throw new Error('missing scenario ' + key(districtId, crop, GRID.rain_mult[ri], GRID.temp_delta[ti], strategy));
     out.yield.mean += w * sc.yield.mean; out.yield.lo += w * sc.yield.lo; out.yield.hi += w * sc.yield.hi;
     out.water_used_mm += w * sc.water_used_mm;
+    for (let s = 0; s < 4; s++) out.stage_rel[s] += w * sc.stage_rel[s];
+    if (sc.pond_daily) { pondDaily = pondDaily || new Array(sc.pond_daily.length).fill(0); for (let i = 0; i < pondDaily.length; i++) pondDaily[i] += w * sc.pond_daily[i]; }
     for (let k = 0; k < out.weekly.length; k++) for (const f of FIELDS) out.weekly[k][f] += w * sc.weekly[k][f];
   }
+  if (pondDaily) out.pond_daily = pondDaily;
   if (interpCache.size > 600) interpCache.clear();
   interpCache.set(ck, out);
   return out;
@@ -256,6 +302,15 @@ function weekState(sc, wpos) {
   for (const k of FIELDS) out[k] = lerp(a[k], b[k], f);
   return out;
 }
+/** Standing water (mm) on the day: the daily series when the file has one, else the end-of-week value. */
+function pondToday(sc, dayIndex, w) { return sc.pond_daily ? sc.pond_daily[Math.min(dayIndex, sc.pond_daily.length - 1)] : w.pond_mm; }
+/** Linear interpolation of a per-week curve (development, senescence, observed NDVI) at the fractional week. */
+function curveAt(arr, wpos) {
+  const x = clamp(wpos - 1, 0, arr.length - 1), i = Math.min(Math.floor(x), arr.length - 2), f = x - i;
+  const a = arr[i], b = arr[i + 1];
+  if (a == null && b == null) return null;
+  return lerp(a == null ? b : a, b == null ? a : b, f);
+}
 
 // ===================================================================================== three.js
 async function loadThree() {
@@ -268,13 +323,14 @@ async function loadThree() {
 }
 const THREE = await loadThree();
 
-const SIZE = 10, N = 128, TILES = 8, PLANTS_PER_TILE = 14;
+const SIZE = 10, N = 144, TILES = 8, PLOTS = 6, VEX = 3, PONDU = 0.0007, BUND_H = 0.06, BUND_W = 0.06;
+const TARGET_PLANTS = 3600;
 const MOIST_STOPS = {
-  standard: [[0, 0xc9a266], [0.35, 0x9c8554], [0.65, 0x5f8fa4], [1, 0x2a6db3]],
+  standard: [[0, 0xcaa56d], [0.3, 0xa58558], [0.62, 0x6e4f33], [1, 0x3f2d1e]],
   safe: [[0, 0xf1e2b6], [0.5, 0x9ec5d8], [1, 0x08306b]],
 };
 let paletteName = 'standard';
-const _c1 = new THREE.Color(), _c2 = new THREE.Color();
+const _c1 = new THREE.Color(), _c2 = new THREE.Color(), _c3 = new THREE.Color();
 function moistureColor(m, target) {
   const stops = MOIST_STOPS[paletteName];
   m = clamp(m);
@@ -310,9 +366,89 @@ function makeCloudTexture() {
   }
   return new THREE.CanvasTexture(c);
 }
+function makeLabelTexture(text) {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = 'rgba(20,20,20,0.72)'; g.beginPath(); g.roundRect(4, 8, 248, 48, 14); g.fill();
+  g.fillStyle = '#fff'; g.font = '600 26px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 33);
+  return new THREE.CanvasTexture(c);
+}
+function makePatchworkTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d'), r = rng(21);
+  g.fillStyle = '#d8d8d0'; g.fillRect(0, 0, 512, 512);
+  const tones = ['#e6e8cf', '#d5e0b0', '#c9d6a0', '#e2d6ac', '#d9c99a', '#cfd9ba', '#bfd0a0'];
+  for (let i = 0; i < 160; i++) { const w = 30 + r() * 90, h = 24 + r() * 70, x = r() * 512, y = r() * 512; g.fillStyle = tones[Math.floor(r() * tones.length)]; g.fillRect(x, y, w, h); g.strokeStyle = 'rgba(120,100,70,0.35)'; g.lineWidth = 1.5; g.strokeRect(x, y, w, h); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(9, 9); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
 const crackTexture = makeCrackTexture();
+const patchworkTexture = makePatchworkTexture();
 const cloudTexture = makeCloudTexture();
-const camState = { theta: 0.9, phi: 0.95, radius: 15.5, target: new THREE.Vector3(0, 0.3, 0) };
+const camState = { theta: 0.9, phi: 1.05, radius: 16, target: new THREE.Vector3(0, 0.3, 0) };
+
+// ----- procedural plant models: low-poly merged geometries with a grey-scale vertex gradient; the colour comes from the instance
+class GeoBuilder {
+  constructor() { this.pos = []; this.col = []; }
+  tri(a, b, c, ka, kb, kc) { this.pos.push(...a, ...b, ...c); this.col.push(ka, ka, ka, kb, kb, kb, kc, kc, kc); }
+  /** A tapered, slightly curved blade: base at ``base``, leaning ``tilt`` radians from vertical towards ``angle``. */
+  blade(angle, tilt, len, width, bend, base = [0, 0, 0], k0 = 0.78, k1 = 1.0) {
+    const hx = Math.cos(angle), hz = Math.sin(angle), sx = -Math.sin(angle), sz = Math.cos(angle);
+    const dir = [hx * Math.sin(tilt), Math.cos(tilt), hz * Math.sin(tilt)];
+    const at = (t, off) => {
+      const w = width * Math.pow(1 - t, 0.8) * off, drop = bend * len * t * t;
+      return [base[0] + dir[0] * len * t + sx * w, base[1] + dir[1] * len * t - drop, base[2] + dir[2] * len * t + sz * w];
+    };
+    const l0 = at(0, -0.5), r0 = at(0, 0.5), l1 = at(0.5, -0.5), r1 = at(0.5, 0.5), tip = at(1, 0);
+    const km = (k0 + k1) / 2;
+    this.tri(l0, r0, l1, k0, k0, km); this.tri(r0, r1, l1, k0, km, km); this.tri(l1, r1, tip, km, km, k1);
+    return tip;
+  }
+  /** A squashed low-poly ellipsoid (icosahedron) centred at ``c``. */
+  blob(c, sx, sy, sz, k0 = 0.7, k1 = 1.0) {
+    const ico = new THREE.IcosahedronGeometry(0.5, 0), g = ico.index ? ico.toNonIndexed() : ico, p = g.attributes.position;
+    for (let i = 0; i < p.count; i += 3) {
+      const v = [0, 1, 2].map((j) => [c[0] + p.getX(i + j) * sx, c[1] + p.getY(i + j) * sy, c[2] + p.getZ(i + j) * sz]);
+      const k = (q) => lerp(k0, k1, clamp((q[1] - (c[1] - sy / 2)) / sy));
+      this.tri(v[0], v[1], v[2], k(v[0]), k(v[1]), k(v[2]));
+    }
+  }
+  build() {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
+    g.computeVertexNormals(); return g;
+  }
+}
+/** Builders return {body, head, height, width}: unit-height geometries (base at y = 0) and their scene size. */
+const MODELS = {
+  rice() {   // a tuft of arching blades; drooping panicles appear at heading
+    const r = rng(101), body = new GeoBuilder(), head = new GeoBuilder();
+    for (let i = 0; i < 12; i++) body.blade((i / 12) * TAU + r() * 0.6, 0.1 + r() * 0.42, 0.74 + r() * 0.26, 0.2, 0.32);
+    for (let i = 0; i < 4; i++) head.blade((i / 5) * TAU + r(), 0.55, 0.38, 0.11, 0.9, [0, 0.66 + r() * 0.1, 0], 0.85, 1.0);
+    return { body: body.build(), head: head.build(), height: 0.34, width: 0.24 };
+  },
+  wheat() {  // upright stalks with flag leaves; an ear tops every stalk
+    const r = rng(202), body = new GeoBuilder(), head = new GeoBuilder();
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * TAU + r() * 0.8, tilt = 0.03 + r() * 0.13, len = 0.86 + r() * 0.14;
+      const tip = body.blade(a, tilt, len, 0.045, 0.04, [(r() - 0.5) * 0.18, 0, (r() - 0.5) * 0.18], 0.6, 0.95);
+      head.blob([tip[0], tip[1] + 0.1, tip[2]], 0.11, 0.3, 0.11, 0.9, 1.0);
+    }
+    for (let i = 0; i < 4; i++) body.blade((i / 4) * TAU + r(), 0.35, 0.5, 0.13, 0.4, [0, 0.05, 0], 0.62, 1.0);
+    return { body: body.build(), head: head.build(), height: 0.36, width: 0.17 };
+  },
+  cotton() { // a rounded bush; white bolls open late
+    const r = rng(303), body = new GeoBuilder(), head = new GeoBuilder();
+    body.blob([0, 0.32, 0], 0.62, 0.5, 0.62, 0.6, 1.0); body.blob([0.16, 0.62, 0.04], 0.42, 0.36, 0.42, 0.7, 1.0); body.blob([-0.18, 0.56, -0.12], 0.38, 0.32, 0.38, 0.7, 1.0);
+    for (let i = 0; i < 10; i++) { const a = r() * TAU, rad = 0.2 + r() * 0.22; head.blob([Math.cos(a) * rad, 0.3 + r() * 0.5, Math.sin(a) * rad], 0.13, 0.12, 0.13, 0.9, 1.0); }
+    return { body: body.build(), head: head.build(), height: 0.34, width: 0.3 };
+  },
+  sugarcane() { // tall canes with an arching crown of long leaves; no separate head
+    const r = rng(404), body = new GeoBuilder();
+    for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU + r(), b = [(r() - 0.5) * 0.18, 0, (r() - 0.5) * 0.18]; body.blade(a, 0.04, 0.8, 0.07, 0.0, b, 0.5, 0.9); body.blade(a + 1.5708, 0.04, 0.8, 0.07, 0.0, b, 0.5, 0.9); }
+    for (let i = 0; i < 9; i++) body.blade((i / 9) * TAU + r() * 0.5, 0.55 + r() * 0.5, 0.5, 0.11, 0.55, [0, 0.62 + r() * 0.15, 0], 0.7, 1.0);
+    return { body: body.build(), head: null, height: 0.8, width: 0.24 };
+  },
+};
+const modelCache = {};
+const modelFor = (crop) => (modelCache[crop] = modelCache[crop] || (MODELS[crop] || MODELS.rice)());
 
 class View {
   constructor(container, label) {
@@ -321,20 +457,33 @@ class View {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, preserveDrawingBuffer: false, powerPreference: 'low-power' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0x9ad0f5, 16, 46);
-    this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    this.scene.fog = new THREE.Fog(0xbfe0f5, 18, 52);
+    this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 140);
     this.hemi = new THREE.HemisphereLight(0xffffff, 0x8a7a5a, 1.05); this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xffffff, 1.1); this.sun.position.set(-6, 9, -5); this.scene.add(this.sun);
     this.heights = new Float32Array(N * N);
     this.tileMoist = new Float32Array(TILES * TILES);
-    this.dirty = true; this.sc = null; this.wpos = 1; this.maxDrops = 3200; this.dropCount = 0; this.fps = 60;
-    this.time = 0; this.districtId = null; this.crop = null;
-    this._tmp = new THREE.Color(); this.noise = new Float32Array(N * N); { const rn = rng(9); for (let i = 0; i < N * N; i++) this.noise[i] = rn(); }
-    this.buildTerrain(); this.buildGridLines(); this.buildWater(); this.buildRain(); this.buildClouds(); this.buildJets();
-    this.sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff1c2 }));
-    this.sunMesh.position.set(-9, 8.5, -8); this.scene.add(this.sunMesh);
+    this.dirty = true; this.sc = null; this.wpos = 1; this.maxDrops = 3200; this.dropCount = 0; this.fps = 60; this.plantFrac = 1;
+    this.time = 0; this.districtId = null; this.crop = null; this.uTime = { value: 0 }; this.uSway = { value: 0.1 };
+    this.noise = new Float32Array(N * N); { const rn = rng(9); for (let i = 0; i < N * N; i++) this.noise[i] = rn(); }
+    this._dummy = new THREE.Object3D(); this._col = new THREE.Color(); this._leaf = new THREE.Color(); this._head = new THREE.Color();
+    this.buildSky(); this.buildSurround(); this.buildTerrain(); this.buildWater(); this.buildRain(); this.buildClouds(); this.buildJets(); this.buildBandLabels();
     this.attachControls();
     this.resize();
+  }
+  // ------------------------------------------------------------------ static scene parts
+  buildSky() {
+    this.skyMat = new THREE.ShaderMaterial({
+      side: THREE.BackSide, depthWrite: false, fog: false,
+      uniforms: { uTop: { value: new THREE.Color(0x4f8fd8) }, uHor: { value: new THREE.Color(0xbfe0f5) }, uSunDir: { value: new THREE.Vector3(0, 1, 0) }, uSunCol: { value: new THREE.Color(0xfff1c2) }, uGlow: { value: 1 } },
+      vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'varying vec3 vDir; uniform vec3 uTop; uniform vec3 uHor; uniform vec3 uSunDir; uniform vec3 uSunCol; uniform float uGlow;\n void main(){ float t = clamp(vDir.y, 0.0, 1.0); vec3 c = mix(uHor, uTop, pow(t, 0.55)); float s = max(dot(normalize(vDir), uSunDir), 0.0); c += uSunCol * (pow(s, 600.0) * 1.3 + pow(s, 14.0) * 0.28 * uGlow); gl_FragColor = vec4(c, 1.0);\n #include <colorspace_fragment>\n }',
+    });
+    this.sky = new THREE.Mesh(new THREE.SphereGeometry(70, 24, 14), this.skyMat); this.sky.frustumCulled = false; this.scene.add(this.sky);
+  }
+  buildSurround() {
+    this.surround = new THREE.Mesh(new THREE.PlaneGeometry(260, 260), new THREE.MeshLambertMaterial({ color: 0x8c9a58, map: patchworkTexture }));
+    this.surround.rotation.x = -Math.PI / 2; this.surround.position.y = -0.02; this.scene.add(this.surround);
   }
   buildTerrain() {
     const pos = new Float32Array(N * N * 3), uv = new Float32Array(N * N * 2), col = new Float32Array(N * N * 3);
@@ -359,15 +508,14 @@ class View {
     };
     this.terrain = new THREE.Mesh(g, mat); this.scene.add(this.terrain);
   }
-  buildGridLines() {
-    this.gridGeo = new THREE.BufferGeometry();
-    this.gridGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((TILES + 1) * 2 * (N - 1) * 6), 3));
-    this.gridLines = new THREE.LineSegments(this.gridGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28 }));
-    this.scene.add(this.gridLines);
-  }
   buildWater() {
+    // flood plane for heavy rain on upland crops
     this.water = new THREE.Mesh(new THREE.PlaneGeometry(SIZE, SIZE), new THREE.MeshStandardMaterial({ color: 0x2f7fc4, transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0.1 }));
     this.water.rotation.x = -Math.PI / 2; this.water.visible = false; this.scene.add(this.water);
+    // paddy ponds: one quad per plot
+    const quad = new THREE.PlaneGeometry(1, 1); quad.rotateX(-Math.PI / 2);
+    this.ponds = new THREE.InstancedMesh(quad, new THREE.MeshPhongMaterial({ color: 0x6f95a6, transparent: true, opacity: 0.82, shininess: 90, specular: 0xdde8f0, depthWrite: false }), PLOTS * PLOTS);
+    this.ponds.frustumCulled = false; this.ponds.count = 0; this.scene.add(this.ponds);
   }
   buildRain() {
     const n = 6400;
@@ -375,18 +523,19 @@ class View {
     const r = rng(3);
     for (let i = 0; i < 6400; i++) {
       const x = (r() - 0.5) * (SIZE + 4), y = r() * 7, z = (r() - 0.5) * (SIZE + 4);
-      this.rainPos.set([x, y, z, x, y - 0.35, z], i * 6); this.rainVel[i] = 9 + r() * 5;
+      this.rainPos.set([x, y, z, x, y - 0.26, z], i * 6); this.rainVel[i] = 9 + r() * 5;
     }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(this.rainPos, 3)); g.setDrawRange(0, 0);
-    this.rainGeo = g; this.rain = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x9cc7ff, transparent: true, opacity: 0.6 }));
+    this.rainGeo = g; this.rain = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xa8cdf5, transparent: true, opacity: 0.42 }));
     this.rain.frustumCulled = false; this.scene.add(this.rain);
   }
   buildClouds() {
     this.clouds = [];
-    for (let i = 0; i < 4; i++) {
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(7, 4.4), new THREE.MeshBasicMaterial({ map: cloudTexture, transparent: true, opacity: 0.3, depthWrite: false, fog: false }));
-      m.rotation.x = -Math.PI / 2; m.position.set((i - 1.5) * 4.2, 6 + i * 0.12, ((i * 7) % 5) - 2.5); this.scene.add(m); this.clouds.push(m);
+    for (let i = 0; i < 7; i++) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(8 + (i % 3) * 2, 4.8), new THREE.MeshBasicMaterial({ map: cloudTexture, transparent: true, opacity: 0.3, depthWrite: false, fog: false }));
+      m.rotation.x = -Math.PI / 2; m.position.set((i - 3) * 3.6, 7 + (i % 4) * 0.35, ((i * 7) % 11) - 5); this.scene.add(m); this.clouds.push(m);
     }
+    this.sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff1c2, fog: false })); this.scene.add(this.sunMesh);
   }
   buildJets() {
     const n = TILES * TILES * 6; this.jetPos = new Float32Array(n * 3); this.jetSeed = new Float32Array(n * 3);
@@ -395,113 +544,243 @@ class View {
     this.jetGeo = g; this.jets = new THREE.Points(g, new THREE.PointsMaterial({ color: 0x4fb0ff, size: 0.09, transparent: true, opacity: 0.9 }));
     this.jets.frustumCulled = false; this.scene.add(this.jets); this.jetCount = 0;
   }
+  buildBandLabels() {
+    this.bandLabels = ['80% low', 'Model', '80% high'].map((t) => {
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(t), depthTest: false, fog: false })); s.scale.set(2.2, 0.55, 1); s.visible = false; s.renderOrder = 10; this.scene.add(s); return s;
+    });
+    this.dividers = [];
+  }
+  // ------------------------------------------------------------------ district and crop
+  /** Plot lines: jittered, seeded by the district, so each place has its own field pattern. */
+  buildLayout(districtId) {
+    const r = rng(hash('plots:' + districtId)), line = () => Array.from({ length: PLOTS + 1 }, (_, k) => (k === 0 || k === PLOTS ? -SIZE / 2 + (k / PLOTS) * SIZE : -SIZE / 2 + ((k + (r() - 0.5) * 0.55) / PLOTS) * SIZE));
+    this.xs = line(); this.zs = line();
+  }
+  plotIndexAt(x, z) {
+    let c = 0, rr = 0; while (c < PLOTS - 1 && x >= this.xs[c + 1]) c++; while (rr < PLOTS - 1 && z >= this.zs[rr + 1]) rr++; return rr * PLOTS + c;
+  }
   setDistrict(d, crop) {
-    this.districtId = d.id; this.crop = crop; this.tiles = d.tiles;
-    const e = d.elevation_proxy;
+    this.districtId = d.id; this.crop = crop; this.tiles = d.tiles; this.district = d;
+    this.cropInfo = DATA.crops[crop]; this.ponded = !!this.cropInfo.ponded; this.model = modelFor(crop);
+    this.buildLayout(d.id);
+    // --- relief: real elevation of a 10 km window when available (scene unit = 1 km, exaggerated VEX times), else the procedural proxy
+    const real = Array.isArray(d.elevation_m), src = real ? d.elevation_m : d.elevation_proxy;
+    let base = 0; if (real) { const flat = src.flat().slice().sort((a, b) => a - b); base = flat[Math.floor(flat.length * 0.05)]; }
+    const rel = new Float32Array(N * N);
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const u = (i / (N - 1)) * 31, v = (j / (N - 1)) * 31, i0 = Math.min(Math.floor(u), 30), j0 = Math.min(Math.floor(v), 30), fu = u - i0, fv = v - j0;
-      const h = lerp(lerp(e[j0][i0], e[j0][i0 + 1], fu), lerp(e[j0 + 1][i0], e[j0 + 1][i0 + 1], fu), fv);
-      this.heights[j * N + i] = 0.1 + h * 1.1;
+      const h = lerp(lerp(src[j0][i0], src[j0][i0 + 1], fu), lerp(src[j0 + 1][i0], src[j0 + 1][i0 + 1], fu), fv);
+      rel[j * N + i] = real ? Math.max(0, (h - base) / 1000 * VEX) : h * 0.9;
     }
+    const kind = new Uint8Array(N * N), plot = new Uint8Array(N * N), level = new Float32Array(PLOTS * PLOTS), cnt = new Float32Array(PLOTS * PLOTS);
+    const chanCol = Math.floor(PLOTS / 2), chanRow = Math.floor(PLOTS / 2);
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const k = j * N + i, x = (i / (N - 1) - 0.5) * SIZE, z = (j / (N - 1) - 0.5) * SIZE, p = this.plotIndexAt(x, z); plot[k] = p; level[p] += rel[k]; cnt[p]++;
+    }
+    for (let p = 0; p < level.length; p++) level[p] = cnt[p] ? level[p] / cnt[p] : 0;
+    for (let pass = 0; pass < 2; pass++) {   // soften the steps between neighbouring terraces
+      const prev = level.slice();
+      for (let rr = 0; rr < PLOTS; rr++) for (let c = 0; c < PLOTS; c++) {
+        let sum = 0, m = 0; for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const r2 = rr + dr, c2 = c + dc; if (r2 >= 0 && r2 < PLOTS && c2 >= 0 && c2 < PLOTS) { sum += prev[r2 * PLOTS + c2]; m++; } }
+        level[rr * PLOTS + c] = 0.5 * prev[rr * PLOTS + c] + 0.5 * (sum / m);
+      }
+    }
+    this.plotLevel = level;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const k = j * N + i, x = (i / (N - 1) - 0.5) * SIZE, z = (j / (N - 1) - 0.5) * SIZE;
+      let dx = 1e9, dz = 1e9, kx = 0, kz = 0;
+      for (let l = 0; l <= PLOTS; l++) { const ax = Math.abs(x - this.xs[l]); if (ax < dx) { dx = ax; kx = l; } const az = Math.abs(z - this.zs[l]); if (az < dz) { dz = az; kz = l; } }
+      const onX = dx < BUND_W, onZ = dz < BUND_W;
+      let h = rel[k] + 0.1 + this.noise[k] * (this.ponded ? 0.004 : 0.012);
+      if (this.ponded) {
+        const c0 = Math.max(0, Math.min(PLOTS - 1, kx - 1)), c1 = Math.min(PLOTS - 1, kx), r0 = Math.max(0, Math.min(PLOTS - 1, kz - 1)), r1 = Math.min(PLOTS - 1, kz);
+        const near = [r0 * PLOTS + c0, r0 * PLOTS + c1, r1 * PLOTS + c0, r1 * PLOTS + c1];
+        if (onX || onZ) {
+          const top = Math.max(...near.map((q) => level[q])) + 0.1;
+          const channel = (onX && kx === chanCol && kx > 0 && kx < PLOTS) || (onZ && kz === chanRow && kz > 0 && kz < PLOTS);
+          kind[k] = channel ? 2 : 1; h = channel ? Math.min(...near.map((q) => level[q])) + 0.1 - 0.025 : top + BUND_H;
+        } else h = level[plot[k]] + 0.1 + this.noise[k] * 0.004;
+      } else if (onX || onZ) kind[k] = 1;
+      this.heights[k] = h;
+    }
+    this.vertKind = kind; this.vertPlot = plot;
     const pos = this.terrainGeo.attributes.position;
     for (let k = 0; k < N * N; k++) pos.setY(k, this.heights[k]);
     pos.needsUpdate = true; this.terrainGeo.computeVertexNormals();
     this.vertIdx = new Uint8Array(N * N * 4); this.vertW = new Float32Array(N * N * 4); this.vertShade = new Float32Array(N * N);
+    const rp = rng(hash('shade:' + d.id)), plotShade = Array.from({ length: PLOTS * PLOTS }, () => 0.93 + 0.14 * rp());
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const k = j * N + i, u = clamp((i / (N - 1)) * TILES - 0.5, 0, TILES - 1.001), v = clamp((j / (N - 1)) * TILES - 0.5, 0, TILES - 1.001);
       const i0 = Math.floor(u), j0 = Math.floor(v), fu = u - i0, fv = v - j0, a = j0 * TILES + i0;
       this.vertIdx.set([a, a + 1, a + TILES, a + TILES + 1], k * 4); this.vertW.set([(1 - fu) * (1 - fv), fu * (1 - fv), (1 - fu) * fv, fu * fv], k * 4);
-      this.vertShade[k] = 0.94 + 0.12 * this.noise[k] + 0.1 * (this.heights[k] - 0.5);
+      this.vertShade[k] = (0.94 + 0.1 * this.noise[k]) * plotShade[plot[k]];
     }
     this.tileRGB = new Float32Array(TILES * TILES * 3);
-    this.updateGridLines();
+    // terrain relief note for the HUD
+    this.reliefNote = real ? `Terrain: real relief of a 10 km window (${d.relief_m.toFixed(0)} m, drawn ${VEX}x exaggerated)` : 'Terrain: procedural relief (real elevation unavailable)';
     this.buildCrops();
+    this.buildDividers();
     this.dirty = true;
+  }
+  /** Two white ribbons on the ground that split the field into the three strips of the uncertainty view. */
+  buildDividers() {
+    for (const m of this.dividers) { this.scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
+    const samples = 80;
+    this.dividers = [-1, 1].map((sgn) => {
+      const x = sgn * SIZE / 6, pos = new Float32Array(samples * 2 * 3), idx = [];
+      for (let i = 0; i < samples; i++) {
+        const z = -SIZE / 2 + (i / (samples - 1)) * SIZE, y = this.heightAt(x, z) + 0.16;
+        pos.set([x - 0.045, y, z, x + 0.045, y, z], i * 6);
+        if (i < samples - 1) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setIndex(idx);
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false }));
+      m.visible = !!state.uncertainty; this.scene.add(m); return m;
+    });
   }
   heightAt(x, z) {
     const u = clamp((x / SIZE + 0.5) * (N - 1), 0, N - 1.001), v = clamp((z / SIZE + 0.5) * (N - 1), 0, N - 1.001);
     const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j, h = this.heights;
     return lerp(lerp(h[j * N + i], h[j * N + i + 1], fu), lerp(h[(j + 1) * N + i], h[(j + 1) * N + i + 1], fu), fv);
   }
-  updateGridLines() {
-    const p = this.gridGeo.attributes.position.array; let o = 0; const step = SIZE / TILES;
-    for (let t = 0; t <= TILES; t++) {
-      const c = -SIZE / 2 + t * step;
-      for (let s = 0; s < N - 1; s++) {
-        const a = -SIZE / 2 + (s / (N - 1)) * SIZE, b = -SIZE / 2 + ((s + 1) / (N - 1)) * SIZE;
-        p[o++] = a; p[o++] = this.heightAt(a, c) + 0.025; p[o++] = c; p[o++] = b; p[o++] = this.heightAt(b, c) + 0.025; p[o++] = c;
-        p[o++] = c; p[o++] = this.heightAt(c, a) + 0.025; p[o++] = a; p[o++] = c; p[o++] = this.heightAt(c, b) + 0.025; p[o++] = b;
-      }
-    }
-    this.gridGeo.attributes.position.needsUpdate = true;
+  swayMaterial(vertexColors = true) {
+    const mat = new THREE.MeshLambertMaterial({ vertexColors, side: THREE.DoubleSide });
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = this.uTime; shader.uniforms.uSway = this.uSway;
+      shader.vertexShader = 'uniform float uTime; uniform float uSway;\n' + shader.vertexShader.replace('#include <begin_vertex>',
+        '#include <begin_vertex>\n #ifdef USE_INSTANCING\n float ph = instanceMatrix[3].x * 1.7 + instanceMatrix[3].z * 1.1;\n transformed.x += sin(uTime * 1.7 + ph) * uSway * position.y * position.y;\n transformed.z += cos(uTime * 1.3 + ph) * uSway * 0.6 * position.y * position.y;\n #endif');
+    };
+    return mat;
   }
   buildCrops() {
-    if (this.stems) { this.scene.remove(this.stems, this.leaves); this.stems.dispose(); this.leaves.dispose(); }
-    const count = TILES * TILES * PLANTS_PER_TILE, style = CROP_STYLE[this.crop] || CROP_STYLE.rice;
-    const stemGeo = new THREE.CylinderGeometry(0.008, 0.012, 1, 5); stemGeo.translate(0, 0.5, 0);
-    const leafGeo = new THREE.ConeGeometry(1, 1, 6); leafGeo.translate(0, 0.5, 0);
-    this.stems = new THREE.InstancedMesh(stemGeo, new THREE.MeshLambertMaterial({ color: 0x8aa655 }), count);
-    this.leaves = new THREE.InstancedMesh(leafGeo, new THREE.MeshLambertMaterial({ color: 0xffffff }), count);
-    this.stems.frustumCulled = this.leaves.frustumCulled = false;
-    this.scene.add(this.stems, this.leaves);
-    const r = rng(hash(this.districtId + this.crop)), step = SIZE / TILES; this.plants = [];
-    for (let ty = 0; ty < TILES; ty++) for (let tx = 0; tx < TILES; tx++) for (let k = 0; k < PLANTS_PER_TILE; k++) {
-      const x = -SIZE / 2 + (tx + 0.1 + 0.8 * r()) * step, z = -SIZE / 2 + (ty + 0.1 + 0.8 * r()) * step;
-      this.plants.push({ x, z, y: this.heightAt(x, z), tile: ty * TILES + tx, phase: r() * 6.28, size: 0.8 + 0.4 * r() });
+    for (const m of [this.bodyMesh, this.headMesh, this.bandSplit]) if (m) { this.scene.remove(m); m.dispose && m.dispose(); }
+    // planting spots: rows inside each plot, away from the bunds; a seeded shuffle makes any prefix a uniform subset (level of detail)
+    const r = rng(hash(this.districtId + this.crop)), spots = [];
+    let area = 0; for (let rr = 0; rr < PLOTS; rr++) for (let c = 0; c < PLOTS; c++) area += (this.xs[c + 1] - this.xs[c] - 2 * (BUND_W + 0.04)) * (this.zs[rr + 1] - this.zs[rr] - 2 * (BUND_W + 0.04));
+    const s = Math.max(Math.sqrt(area / TARGET_PLANTS), this.model.width * 0.62);
+    for (let rr = 0; rr < PLOTS; rr++) for (let c = 0; c < PLOTS; c++) {
+      const x0 = this.xs[c] + BUND_W + 0.04, x1 = this.xs[c + 1] - BUND_W - 0.04, z0 = this.zs[rr] + BUND_W + 0.04, z1 = this.zs[rr + 1] - BUND_W - 0.04;
+      for (let z = z0 + s / 2; z < z1; z += s) for (let x = x0 + s / 2; x < x1; x += s) {
+        const px = x + (r() - 0.5) * s * 0.25, pz = z + (r() - 0.5) * s * 0.25, p = rr * PLOTS + c;
+        spots.push({ x: px, z: pz, y: this.heightAt(px, pz), plot: p, tile: Math.min(TILES - 1, Math.floor((pz / SIZE + 0.5) * TILES)) * TILES + Math.min(TILES - 1, Math.floor((px / SIZE + 0.5) * TILES)), band: px < -SIZE / 6 ? 0 : px > SIZE / 6 ? 2 : 1, phase: r() * TAU, size: 0.85 + 0.3 * r(), vary: 0.9 + 0.2 * r(), key: r() });
+      }
     }
-    this.cropStyle = style; this._dummy = new THREE.Object3D(); this._col = new THREE.Color();
+    spots.sort((a, b) => a.key - b.key); this.plants = spots;
+    this.bodyMesh = new THREE.InstancedMesh(this.model.body, this.swayMaterial(), spots.length);
+    this.bodyMesh.frustumCulled = false; this.scene.add(this.bodyMesh);
+    this.headMesh = null;
+    if (this.model.head) { this.headMesh = new THREE.InstancedMesh(this.model.head, this.swayMaterial(), spots.length); this.headMesh.frustumCulled = false; this.scene.add(this.headMesh); }
+    this.spacing = s;
   }
   setScenario(sc, wpos) { this.sc = sc; this.wpos = wpos; this.dirty = true; }
   setWeek(wpos) { if (Math.abs(wpos - this.wpos) > 0.03 || wpos === 1 || wpos === 16) { this.wpos = wpos; this.dirty = true; } }
+  // ------------------------------------------------------------------ one state -> the whole scene
   applyState() {
-    const s = weekState(this.sc, this.wpos); this.state = s;
-    // terrain colours: smooth tile moisture field, modulated by the tile's soil class (visual device)
+    const s = weekState(this.sc, this.wpos), wk = Math.floor(clamp(this.wpos, 1, 16)), day = dailyAt(this.wpos); this.state = s; this.day = day;
+    const crop = this.cropInfo, wpos = this.wpos, ponded = this.ponded, pondNow = pondToday(this.sc, day.index, s); this.pondNow = pondNow;
+    // ---- soil colour per tile (soil class modulates moisture), bunds / paths / channels
     const classFactor = [0.86, 0.96, 1.04, 1.14];
     for (let ty = 0; ty < TILES; ty++) for (let tx = 0; tx < TILES; tx++) this.tileMoist[ty * TILES + tx] = clamp(s.soil_moisture_0_1 * classFactor[this.tiles[ty][tx]]);
-    const col = this.terrainGeo.attributes.color, c = this._tmp, rgb = this.tileRGB, out = col.array;
+    const col = this.terrainGeo.attributes.color, c = this._col, rgb = this.tileRGB, out = col.array;
     for (let t = 0; t < TILES * TILES; t++) { moistureColor(this.tileMoist[t], c); rgb[t * 3] = c.r; rgb[t * 3 + 1] = c.g; rgb[t * 3 + 2] = c.b; }
-    const vi = this.vertIdx, vw = this.vertW, vs = this.vertShade;
+    const vi = this.vertIdx, vw = this.vertW, vs = this.vertShade, vk = this.vertKind;
+    const channelWater = (s.irrigation_mm > 0.5 ? 0.95 : pondNow > 8 ? 0.6 : 0.0);
+    const earth = _c2.setHex(0x8d7452), path = _c3.setHex(0xb8a581), chDry = new THREE.Color(0x7a6a52), chWet = new THREE.Color(0x4c7fa8);
     for (let k = 0; k < N * N; k++) {
       const a = vi[k * 4] * 3, b = vi[k * 4 + 1] * 3, c2 = vi[k * 4 + 2] * 3, d2 = vi[k * 4 + 3] * 3, w0 = vw[k * 4], w1 = vw[k * 4 + 1], w2 = vw[k * 4 + 2], w3 = vw[k * 4 + 3], sh = vs[k];
-      out[k * 3] = (rgb[a] * w0 + rgb[b] * w1 + rgb[c2] * w2 + rgb[d2] * w3) * sh;
-      out[k * 3 + 1] = (rgb[a + 1] * w0 + rgb[b + 1] * w1 + rgb[c2 + 1] * w2 + rgb[d2 + 1] * w3) * sh;
-      out[k * 3 + 2] = (rgb[a + 2] * w0 + rgb[b + 2] * w1 + rgb[c2 + 2] * w2 + rgb[d2 + 2] * w3) * sh;
+      let r = rgb[a] * w0 + rgb[b] * w1 + rgb[c2] * w2 + rgb[d2] * w3, g = rgb[a + 1] * w0 + rgb[b + 1] * w1 + rgb[c2 + 1] * w2 + rgb[d2 + 1] * w3, bl = rgb[a + 2] * w0 + rgb[b + 2] * w1 + rgb[c2 + 2] * w2 + rgb[d2 + 2] * w3;
+      const kd = vk[k];
+      if (kd === 1) { const m = ponded ? earth : path, f = ponded ? 0.7 : 0.55; r = lerp(r, m.r, f); g = lerp(g, m.g, f); bl = lerp(bl, m.b, f); }
+      else if (kd === 2) { r = lerp(chDry.r, chWet.r, channelWater); g = lerp(chDry.g, chWet.g, channelWater); bl = lerp(chDry.b, chWet.b, channelWater); }
+      out[k * 3] = r * sh; out[k * 3 + 1] = g * sh; out[k * 3 + 2] = bl * sh;
     }
     col.needsUpdate = true;
-    this.crackUniform.value = clamp((0.42 - s.soil_moisture_0_1) / 0.32) ** 1.2;
-    // flood: heavy rain over the last three weeks on a saturated soil (rain-driven, so irrigation drainage never floods the field)
-    const recentRain = this.sc.weekly.slice(Math.max(0, Math.floor(this.wpos) - 3), Math.floor(this.wpos)).reduce((a, w) => a + w.rain_mm, 0);
-    const level = clamp((recentRain - 110) / 150) * clamp((s.soil_moisture_0_1 - 0.8) / 0.2);
+    this.crackUniform.value = ponded && pondNow > 1 ? 0 : clamp((0.42 - s.soil_moisture_0_1) / 0.32) ** 1.2;
+    // ---- upland flood plane: heavy rain over the last three weeks on a saturated soil; paddy ponds come from the water balance
+    const recentRain = this.sc.weekly.slice(Math.max(0, wk - 3), wk).reduce((a, w) => a + w.rain_mm, 0);
+    const level = ponded ? 0 : clamp((recentRain - 110) / 150) * clamp((s.soil_moisture_0_1 - 0.8) / 0.2);
     this.water.visible = level > 0.02; this.water.position.y = 0.12 + level * 0.9;
-    // crops
-    const st = this.cropStyle, wilt = clamp((s.stress_0_1 - 0.35) / 0.5), greenness = clamp((s.ndvi - 0.15) / 0.65), d = this._dummy, cc = this._col;
-    for (let k = 0; k < this.plants.length; k++) {
-      const p = this.plants[k], tm = this.tileMoist[p.tile];
-      const growth = clamp(greenness * (0.82 + 0.3 * tm)), h = (0.06 + st.h * growth * p.size) * (1 - 0.38 * wilt);
-      d.position.set(p.x, p.y, p.z); d.rotation.set(0, p.phase, wilt * 0.55 * Math.sin(p.phase * 3)); d.scale.set(1, Math.max(h, 0.03), 1); d.updateMatrix();
-      this.stems.setMatrixAt(k, d.matrix);
-      d.position.y = p.y + h * 0.35; d.scale.set(st.w + 0.035 * growth, Math.max(h * 0.75, 0.03), st.w + 0.035 * growth); d.updateMatrix();
-      this.leaves.setMatrixAt(k, d.matrix);
-      cc.setHex(0xc9a94a).lerp(this._leaf.setHex(st.leaf), clamp((1 - wilt) * (0.35 + 0.65 * greenness))); this.leaves.setColorAt(k, cc);
+    this.updatePonds(pondNow);
+    // ---- crop development, stress, heat, uncertainty
+    const dev = curveAt(crop.development, wpos), rip = curveAt(crop.senescence, wpos), look = this.model;
+    const acc = stressAccumulated(this.sc, wpos), wilt = clamp((s.stress_0_1 - 0.35) / 0.5);
+    const scorch = clamp((day.tmax - 38) / 6) * (s.heat_p > 0.05 ? 1 : 0.35);
+    const observed = state.greenSource === 'observed' ? observedGreen(this.district, this.crop, wpos) : null;
+    const yl = this.sc.yield, vig = state.uncertainty ? [yl.lo / Math.max(yl.mean, 1e-6), 1, yl.hi / Math.max(yl.mean, 1e-6)].map((v) => clamp(v, 0.5, 1.3)) : [1, 1, 1];
+    const d = this._dummy, cc = this._col, leaf = this._leaf, head = this._head;
+    const ripGain = { rice: 1, wheat: 1, cotton: 0.45, sugarcane: 0.25 }[this.crop] ?? 0.5;
+    const grow = Math.pow(dev, 0.8), widthF = 0.28 + 0.72 * Math.pow(dev, 0.6);
+    const n = Math.max(1, Math.floor(this.plants.length * this.plantFrac)), widen = 1 / Math.sqrt(this.plantFrac);
+    const headT = this.crop === 'cotton' ? clamp((rip - 0.05) * 3) : smooth((dev - 0.8) / 0.1);
+    const waterCover = ponded ? clamp(pondNow / 20) : 0;
+    for (let k = 0; k < n; k++) {
+      const p = this.plants[k], v = vig[p.band];
+      const dens = clamp(0.82 + 0.3 * this.tileMoist[p.tile]);
+      const hgt = look.height * grow * (observed != null ? (0.55 + 0.6 * observed) : dens) * p.size * v * (1 - 0.38 * wilt);
+      const w = look.width * widthF * p.size * widen * (1 - 0.18 * wilt) * (0.9 + 0.1 * v);
+      d.position.set(p.x, p.y, p.z); d.rotation.set(0, p.phase, wilt * 0.5 * Math.sin(p.phase * 3)); d.scale.set(w, Math.max(hgt, 0.012), w); d.updateMatrix();
+      this.bodyMesh.setMatrixAt(k, d.matrix);
+      if (this.headMesh) { const hs = headT > 0.02 ? 1 : 0.0001; d.scale.set(w * hs * (0.6 + 0.4 * headT), Math.max(hgt, 0.012) * hs * (0.6 + 0.4 * headT), w * hs * (0.6 + 0.4 * headT)); d.updateMatrix(); this.headMesh.setMatrixAt(k, d.matrix); }
+      // colour: young lime -> healthy green -> gold at ripening; yellow-brown with accumulated stress; pale with scorch
+      leaf.setHex(0xa6dc62).lerp(_c1.setHex(0x5aa83c), smooth(dev * 1.25)).lerp(_c1.setHex(0xcdb552), clamp(rip * ripGain * 0.95));
+      const greener = observed != null ? clamp((observed - 0.2) / 0.6) : 1 - clamp(acc * 0.85 + Math.max(0, 1 - v) * 2.2) + Math.max(0, v - 1) * 0.0;
+      leaf.lerp(_c1.setHex(0xb59a45), clamp((1 - greener) * 0.85)).lerp(_c1.setHex(0xc9a45c), clamp(scorch * 0.7));
+      cc.copy(leaf).multiplyScalar(p.vary * (v > 1 ? 1 + (v - 1) * 0.5 : 1)); this.bodyMesh.setColorAt(k, cc);
+      if (this.headMesh) {
+        if (this.crop === 'cotton') head.setHex(0xf7f4ea); else if (this.crop === 'wheat') head.setHex(0xb9c866).lerp(_c1.setHex(0xdcb44a), clamp(rip * 1.4)); else head.setHex(0x9fc36a).lerp(_c1.setHex(0xe2c35a), clamp(rip * 1.3));
+        head.lerp(_c1.setHex(0xc9a45c), clamp(scorch * 0.5)); head.multiplyScalar(p.vary); this.headMesh.setColorAt(k, head);
+      }
     }
-    this.stems.instanceMatrix.needsUpdate = this.leaves.instanceMatrix.needsUpdate = true;
-    if (this.leaves.instanceColor) this.leaves.instanceColor.needsUpdate = true;
-    // sky, sun, fog, clouds
-    const heat = clamp((s.tmax_c - 28) / 14), sky = _c1.setHex(0x8ec9f0).lerp(_c2.setHex(0xf0c690), heat);
-    const wet = clamp(s.rain_mm / 70); sky.lerp(_c2.setHex(0x8a97a6), wet * 0.6);
-    sky.lerp(_c2.setHex(0xffb46b), clamp(s.heat_p) * 0.5);
-    this.scene.background = this.scene.background || new THREE.Color(); this.scene.background.copy(sky); this.scene.fog.color.copy(sky);
-    this.sun.color.setHex(0xffffff).lerp(_c2.setHex(0xffc88a), heat); this.sun.intensity = 1.0 + 0.5 * heat - 0.4 * wet;
-    this.sunMesh.material.color.setHex(0xfff1c2).lerp(_c2.setHex(0xff9a3c), heat);
-    this.cloudOpacity = clamp(0.12 + wet * 0.75, 0, 0.85); this.clouds.forEach((m) => { m.material.opacity = this.cloudOpacity; m.material.color.setScalar(1 - 0.5 * wet); });
-    this.dropCount = Math.floor(Math.min(this.maxDrops, this.maxDrops * clamp(s.rain_mm / 90)));
+    this.bodyMesh.count = n; this.bodyMesh.instanceMatrix.needsUpdate = true; if (this.bodyMesh.instanceColor) this.bodyMesh.instanceColor.needsUpdate = true;
+    if (this.headMesh) { this.headMesh.count = n; this.headMesh.instanceMatrix.needsUpdate = true; if (this.headMesh.instanceColor) this.headMesh.instanceColor.needsUpdate = true; }
+    // ---- uncertainty labels
+    const top = Math.max(...this.heights) + 0.9;
+    this.bandLabels.forEach((sp, b) => { sp.visible = !!state.uncertainty; sp.position.set((b - 1) * SIZE / 3, top + 0.4, -SIZE / 2 + 0.4); });
+    this.dividers.forEach((m) => { m.visible = !!state.uncertainty; });
+    // ---- surround colour: greener when wet
+    this.surround.material.color.setHex(0xb59a62).lerp(_c1.setHex(0x7d9b4a), clamp(s.soil_moisture_0_1 * 0.9 + clamp(s.rain_mm / 80) * 0.3));
+    // ---- weather of the day: rain streaks, sky, light, haze
+    const wet = clamp(day.rain / 25), cover = clamp(0.12 + wet * 0.8 + (s.rain_mm > 30 ? 0.12 : 0)), heat = clamp((day.tmax - 30) / 12);
+    this.dropCount = Math.floor(Math.min(this.maxDrops, this.maxDrops * 0.8 * clamp(day.rain / 40)));
     this.rainGeo.setDrawRange(0, this.dropCount * 2);
-    this.jetCount = s.irrigation_mm > 0.5 ? Math.floor(clamp(0.25 + s.irrigation_mm / 60) * TILES * TILES * 6) : 0;
+    this.cloudOpacity = clamp(cover, 0.08, 0.9); this.clouds.forEach((m) => { m.material.opacity = this.cloudOpacity * (0.6 + 0.4 * ((m.position.z + 6) % 3) / 3); m.material.color.setScalar(1 - 0.55 * wet); });
+    this.uSway.value = 0.07 + 0.1 * wet;
+    this.applySky(day, heat, wet, cover);
+    if (ponded) { this.jetCount = 0; } else this.jetCount = s.irrigation_mm > 0.5 ? Math.floor(clamp(0.25 + s.irrigation_mm / 60) * TILES * TILES * 6) : 0;
     this.jetGeo.setDrawRange(0, this.jetCount); this.irrigationMm = s.irrigation_mm;
-    this.dirty = false;
+    this.dirty = false; this.waterCover = waterCover;
+  }
+  updatePonds(depth) {
+    if (!this.ponded) { this.ponds.count = 0; return; }
+    const d = this._dummy, rp = rng(hash('pond:' + this.districtId));
+    let n = 0;
+    for (let rr = 0; rr < PLOTS; rr++) for (let c = 0; c < PLOTS; c++) {
+      const p = rr * PLOTS + c, vary = 0.85 + 0.3 * rp();
+      const mm = depth * vary;
+      const x0 = this.xs[c] + BUND_W, x1 = this.xs[c + 1] - BUND_W, z0 = this.zs[rr] + BUND_W, z1 = this.zs[rr + 1] - BUND_W;
+      const shown = mm > 1.5;
+      d.position.set((x0 + x1) / 2, this.plotLevel[p] + 0.1 + 0.012 + Math.min(mm, 75) * PONDU, (z0 + z1) / 2); d.rotation.set(0, 0, 0); d.scale.set(shown ? x1 - x0 : 0.0001, 1, shown ? z1 - z0 : 0.0001); d.updateMatrix();
+      this.ponds.setMatrixAt(n++, d.matrix);
+    }
+    this.ponds.count = n; this.ponds.instanceMatrix.needsUpdate = true;
+  }
+  applySky(day, heat, wet, cover) {
+    const hour = state.hour, el = (5 + 62 * Math.sin(Math.PI * (hour - 6) / 13)) * Math.PI / 180, az = ((hour - 6) / 13) * Math.PI - Math.PI / 2;
+    const sunDir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), -Math.cos(el) * Math.cos(az) * 0.9 - 0.15).normalize(), low = 1 - Math.sin(el);
+    const top = _c1.setHex(0x3f84d6).lerp(_c2.setHex(0x8693a2), clamp(cover * 0.85)).lerp(_c2.setHex(0x1f4f8c), low * 0.35 * (1 - cover));
+    const hor = _c2.setHex(0xaed7f6).lerp(_c3.setHex(0xb7c0c8), clamp(cover * 0.9)).lerp(_c3.setHex(0xf3d3a2), clamp(heat - 0.25) * 0.5).lerp(_c3.setHex(0xf6b27a), clamp(low * 0.9 - 0.1) * (1 - cover * 0.6));
+    this.skyMat.uniforms.uTop.value.copy(top); this.skyMat.uniforms.uHor.value.copy(hor); this.skyMat.uniforms.uSunDir.value.copy(sunDir);
+    this.skyMat.uniforms.uSunCol.value.setHex(0xfff1c2).lerp(_c3.setHex(0xff9a3c), low).multiplyScalar(1 - cover * 0.85); this.skyMat.uniforms.uGlow.value = 1 + heat;
+    this.scene.fog.color.copy(hor);
+    const haze = clamp(heat * 0.8 + (day.tmax >= 40 ? 0.2 : 0)); this.scene.fog.near = lerp(18, 7, haze); this.scene.fog.far = lerp(52, 30, haze);
+    this.sun.position.copy(sunDir).multiplyScalar(14); this.sun.color.setHex(0xffffff).lerp(_c3.setHex(0xffc88a), clamp(low * 0.9 + heat * 0.4));
+    this.sun.intensity = (0.35 + 1.1 * Math.sin(el)) * (1 - 0.55 * cover) * (1 + 0.15 * heat);
+    this.hemi.intensity = 0.8 + 0.45 * Math.sin(el) * (1 - 0.3 * cover);
+    this.sunMesh.position.copy(sunDir).multiplyScalar(30); this.sunMesh.visible = cover < 0.75; this.sunMesh.material.color.setHex(0xfff1c2).lerp(_c3.setHex(0xff9a3c), low);
+    this.hazeAmount = haze;
   }
   attachControls() {
-    this._leaf = new THREE.Color(); let mode = null, lx = 0, ly = 0;
+    let mode = null, lx = 0, ly = 0;
     const el = this.canvas;
     el.addEventListener('pointerdown', (e) => { mode = (e.button === 2 || e.shiftKey) ? 'pan' : 'rot'; lx = e.clientX; ly = e.clientY; el.setPointerCapture(e.pointerId); });
     el.addEventListener('pointerup', () => { mode = null; });
@@ -520,7 +799,7 @@ class View {
   frame(dt, running) {
     if (!this.sc) return;
     if (this.dirty) this.applyState();
-    this.time += dt;
+    this.time += dt; this.uTime.value = this.time;
     const ct = camState; this.camera.position.set(ct.target.x + ct.radius * Math.sin(ct.phi) * Math.sin(ct.theta), ct.target.y + ct.radius * Math.cos(ct.phi), ct.target.z + ct.radius * Math.sin(ct.phi) * Math.cos(ct.theta));
     this.camera.lookAt(ct.target);
     if (this.dropCount > 0) {
@@ -528,7 +807,7 @@ class View {
       for (let i = 0; i < this.dropCount; i++) {
         const o = i * 6; let y = a[o + 1] - this.rainVel[i] * dt * speed;
         if (y < 0.2) { y = 6.5 + (i % 7) * 0.1; }
-        a[o + 1] = y; a[o + 4] = y - 0.35; a[o] += wind * dt * speed; a[o + 3] = a[o] - wind * 0.4;
+        a[o + 1] = y; a[o + 4] = y - 0.26; a[o] += wind * dt * speed; a[o + 3] = a[o] - wind * 0.4;
         if (a[o] > SIZE / 2 + 2) { a[o] -= SIZE + 4; a[o + 3] = a[o]; }
       }
       this.rainGeo.attributes.position.needsUpdate = true;
@@ -543,18 +822,20 @@ class View {
       }
       this.jetGeo.attributes.position.needsUpdate = true;
     } else if (this.jetCount > 0) { this.jetGeo.setDrawRange(0, 0); }
-    if (!reducedMotion) this.clouds.forEach((m, i) => { m.position.x += dt * (0.12 + i * 0.03); if (m.position.x > 9) m.position.x = -9; });
+    if (!reducedMotion) this.clouds.forEach((m, i) => { m.position.x += dt * (0.12 + i * 0.03); if (m.position.x > 12) m.position.x = -12; });
     this.renderer.render(this.scene, this.camera);
   }
   adapt(fps) {
     this.fps = fps;
-    if (fps < 30 && this.maxDrops > 800) { this.maxDrops = Math.max(800, Math.floor(this.maxDrops * 0.85)); this.dirty = true; }
-    else if (fps > 56 && this.maxDrops < 6400) { this.maxDrops = Math.min(6400, Math.floor(this.maxDrops * 1.05)); this.dirty = true; }
+    if (state.quality === 'high') { if (this.plantFrac !== 1 || this.maxDrops !== 6400) { this.plantFrac = 1; this.maxDrops = 6400; this.dirty = true; } return; }
+    if (state.quality === 'low') { if (this.plantFrac !== 0.35 || this.maxDrops !== 800) { this.plantFrac = 0.35; this.maxDrops = 800; this.dirty = true; } return; }
+    if (fps < 28 && (this.maxDrops > 800 || this.plantFrac > 0.35)) { this.maxDrops = Math.max(800, Math.floor(this.maxDrops * 0.85)); this.plantFrac = Math.max(0.35, this.plantFrac * 0.88); this.dirty = true; }
+    else if (fps > 56 && (this.maxDrops < 6400 || this.plantFrac < 1)) { this.maxDrops = Math.min(6400, Math.floor(this.maxDrops * 1.05)); this.plantFrac = Math.min(1, this.plantFrac * 1.06); this.dirty = true; }
   }
 }
 
 // ===================================================================================== app state and UI
-const state = { district: null, crop: null, rain: 1, temp: 0, strategy: 'optimized', wpos: 1, playing: false, speed: 1, compare: false };
+const state = { district: null, crop: null, rain: 1, temp: 0, strategy: 'optimized', wpos: 1, playing: false, speed: 1, compare: false, hour: 12, quality: 'auto', uncertainty: false, greenSource: 'proxy' };
 let viewA, viewB;
 
 function populate() {
@@ -569,6 +850,21 @@ function fillCrops() {
 }
 const districtOf = () => DATA.districts.find((x) => x.id === state.district);
 
+/** Daily weather of the reference year at the fractional week, with the sliders applied (the model state stays weekly). */
+function dailyAt(wpos) {
+  const d = districtOf(), ref = d.reference_daily[state.crop], idx = Math.min(ref.rain_mm.length - 1, Math.max(0, Math.floor((clamp(wpos, 1, 16.999) - 1) * 7)));
+  const info = DATA.crops[state.crop], [mm, dd] = info.season_start.split('-').map(Number), date = new Date(Date.UTC(d.reference_year[state.crop], mm - 1, dd + idx));
+  return { index: idx, rain: ref.rain_mm[idx] * state.rain, tmax: ref.tmax_c[idx] + state.temp, tmin: ref.tmin_c[idx] + state.temp, date: date.toISOString().slice(0, 10) };
+}
+/** Water stress accumulated up to the week (the same smoothing as the greenness proxy: half of the previous value, half of the new). */
+function stressAccumulated(sc, wpos) {
+  let acc = 0; const n = Math.floor(clamp(wpos, 1, 16));
+  for (let w = 0; w < n; w++) acc = 0.5 * acc + 0.5 * sc.weekly[w].stress_0_1;
+  return acc;
+}
+function observedSeries(d, crop) { const r = d.reference_ndvi && d.reference_ndvi[crop]; return r && !r.is_synthetic ? r.weekly : null; }
+function observedGreen(d, crop, wpos) { const s = observedSeries(d, crop); return s ? curveAt(s, wpos) : null; }
+
 function pct(x) { return (100 * x).toFixed(0) + '%'; }
 function fmt(x, d = 1) { return Number(x).toFixed(d); }
 
@@ -577,22 +873,27 @@ function refresh(full = true) {
   if (full) {
     for (const v of [viewA, viewB]) if (v && (v.districtId !== d.id || v.crop !== state.crop)) v.setDistrict(d, state.crop);
   }
+  const real = d.reference_ndvi && d.reference_ndvi[state.crop] && !d.reference_ndvi[state.crop].is_synthetic;   // observed greenness is only offered for real data
+  $('fs-green').hidden = !real; if (!real && state.greenSource !== 'proxy') { state.greenSource = 'proxy'; document.querySelector('input[name=green][value=proxy]').checked = true; viewA.dirty = true; if (viewB) viewB.dirty = true; }
   const strategies = state.compare ? ['baseline', 'optimized'] : [state.strategy];
   const scs = strategies.map((s) => scenarioAt(state.district, state.crop, state.rain, state.temp, s));
   viewA.setScenario(scs[0], state.wpos); $('badge-a').textContent = state.compare ? 'Farmer baseline' : labelOf(state.strategy);
   if (state.compare) { viewB.setScenario(scs[1], state.wpos); $('badge-b').textContent = 'Optimized'; }
   state.scs = scs; state.strategies = strategies;
+  $('crop-note').textContent = DATA.crops[state.crop].note || '';
   updateHud(); drawCharts();
 }
 const labelOf = (s) => ({ rainfed: 'Rainfed', baseline: 'Farmer baseline', optimized: 'Optimized' }[s]);
 
 function updateHud() {
-  const sc = state.scs[state.strategies.length - 1], d = districtOf(), meta = DATA.meta;
+  const sc = state.scs[state.strategies.length - 1], d = districtOf(), meta = DATA.meta, info = DATA.crops[state.crop];
   const y = sc.yield, ymax = Math.max(...['rainfed', 'baseline', 'optimized'].map((s) => scenarioAt(state.district, state.crop, state.rain, state.temp, s).yield.hi), 1e-6);
   $('hud-yield').textContent = fmt(y.mean, 2); $('hud-yield').dataset.value = y.mean.toFixed(4);
   $('yield-range').style.left = (100 * y.lo / ymax) + '%'; $('yield-range').style.width = (100 * (y.hi - y.lo) / ymax) + '%'; $('yield-point').style.left = `calc(${100 * y.mean / ymax}% - 2px)`;
   $('yield-interval').textContent = `80% interval ${fmt(y.lo, 2)} to ${fmt(y.hi, 2)} t/ha (${labelOf(state.strategies[state.strategies.length - 1])})`;
-  $('yield-note').textContent = DATA.crops[state.crop].note || '';
+  $('yield-note').textContent = info.note || '';
+  const un = $('uncertainty-note'); un.hidden = !state.uncertainty;
+  if (state.uncertainty) un.textContent = `Uncertainty view: the western third of the field shows the crop at the low end of the 80% interval (${fmt(y.lo, 2)} t/ha), the middle third the model value (${fmt(y.mean, 2)}), the eastern third the high end (${fmt(y.hi, 2)}). It illustrates the interval; it is not a separate model.`;
   $('water-used').textContent = fmt(sc.water_used_mm, 0); $('water-used').dataset.value = sc.water_used_mm.toFixed(3);
   const wk = Math.floor(state.wpos), cum = sc.weekly.slice(0, wk).reduce((a, w) => a + w.irrigation_mm, 0);
   $('water-todate').textContent = `${fmt(cum, 0)} mm applied up to week ${wk}`;
@@ -604,14 +905,31 @@ function updateHud() {
     $('compare-water-saved').textContent = `${fmt(saved, 0)} mm (${b.water_used_mm > 0 ? fmt(100 * saved / b.water_used_mm, 0) : '0'}%)`; $('compare-water-saved').dataset.value = saved.toFixed(3);
     $('compare-yield').textContent = `${dy >= 0 ? '+' : ''}${fmt(dy, 2)} t/ha`; $('compare-yield').className = dy >= 0 ? 'pos' : 'neg'; $('compare-yield').dataset.value = dy.toFixed(4);
   }
-  const w = weekState(sc, state.wpos);
+  const w = weekState(sc, state.wpos), day = dailyAt(state.wpos);
   setGauge('drought', clamp(w.drought_p), `${pct(w.drought_p)}`, levelOf(w.drought_p, meta.risk_levels.drought));
   const days = w.heat_p * 7; setGauge('heat', clamp(w.heat_p), `${fmt(days, 1)}`, days < 0.5 ? 'none' : (days < 2 ? 'some' : 'many'), true);
-  $('stress-line').textContent = `Water stress ${pct(w.stress_0_1)} (1 - ETa/ETc), soil moisture ${pct(w.soil_moisture_0_1)} of capacity, Tmax ${fmt(w.tmax_c, 1)} C, rain ${fmt(w.rain_mm, 0)} mm.`;
+  $('stress-line').textContent = `Water stress ${pct(w.stress_0_1)} (1 - ETa/ETc), soil moisture ${pct(w.soil_moisture_0_1)} of capacity, week mean Tmax ${fmt(w.tmax_c, 1)} C, rain ${fmt(w.rain_mm, 0)} mm.` + (days >= 0.5 && day.tmax >= 38 ? ' Heatwave days: leaves are drawn scorched; the yield model handles temperature separately.' : '');
   $('val-week').textContent = 'Week ' + w.week; $('weekbadge').textContent = 'Week ' + w.week;
+  $('val-day').textContent = `Day ${day.index + 1} of ${d.reference_daily[state.crop].rain_mm.length}, ${day.date} (weather of reference year ${d.reference_year[state.crop]}): rain ${fmt(day.rain, 1)} mm, Tmax ${fmt(day.tmax, 1)} C`;
+  $('scenebadge').textContent = `${d.name}: ${viewA ? viewA.reliefNote : ''}. Plants and plots are schematic.`;
+  // paddy water
+  $('card-pond').hidden = !info.ponded;
+  if (info.ponded) {
+    const pn = pondToday(sc, day.index, w); $('pond-mm').textContent = fmt(pn, 0); $('pond-mm').dataset.value = pn.toFixed(3); $('seep-mm').textContent = fmt(w.seepage_mm, 0); $('seep-mm').dataset.value = w.seepage_mm.toFixed(3);
+    $('pond-note').textContent = `Bunds hold ${info.pond_max_mm} mm; seepage ${info.percolation_mm_day} mm/day while water stands. Depth in the scene is not to scale.`;
+  }
+  drawStageBars(sc, wk);
   $('explain').textContent = explain(sc, d);
-  const ew = d.early_warning[DATA.crops[state.crop].season];
+  const ew = d.early_warning[info.season];
   $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (hazard: ${ew.hazard}, lead ${ew.lead_days} d)<br>Heatwave ${pct(ew.heatwave_p)} (${ew.heatwave_source}), drought ${pct(ew.drought_p)}.<br><span class="small">Phase 5 early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
+}
+function drawStageBars(sc, wk) {
+  const box = $('stage-bars'), now = stageOfWeek(state.crop, wk), rel = sc.stage_rel;
+  if (box.children.length !== 4) { box.innerHTML = ''; for (let s = 0; s < 4; s++) { const r = document.createElement('div'); r.className = 'stagerow'; r.dataset.stage = s; r.innerHTML = `<span>${STAGE_SHORT[s]}</span><div class="track"><div class="fill"></div></div><span class="loss"></span>`; box.appendChild(r); } }
+  let worst = 0;
+  rel.forEach((f, s) => { if (1 - f > 1 - rel[worst]) worst = s; const row = box.children[s]; row.classList.toggle('now', s === now); row.dataset.value = f.toFixed(4); row.querySelector('.fill').style.width = (100 * f).toFixed(1) + '%'; row.querySelector('.loss').textContent = f >= 0.9995 ? 'none' : '-' + ((1 - f) * 100).toFixed(0) + '%'; });
+  const loss = 1 - rel[worst];
+  $('stage-note').textContent = loss < 0.005 ? 'No stage loses yield to water stress in this scenario.' : `Largest loss: ${STAGE_NAMES[worst]} (${(loss * 100).toFixed(0)}% of that stage's yield potential). Bars are the FAO-33 water-stress factors; the highlighted row is the stage the week falls in.`;
 }
 function levelOf(p, cfg) { return p >= cfg.severe ? 'severe' : p >= cfg.high ? 'high' : p >= cfg.moderate ? 'moderate' : 'low'; }
 function setGauge(name, frac, text, level, isHeat = false) {
@@ -635,7 +953,8 @@ function explain(sc, d) {
   const trend = dm < -0.03 ? 'falling' : dm > 0.03 ? 'rising' : 'steady';
   const baseCum = scenarioAt(state.district, state.crop, state.rain, state.temp, 'baseline').weekly.slice(0, wk).reduce((a, x) => a + x.irrigation_mm, 0);
   const cum = sc.weekly.slice(0, wk).reduce((a, x) => a + x.irrigation_mm, 0), saved = baseCum - cum, strat = state.strategies[state.strategies.length - 1];
-  let t = `Week ${wk} (${stage}): rainfall is ${rainPct} and soil moisture is ${trend} at ${pct(w.soil_moisture_0_1)} of capacity. `;
+  const ponded = DATA.crops[state.crop].ponded, pn = pondToday(sc, dailyAt(state.wpos).index, w);
+  let t = `Week ${wk} (${stage}): rainfall is ${rainPct} and ` + (ponded ? `${pn >= 1.5 ? `${fmt(pn, 0)} mm of water stands in the paddy` : 'the paddy has no standing water'}, soil moisture ${trend} at ${pct(w.soil_moisture_0_1)} of capacity. ` : `soil moisture is ${trend} at ${pct(w.soil_moisture_0_1)} of capacity. `);
   if (strat === 'rainfed') t += 'No irrigation is applied. ';
   else if (w.irrigation_mm > 1) t += `${labelOf(strat)} irrigation adds ${fmt(w.irrigation_mm, 0)} mm this week` + (strat === 'optimized' && stage.startsWith('flowering') ? ' to protect the most water-sensitive stage' : '') + '. ';
   else t += `${labelOf(strat)} schedule applies no irrigation this week. `;
@@ -646,7 +965,7 @@ function explain(sc, d) {
 
 // ----- mini charts
 function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
-function drawChart(canvasId, series, kind, color, ymax) {
+function drawChart(canvasId, series, kind, color, ymax, overlay) {
   const c = $(canvasId), dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth, h = c.clientHeight; if (!w) return;
   c.width = w * dpr; c.height = h * dpr; const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
   const n = series.length, l = 4, r = 4, t = 6, b = 14, pw = w - l - r, ph = h - t - b, top = ymax || Math.max(...series, 1e-6) * 1.1;
@@ -656,15 +975,19 @@ function drawChart(canvasId, series, kind, color, ymax) {
   g.strokeStyle = color; g.fillStyle = color; g.lineWidth = 2;
   if (kind === 'bars') { series.forEach((v, i) => { const bw = pw / n * 0.62; g.fillRect(x(i) - bw / 2, y(v), bw, t + ph - y(v)); }); }
   else { g.beginPath(); series.forEach((v, i) => (i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)))); g.stroke(); }
+  if (overlay) { g.save(); g.setLineDash([4, 3]); g.strokeStyle = cssVar('--s2'); g.lineWidth = 1.6; g.beginPath(); let pen = false; overlay.forEach((v, i) => { if (v == null) { pen = false; return; } pen ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)); pen = true; }); g.stroke(); g.restore(); }
   const cx = l + pw * (clamp(state.wpos, 1, n) - 0.5) / n; g.strokeStyle = cssVar('--ink'); g.lineWidth = 1; g.beginPath(); g.moveTo(cx, t); g.lineTo(cx, t + ph); g.stroke();
 }
 function drawCharts() {
-  if (!state.scs) return; const sc = state.scs[state.scs.length - 1];
+  if (!state.scs) return; const sc = state.scs[state.scs.length - 1], d = districtOf(), ponded = DATA.crops[state.crop].ponded;
   drawChart('chart-rain', sc.weekly.map((w) => w.rain_mm), 'bars', cssVar('--s1'));
   drawChart('chart-soil', sc.weekly.map((w) => w.soil_moisture_0_1), 'line', cssVar('--s3'), 1);
-  drawChart('chart-ndvi', sc.weekly.map((w) => w.ndvi), 'line', cssVar('--s4'), 1);
+  $('wrap-pond').hidden = !ponded; if (ponded) drawChart('chart-pond', sc.weekly.map((w) => w.pond_mm), 'line', cssVar('--s1'), DATA.crops[state.crop].pond_max_mm);
+  const ref = d.reference_ndvi && d.reference_ndvi[state.crop];
+  drawChart('chart-ndvi', sc.weekly.map((w) => w.ndvi), 'line', cssVar('--s4'), 1, ref ? ref.weekly : null);
+  $('ndvi-legend').innerHTML = `<span><i style="border-color:${cssVar('--s4')}"></i>model proxy (follows the sliders)</span>` + (ref ? `<span><i style="border-color:${cssVar('--s2')};border-top-style:dashed"></i>satellite NDVI, reference year${ref.is_synthetic ? ' (SYNTHETIC)' : ' (observed)'}</span>` : '');
   const w = weekState(sc, state.wpos);
-  $('ct-rain').textContent = `${fmt(w.rain_mm, 0)} mm`; $('ct-soil').textContent = pct(w.soil_moisture_0_1); $('ct-ndvi').textContent = fmt(w.ndvi, 2);
+  $('ct-rain').textContent = `${fmt(w.rain_mm, 0)} mm`; $('ct-soil').textContent = pct(w.soil_moisture_0_1); $('ct-ndvi').textContent = fmt(w.ndvi, 2); if (ponded) $('ct-pond').textContent = `${fmt(w.pond_mm, 0)} mm`;
 }
 
 // ===================================================================================== wiring
@@ -676,16 +999,25 @@ function setCompare(on) {
   if (on) { viewB.setDistrict(districtOf(), state.crop); }
   refresh();
 }
+function setUncertainty(on) {
+  state.uncertainty = on; $('btn-uncertainty').setAttribute('aria-pressed', String(on));
+  viewA.dirty = true; if (viewB) viewB.dirty = true; updateHud();
+}
+function setHour(h) { state.hour = h; const hh = Math.floor(h), mm = Math.round((h - hh) * 60); $('val-hour').textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`; viewA.dirty = true; if (viewB) viewB.dirty = true; }
 function wire() {
   $('sel-district').addEventListener('change', (e) => { state.district = e.target.value; fillCrops(); refresh(); });
   $('sel-crop').addEventListener('change', (e) => { state.crop = e.target.value; refresh(); });
   $('rng-rain').addEventListener('input', (e) => { state.rain = Number(e.target.value); $('val-rain').textContent = state.rain.toFixed(2) + 'x'; refresh(false); });
   $('rng-temp').addEventListener('input', (e) => { state.temp = Number(e.target.value); $('val-temp').textContent = (state.temp >= 0 ? '+' : '') + state.temp.toFixed(1) + ' C'; refresh(false); });
   for (const r of document.querySelectorAll('input[name=strategy]')) r.addEventListener('change', (e) => { state.strategy = e.target.value; refresh(false); });
+  for (const r of document.querySelectorAll('input[name=green]')) r.addEventListener('change', (e) => { state.greenSource = e.target.value; viewA.dirty = true; if (viewB) viewB.dirty = true; });
   $('rng-week').addEventListener('input', (e) => { state.wpos = Number(e.target.value); setWeek(state.wpos, false); });
+  $('rng-hour').addEventListener('input', (e) => setHour(Number(e.target.value)));
+  $('sel-quality').addEventListener('change', (e) => { state.quality = e.target.value; viewA.adapt(viewA.fps); viewB && viewB.adapt(viewB.fps); });
   $('btn-play').addEventListener('click', togglePlay);
   $('sel-speed').addEventListener('change', (e) => { state.speed = Number(e.target.value); });
   $('btn-compare').addEventListener('click', () => setCompare(!state.compare));
+  $('btn-uncertainty').addEventListener('click', () => setUncertainty(!state.uncertainty));
   $('btn-palette').addEventListener('click', (e) => { paletteName = paletteName === 'standard' ? 'safe' : 'standard'; e.currentTarget.setAttribute('aria-pressed', String(paletteName === 'safe')); viewA.dirty = true; if (viewB) viewB.dirty = true; });
   $('btn-shot').addEventListener('click', screenshot);
   window.addEventListener('keydown', (e) => {
@@ -694,6 +1026,7 @@ function wire() {
     else if (e.key === 'ArrowRight') { e.preventDefault(); setWeek(Math.min(DATA.meta.weeks, Math.floor(state.wpos) + 1)); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); setWeek(Math.max(1, Math.ceil(state.wpos) - 1)); }
     else if (e.key === 'c' || e.key === 'C') setCompare(!state.compare);
+    else if (e.key === 'u' || e.key === 'U') setUncertainty(!state.uncertainty);
     else if (e.key === 's' || e.key === 'S') screenshot();
   });
   window.addEventListener('resize', () => { viewA.resize(); viewB && viewB.resize(); drawCharts(); });
@@ -730,7 +1063,14 @@ function askForFile() {
 }
 
 let hidden = false, last = performance.now(), fpsAcc = 0, fpsN = 0;
-window.__sim = { frames: 0, ready: false, state, get views() { return [viewA, viewB]; } };
+window.__sim = {
+  frames: 0, ready: false, state, get views() { return [viewA, viewB]; },
+  /** What the scene currently shows (used by the browser tests). */
+  describe() {
+    const v = viewA; if (!v || !v.sc) return null;
+    return { crop: v.crop, ponded: v.ponded, plants: v.plants.length, drawn: v.bodyMesh ? v.bodyMesh.count : 0, heads: v.headMesh ? v.headMesh.count : 0, pondsVisible: v.ponds.count, pondScale: v.ponds.count ? (() => { const m = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(); v.ponds.getMatrixAt(0, m); m.decompose(p, q, s); return s.x; })() : 0, relief: v.reliefNote, quality: state.quality, plantFrac: v.plantFrac, haze: v.hazeAmount, sunY: v.skyMat.uniforms.uSunDir.value.y, cloud: v.cloudOpacity, drops: v.dropCount, day: v.day, uncertainty: state.uncertainty };
+  },
+};
 
 function loop(now) {
   requestAnimationFrame(loop);
@@ -749,12 +1089,15 @@ async function main() {
   if (syn.weather) flags.push('synthetic weather'); if (syn.crop_labels) flags.push('synthetic yields'); if (syn.satellite_dataset) flags.push('satellite dataset is synthetic (not used by the served models; greenness here is a proxy)');
   if (flags.length) { $('chip-synthetic').hidden = false; $('chip-synthetic').textContent = 'Data note: ' + flags.join('; '); }
   $('foot-disclaimer').textContent = DATA.meta.disclaimer;
+  $('foot-attribution').textContent = (DATA.meta.attribution || []).join(' ');
   $('foot-meta').textContent = Object.entries(DATA.meta.model_versions).map(([k, v]) => `${k}: ${v}`).join(' | ');
   populate();
-  viewA = new View($('view-a'), 'A'); wire();
   const params = new URLSearchParams(location.search);
+  if (params.get('quality') && ['auto', 'high', 'low'].includes(params.get('quality'))) { state.quality = params.get('quality'); $('sel-quality').value = state.quality; }
   if (params.get('district') && DATA.districts.some((d) => d.id === params.get('district'))) { state.district = params.get('district'); $('sel-district').value = state.district; fillCrops(); }
   if (params.get('crop') && districtOf().crops.includes(params.get('crop'))) { state.crop = params.get('crop'); $('sel-crop').value = state.crop; }
+  viewA = new View($('view-a'), 'A'); wire();
+  if (state.quality !== 'auto') viewA.adapt(60);
   viewA.setDistrict(districtOf(), state.crop);
   refresh(false); viewA.resize();
   window.__sim.ready = true; requestAnimationFrame(loop);

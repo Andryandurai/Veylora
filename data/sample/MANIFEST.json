@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-16T07:34:57+00:00",
+  "created": "2026-10-16T09:21:39+00:00",
   "note": "derived district-level tables and serving models; satellite_16d is synthetic (is_synthetic=True)",
   "files": {
     "processed/districts.parquet": {
@@ -35,8 +35,8 @@
       "sha256": "09a74c389f47a61223a816be0864abfac5764956821ecfd1a163cea7b005c54d"
     },
     "simulator/index_embedded.html": {
-      "bytes": 10019589,
-      "sha256": "f73eb7b2b0c8d478286258a3ae1076e0c88d1e9ed9720e3921eb46dd18de5828"
+      "bytes": 11990324,
+      "sha256": "7c51c9587f59e20e2aa276144d91240e84bad42a61c51bc019354ccffb80d3e5"
     },
     "simulator/sim_districts.json": {
       "bytes": 1004,

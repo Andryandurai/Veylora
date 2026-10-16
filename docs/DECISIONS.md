@@ -296,3 +296,40 @@ dashboard warns on every non-English advisory and the sender defaults to dry run
   silently left wrong. The plan's targets are shown as hypotheses with measured values beside them, never as achievements.
 - **`make pipeline`** chains db-up, etl, db-all, analytics-eda, train-yield, train-extreme, prescriptive-report, export-sim, embed-sim
   and stops at the first failure; every step is idempotent.
+
+## 2026-10-16 - Simulator realism upgrade (v1.1)
+
+### D-029: Paddy rice is a ponded field; results of the irrigation phase changed
+The earlier water balance treated rice like any root-zone crop (D-021 noted that seepage and ponding were missing). The model now has an
+optional ponded-field extension, enabled for rice in `config/crop_params.yaml` (`paddy:`): depletion may go negative down to
+`-pond_max_mm` (standing water behind the bunds, 75 mm), `min(percolation_mm_day, standing water)` (2 mm/day) is lost to seepage each day
+while water stands, water above the bunds spills, and the field starts with 25 mm of water. Without the block, or for any other crop, the
+balance is bit-for-bit the earlier one (tested). The weekly LP gets the matching storage bound (`TAW + pond`) and a weekly seepage loss that
+cannot exceed the water available (a penalised slack keeps it feasible when water is short). The three values are **approximate and
+unverified**, like the other agronomic parameters. Land preparation (puddling) water, the nursery and bund leakage are still not modelled.
+- The rice seasonal budget was raised from 350 to 500 mm (a rounded allowance for seepage); other crops are unchanged.
+- **Consequences, all regenerated from the new model:** `reports/prescriptive_results.*`, the simulator data, the irrigation amounts in
+  rice advisories, and the final report. Optimized irrigation now saves 61 percent of the 600 mm baseline water in normal rainfall and keeps
+  98 percent of the baseline yield (was 70 and 93 percent); against an even split it is a small but clear gain in normal rainfall (interval
+  +0.0005 to +0.027) and not clear in the dry scenario. The report generator now computes that verdict from the interval instead of fixed
+  prose (`analytics/prescriptive/wording.py`), and its claim check had caught the old sentence ("not distinguishable") becoming wrong.
+- A ponded field buffers water that a root-zone model would discard above field capacity, so with the same schedule the ponded rice can
+  yield *more* than the earlier model while losing seepage: ponding is not simply "more demanding".
+
+### D-030: What the simulator draws from data and what it invents (schema version 2)
+The scene was made more realistic without making it look more certain than it is. New data fields: `pond_daily`, `pond_mm`, `seepage_mm`,
+`stage_rel` (FAO-33 stage factors), `reference_daily` (observed daily weather of the reference year, unscaled; the page applies the sliders),
+`reference_ndvi` (flagged synthetic), `elevation_m` and `relief_m` (real relief of a 10 km window from open terrain tiles, with attribution),
+and per-crop `development` / `senescence` (a visual growth curve built from the stage lengths).
+- **Real relief, schematic everything else.** Elevation comes from AWS Terrain Tiles (SRTM and other public data; cached under
+  `data/raw/elevation`; falls back to the procedural proxy, labelled, when offline). Fields, soil classes and plants stay schematic and the
+  page says so. Soil maps were not added (no open source was checked); the soil classes remain procedural.
+- **Model state is weekly, weather is daily.** Only the standing water of paddies is exported daily (the irrigation event is visible);
+  moisture, stress and yield are weekly values. The page says so.
+- **Observed NDVI cannot drive the scene while the dataset is synthetic.** The dashed NDVI line is labelled SYNTHETIC; a choice "observed
+  NDVI" appears only when `is_synthetic` is false (tested on a modified copy of the data). Earth Engine authentication is still a manual step.
+- **No heat-sterility icon and no heat shimmer.** The yield model has no mechanism for flowering sterility, and a screen-space distortion
+  was too costly for software rendering; heatwave weeks are shown as haze and scorched leaves, tied to the daily Tmax and the `heat_p` indicator.
+- **Uncertainty view** illustrates the 80 percent interval with three strips of low, model and high vigour; it is not a separate model.
+- The measured software-rendering frame rate fell (about 8 fps from about 12) because the scene has more geometry; the page lowers detail
+  automatically below 28 fps and offers fixed High and Low. A real-GPU measurement is still missing.

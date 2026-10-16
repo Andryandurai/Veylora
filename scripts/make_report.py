@@ -28,6 +28,8 @@ from typing import Any
 
 import pandas as pd
 
+from analytics.prescriptive.wording import paired_phrase
+
 ROOT = Path(__file__).resolve().parents[1]
 REPORTS = ROOT / "reports"
 LOG = logging.getLogger("make_report")
@@ -232,6 +234,18 @@ def collect(f: Facts, count_tests: bool) -> dict[str, str]:
         "w_even_water": f.show(
             "water vs even split", lambda: -paired("normal rainfall", "delta_water_mm"), "{:.0f}"
         ),
+        "w_even_phrase": f.show(
+            "yield verdict vs even split",
+            lambda: paired_phrase(
+                paired("normal rainfall", "delta_rel_yield"),
+                paired("normal rainfall", "delta_rel_yield_lo"),
+                paired("normal rainfall", "delta_rel_yield_hi"),
+                "yield gain",
+                "yield loss",
+                "no clear yield difference",
+            ),
+            "{}",
+        ),
         "w_even_dy": f.show(
             "yield difference vs even",
             lambda: paired("normal rainfall", "delta_rel_yield"),
@@ -240,12 +254,12 @@ def collect(f: Facts, count_tests: bool) -> dict[str, str]:
         "w_even_lo": f.show(
             "yield difference low",
             lambda: paired("normal rainfall", "delta_rel_yield_lo"),
-            "{:+.3f}",
+            "{:+.4f}",
         ),
         "w_even_hi": f.show(
             "yield difference high",
             lambda: paired("normal rainfall", "delta_rel_yield_hi"),
-            "{:+.3f}",
+            "{:+.4f}",
         ),
         "w_worse": f.show(
             "cases optimized worse",
@@ -370,7 +384,7 @@ ClimateResilience-India is a district-level decision-support system for four sou
 
 * The yield models are **not better than simple baselines** by a margin the data can confirm. They are useful as a weather-adjusted baseline with an honest interval, not as precise predictors.
 * The heatwave LSTM has **no skill over climatology**; the system serves climatology and says so. The drought model **does** beat climatology and persistence.
-* The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it is not distinguishable on yield. The plan's story that yield recovers while water is saved is not what the models show.
+* The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it uses less water with {v["w_even_phrase"]}. The plan's story that yield recovers while water is saved is not what the models show.
 * Satellite NDVI/soil-moisture inputs are **synthetic** (Earth Engine was not authenticated). The served models do not use them.
 
 ## 2. Data and scope
@@ -399,7 +413,7 @@ Target: yield relative to the district's prior mean. Time-based splits only (tra
 
 ## 6. Irrigation optimization
 
-Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme (PuLP/CBC); the slowest LP case took {v["w_secs"]} s.
+Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme (PuLP/CBC); the slowest LP case took {v["w_secs"]} s. Paddy rice is modelled as a ponded field (standing water behind bunds and seepage while it stands; the parameters are approximate and unverified, D-029); the other crops use the plain root-zone balance.
 
 * Normal rainfall: {v["w_saved"]} water saved against the 600 mm baseline, yield {v["w_yield"]} of baseline. Dry year (rain x0.7): {v["w_saved_dry"]} saved, yield {v["w_yield_dry"]} of baseline.
 * Against an even split: {v["w_even_water"]} mm less water, relative-yield difference {v["w_even_dy"]} (interval {v["w_even_lo"]} to {v["w_even_hi"]}), worse in {v["w_worse"]} of {v["w_cases"]} cases.
@@ -407,7 +421,7 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 
 ## 7. Simulator, dashboards, advisory
 
-* **3D simulator** (Three.js, one self-contained page): checked in headless Chromium with software rendering ({v["sim_scen"]}), which ran at {v["sim_fps"]} frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: {v["real_gpu_fps"]}.
+* **3D simulator** (Three.js, one self-contained page): crop-specific plant models that grow over the season, flooded and terraced paddies, soil that darkens when wet and cracks when dry, daily weather with dates, a time-of-day control, an uncertainty view and a by-stage stress panel; the relief is real (open terrain tiles) but fields, plants and soil classes are schematic. Checked in headless Chromium with software rendering ({v["sim_scen"]}), which ran at {v["sim_fps"]} frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: {v["real_gpu_fps"]}.
 * **Dashboards** (Streamlit, a home page and six pages): {v["dash_pages"]} addresses loaded in a browser with {v["dash_fail"]} failed checks (no exception boxes, no failed requests); median warm page loads {v["dash_warm_min"]}-{v["dash_warm_max"]} s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; {v["bot_ok"]} of {v["bot_n"]} bot smoke checks passed. Translation review: {v["translation_review"]}.
 * **Container:** {v["ctr_ok"]} of {v["ctr_n"]} checks passed (serving image {v["ctr_mb"]} MB, non-root, health check answers, models run from the demo bundle, memory {v["ctr_mem"]}); the full test suite inside a container built from `requirements.lock`: {v["ctr_tests"]} (browser tests skip there: no Chromium or node in the image).
@@ -479,7 +493,7 @@ def demo_script(v: dict[str, str]) -> str:
 
 **2:30 Yield predictor.** Rice, Thanjavur. Show the forecast with its 80% interval ({v["y_cover"]} of test cases fall inside) and the SHAP drivers. Move the rainfall slider. "Honest finding: the forecast hardly moves ({v["y_rain06"]} for 40% less rain). The model mostly learned each district's own history. Against the best simple baseline its error is {v["y_rel"]} against {v["y_best_rel"]} of the mean yield: no clear gain, so I show an interval, not a promise." Open the crop comparison and point out when the pessimistic ranking differs.
 
-**3:30 3D simulator.** Pick the optimized and baseline strategies and use Compare. "The optimizer saves {v["w_saved"]} of the water in the model but keeps {v["w_yield"]} of the baseline yield; against an even split it saves {v["w_even_water"]} mm with no clear yield difference. That is a trade-off for agronomists to judge, not a free lunch." Mention that the frame rate was only checked with software rendering ({v["sim_fps"]} fps); real-GPU performance: {v["real_gpu_fps"]}.
+**3:30 3D simulator.** Choose rice, step through the weeks (seedlings, then tufts, then heads, with the date of the weather shown) and use Compare: the farmer-baseline paddy stays flooded while the optimized one is drained between irrigation events. Press U for the uncertainty view (three strips: low end, model, high end of the 80% interval) and read the water-stress-by-stage panel. "The optimizer saves {v["w_saved"]} of the water in the model but keeps {v["w_yield"]} of the baseline yield; against an even split it saves {v["w_even_water"]} mm with {v["w_even_phrase"]}. That is a trade-off for agronomists to judge, not a free lunch." Mention that the frame rate was only checked with software rendering ({v["sim_fps"]} fps); real-GPU performance: {v["real_gpu_fps"]}.
 
 **4:15 Farmer advisory.** Show the same district in English and Tamil. "Fixed templates, no language model, 320 characters; the WhatsApp bot asks before using an uncertain district name and honours STOP. Sending is a dry run by default. The translations are drafts: {v["translation_review"]}."
 
@@ -578,11 +592,6 @@ def verify_claims(f: Facts) -> list[str]:
         if not normal["yield_vs_baseline"] < 1.0 or normal["water_saved_pct"] <= 30:
             failed.append(
                 "the optimizer no longer saves water at a yield cost against the baseline"
-            )
-        pair = [r for r in pre["paired_optimized_vs_even"] if r["scenario"] == "normal rainfall"][0]
-        if not pair["delta_rel_yield_lo"] <= 0.0 <= pair["delta_rel_yield_hi"]:
-            failed.append(
-                "the optimizer's yield difference against an even split is now statistically clear"
             )
         if not qual["synthetic_share"]["satellite_16d"] > 0:
             failed.append(

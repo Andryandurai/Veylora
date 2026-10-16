@@ -1,9 +1,9 @@
 {
   "build_serving_image": {
     "ok": true,
-    "seconds": 5.5,
+    "seconds": 12.0,
     "detail": {
-      "image_mb": 3515
+      "image_mb": 3525
     }
   },
   "app_health_endpoint": {
@@ -13,19 +13,19 @@
   },
   "runs_as_non_root": {
     "ok": true,
-    "seconds": 0.1,
+    "seconds": 0.2,
     "detail": {
       "uid": "10001"
     }
   },
   "restore_demo_bundle": {
     "ok": true,
-    "seconds": 0.5,
+    "seconds": 1.0,
     "detail": "restored 9 file(s) from the demo bundle\nwrote 9 file(s)\n"
   },
   "models_work_in_container": {
     "ok": true,
-    "seconds": 11.3,
+    "seconds": 38.5,
     "detail": {
       "yield_t_ha": 2.276,
       "level": "high",
@@ -35,17 +35,17 @@
       ]
     }
   },
-  "memory_in_use_after_smoke": "347.3MiB / 8.729GiB",
+  "memory_in_use_after_smoke": "172.5MiB / 8.729GiB",
   "build_full_image": {
     "ok": true,
-    "seconds": 4.2,
+    "seconds": 6.9,
     "detail": null
   },
   "full_test_suite_in_container": {
     "ok": true,
-    "seconds": 38.0,
+    "seconds": 80.2,
     "detail": {
-      "summary": "300 passed, 6 skipped in 34.18s",
+      "summary": "327 passed, 9 skipped in 71.21s (0:01:11)",
       "database_reachable": true
     }
   }

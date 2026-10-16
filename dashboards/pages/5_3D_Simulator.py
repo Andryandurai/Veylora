@@ -30,7 +30,8 @@ def main() -> None:
     st.iframe(url, height=760)
     st.markdown(f"[Open the simulator in its own tab]({url})")
     st.caption(
-        "The scene interpolates a precomputed grid (7 rainfall x 6 temperature x 3 irrigation strategies per district and crop; FAO-56 water balance plus the yield response). It does not run a crop model live. "
+        "The scene interpolates a precomputed grid (7 rainfall x 6 temperature x 3 irrigation strategies per district and crop; FAO-56 water balance plus the yield response, with paddy rice as a ponded field). It does not run a crop model live. "
+        "The relief is real (open terrain tiles, exaggerated); fields, plants, soil classes and the time-of-day light are schematic. "
         "Rendering speed was checked only with software rendering; verify the frame rate on your own GPU."
     )
 

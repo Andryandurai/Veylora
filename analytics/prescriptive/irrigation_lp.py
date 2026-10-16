@@ -9,6 +9,10 @@ soil water ``S_w`` and drainage ``DP_w``. The model is a linearisation of the da
     E_w <= S_w + Pe_w + I_w                          (cannot use water that is not there)
     sum_w I_w <= budget,    0 <= I_w <= weekly_cap
 
+Ponded paddy (D-029): the storage bound becomes ``TAW + pond depth`` and every week loses ``perc_w`` mm to seepage and
+percolation (assuming the field is kept flooded). The loss cannot exceed the water that is there: a slack ``U_w`` returns
+the part of ``perc_w`` that is not available, and a large penalty keeps ``U_w`` at zero unless the water really is short.
+
 Objective: maximise ``sum_w (Ky_s(w) / ETc_s) E_w``, which is the first-order (additive) form of the FAO-33
 relative yield ``1 - sum_s Ky_s (1 - ETa_s / ETc_s)``, minus a tiny penalty on irrigation so that water is only
 used when it buys yield. The LP is a *planning* model; every schedule (the LP's and the baselines') is then
@@ -30,6 +34,9 @@ from analytics.prescriptive.water_balance import stage_index
 LOG = logging.getLogger(__name__)
 
 WATER_PENALTY = 1e-5  # per mm of irrigation; far below the value of a mm of ETa (~1e-3 .. 1e-2)
+UNREALISED_LOSS_PENALTY = (
+    1.0  # per mm of percolation that the model "did not lose": only used when water is really short
+)
 SOLVER_TIME_LIMIT_S = 5
 
 
@@ -44,10 +51,16 @@ class LPInputs:
     taw: float
     p: float
     s0: float  # soil water at the start of week 0
+    perc_w: float = 0.0  # weekly seepage and percolation of a ponded field (mm); 0 for upland crops
+    cap: float | None = None  # storage upper bound: TAW plus the pond depth (None = TAW)
 
     @property
     def n_weeks(self) -> int:
         return len(self.etc_w)
+
+    @property
+    def storage_cap(self) -> float:
+        return self.taw if self.cap is None else self.cap
 
     @property
     def s_crit(self) -> float:
@@ -92,6 +105,8 @@ def build_inputs(
         taw,
         crop.p,
         taw - initial_depletion,
+        perc_w=7.0 * crop.percolation_mm_day,
+        cap=taw + crop.pond_max_mm if crop.ponded else None,
     )
 
 
@@ -143,12 +158,15 @@ def schedule_objective(inputs: LPInputs, schedule: np.ndarray, stress_basis: str
     LP may deliberately hold water back for a more sensitive stage.)
     """
     weights = stage_weights(inputs)
-    storage, value = inputs.s0, 0.0
+    storage, value, cap = inputs.s0, 0.0, inputs.storage_cap
     for w in range(inputs.n_weeks):
         available = storage + inputs.peff_w[w] + schedule[w]
-        eta = max_weekly_eta(inputs.etc_w[w], available, inputs.taw, inputs.s_crit, stress_basis)
+        available -= min(
+            inputs.perc_w, available
+        )  # seepage and percolation come first and cannot exceed the water there
+        eta = max_weekly_eta(inputs.etc_w[w], available, cap, inputs.s_crit, stress_basis)
         value += weights[w] * eta
-        storage = min(inputs.taw, available - eta)
+        storage = min(cap, available - eta)
     return float(value)
 
 
@@ -171,22 +189,28 @@ def solve_irrigation(
     prob = pulp.LpProblem("irrigation", pulp.LpMaximize)
     irr = [pulp.LpVariable(f"I_{w}", 0, weekly_cap_mm) for w in range(n)]
     eta = [pulp.LpVariable(f"E_{w}", 0, float(inputs.etc_w[w])) for w in range(n)]
-    storage = [pulp.LpVariable(f"S_{w}", 0, inputs.taw) for w in range(n + 1)]
+    storage = [pulp.LpVariable(f"S_{w}", 0, inputs.storage_cap) for w in range(n + 1)]
     drain = [pulp.LpVariable(f"DP_{w}", 0) for w in range(n)]
-    prob += pulp.lpSum(float(weights[w]) * eta[w] for w in range(n)) - WATER_PENALTY * pulp.lpSum(
-        irr
+    slack = (
+        [pulp.LpVariable(f"U_{w}", 0, inputs.perc_w) for w in range(n)] if inputs.perc_w > 0 else []
+    )
+    prob += (
+        pulp.lpSum(float(weights[w]) * eta[w] for w in range(n))
+        - WATER_PENALTY * pulp.lpSum(irr)
+        - UNREALISED_LOSS_PENALTY * pulp.lpSum(slack)
     )
     prob += storage[0] == float(inputs.s0)
     for w in range(n):
         available = storage[w] + float(inputs.peff_w[w]) + irr[w]
-        prob += storage[w + 1] == available - eta[w] - drain[w]
+        loss = float(inputs.perc_w) - slack[w] if slack else 0.0
+        prob += storage[w + 1] == available - loss - eta[w] - drain[w]
         basis = {
             "start": available,
             "end": storage[w + 1],
             "mid": 0.5 * (available + storage[w + 1]),
         }[stress_basis]
         prob += eta[w] <= (float(inputs.etc_w[w]) / inputs.s_crit) * basis
-        prob += eta[w] <= available
+        prob += eta[w] <= available - loss
     prob += pulp.lpSum(irr) <= budget_mm
     started = time.perf_counter()
     status = prob.solve(pulp.PULP_CBC_CMD(msg=0, timeLimit=SOLVER_TIME_LIMIT_S))

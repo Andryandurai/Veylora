@@ -14,15 +14,15 @@ ClimateResilience-India is a district-level decision-support system for four sou
 | Yield forecast (2015-17, 60-day lead) | relative RMSE 40.4% (pooled RMSE 1.04 t/ha, R² 0.91); best simple baseline (district trend) 40.9% | Level with the best baselines: ratio vs district trend 0.99 (95% interval 0.94 to 1.03); clearly better than last year's yield (0.81). 80% interval covers 80% of test cases |
 | Drought warning (2020-24) | F1 0.50, PR-AUC 0.38 vs climatology 0.09 (base rate 7.5%) | Real skill over climatology and persistence (0.13); validation F1 was 0.70 |
 | Heatwave warning (14 days) | LSTM PR-AUC 0.014 vs climatology 0.064 on 37 pooled onsets | No skill over climatology, so the **climatology** probability is served |
-| Irrigation optimizer (normal rain) | saves 70% of the 600 mm baseline water; keeps 93% of baseline yield | Modelled, not field-tested. Vs an even split: 136 mm less water, yield difference +0.017 (interval -0.003 to +0.038), worse in 8 of 20 cases |
-| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.3-2.4 s | Headless Chromium with software rendering |
+| Irrigation optimizer (normal rain) | saves 61% of the 600 mm baseline water; keeps 98% of baseline yield | Modelled, not field-tested. Vs an even split: 161 mm less water, yield difference +0.013 (interval +0.0005 to +0.0268), worse in 7 of 20 cases |
+| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.6-2.6 s | Headless Chromium with software rendering |
 | Advisory bot | 7 of 7 smoke checks passed | Dry run by default; translations unreviewed |
-| Tests | 306 automated tests | `make test`; in a clean Linux container: 300 passed, 6 skipped in 34.18s |
+| Tests | 336 automated tests | `make test`; in a clean Linux container: 327 passed, 9 skipped in 71.21s (0:01:11) |
 
 
 * The yield models are **not better than simple baselines** by a margin the data can confirm. They are useful as a weather-adjusted baseline with an honest interval, not as precise predictors.
 * The heatwave LSTM has **no skill over climatology**; the system serves climatology and says so. The drought model **does** beat climatology and persistence.
-* The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it is not distinguishable on yield. The plan's story that yield recovers while water is saved is not what the models show.
+* The optimizer **saves a large share of the water but keeps less yield than the 600 mm baseline** in the model. Against an even split of the same kind of budget it uses less water with a clear but small yield gain. The plan's story that yield recovers while water is saved is not what the models show.
 * Satellite NDVI/soil-moisture inputs are **synthetic** (Earth Engine was not authenticated). The served models do not use them.
 
 ## 2. Data and scope
@@ -57,19 +57,19 @@ Target: yield relative to the district's prior mean. Time-based splits only (tra
 
 ## 6. Irrigation optimization
 
-Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme (PuLP/CBC); the slowest LP case took 0.77 s.
+Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme (PuLP/CBC); the slowest LP case took 0.12 s. Paddy rice is modelled as a ponded field (standing water behind bunds and seepage while it stands; the parameters are approximate and unverified, D-029); the other crops use the plain root-zone balance.
 
-* Normal rainfall: 70% water saved against the 600 mm baseline, yield 93% of baseline. Dry year (rain x0.7): 65% saved, yield 90% of baseline.
-* Against an even split: 136 mm less water, relative-yield difference +0.017 (interval -0.003 to +0.038), worse in 8 of 20 cases.
+* Normal rainfall: 61% water saved against the 600 mm baseline, yield 98% of baseline. Dry year (rain x0.7): 56% saved, yield 96% of baseline.
+* Against an even split: 161 mm less water, relative-yield difference +0.013 (interval +0.0005 to +0.0268), worse in 7 of 20 cases.
 * Crop parameters and prices are approximate and unverified (D-021, D-022). Results are model output, not field trials.
 
 ## 7. Simulator, dashboards, advisory
 
-* **3D simulator** (Three.js, one self-contained page): checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 11 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
-* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.3-2.4 s.
+* **3D simulator** (Three.js, one self-contained page): crop-specific plant models that grow over the season, flooded and terraced paddies, soil that darkens when wet and cracks when dry, daily weather with dates, a time-of-day control, an uncertainty view and a by-stage stress panel; the relief is real (open terrain tiles) but fields, plants and soil classes are schematic. Checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 9 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
+* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.6-2.6 s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; 7 of 7 bot smoke checks passed. Translation review: MISSING (no native-speaker review done).
-* **Container:** 7 of 7 checks passed (serving image 3,515 MB, non-root, health check answers, models run from the demo bundle, memory 347.3MiB / 8.729GiB); the full test suite inside a container built from `requirements.lock`: 300 passed, 6 skipped in 34.18s (browser tests skip there: no Chromium or node in the image).
-* **Automated tests:** 306 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
+* **Container:** 7 of 7 checks passed (serving image 3,525 MB, non-root, health check answers, models run from the demo bundle, memory 172.5MiB / 8.729GiB); the full test suite inside a container built from `requirements.lock`: 327 passed, 9 skipped in 71.21s (0:01:11) (browser tests skip there: no Chromium or node in the image).
+* **Automated tests:** 336 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
 * **Deployed URL:** MISSING (deployment is a manual step, see docs/DEPLOY.md).
 
 ## 8. The plan's targets against what was measured
@@ -78,7 +78,7 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 |---|---|---|
 | Yield RMSE 2.9 and R² 0.82 | pooled RMSE 1.04 t/ha, R² 0.91, relative RMSE 40.4% | Not comparable as stated (the plan fixes neither units nor pooling); the honest comparison is against baselines, where there is no clear gain |
 | F1 0.75 for extreme weather | drought F1 0.50 (test), 0.70 (validation); heatwave served as climatology | Not reached on held-out years |
-| 30% water saving | 70% (normal), 65% (dry) against the 600 mm baseline | Exceeded in the model, at 93% / 90% of baseline yield |
+| 30% water saving | 61% (normal), 56% (dry) against the 600 mm baseline | Exceeded in the model, at 98% / 96% of baseline yield |
 
 The plan's figures were hypotheses, not results; they are shown here so that nobody mistakes them for achievements.
 

@@ -37,8 +37,13 @@ crops:
     root_depth_m: 0.5
     p: 0.20
     ky: [0.5, 0.8, 1.3, 0.6]
-    default_budget_mm: 350
-    note: Puddled paddy is flooded; this model treats it as a saturated-soil crop with a small depletion store, so seepage and ponding are NOT modelled.
+    default_budget_mm: 500   # was 350 before ponding (D-029): the extra 150 mm is a rounded allowance for seepage losses
+    # Ponded-field extension (D-029): a puddled paddy holds standing water behind its bunds and loses water by seepage and
+    # percolation while it is flooded. Values are APPROXIMATE (typical orders of magnitude for puddled clay and clay loam),
+    # not transcribed from a source: verify before relying on them. Set enabled: false (or delete the block) to return to
+    # the earlier saturated-soil model, which ignores seepage and ponding.
+    paddy: {enabled: true, pond_max_mm: 75, percolation_mm_day: 2.0, initial_pond_mm: 25}
+    note: Puddled paddy is flooded. The model keeps standing water (up to the bund height) on top of the root zone and loses percolation_mm_day to seepage while water stands; land preparation water and nursery are not included.
   wheat:
     kc: {ini: 0.30, mid: 1.15, end: 0.35}
     stage_days: [18, 27, 40, 27]

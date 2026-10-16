@@ -10,7 +10,11 @@ are treated as one scenario). Equations:
   ``Ks = (TAW - Dr) / ((1 - p) TAW)`` when ``Dr > p TAW`` (else 1), and water above field capacity drains (DP).
 * Yield response: ``Ya/Ym = prod_s (1 - Ky_s (1 - sum ETa_s / sum ETc_s))`` over the four stages.
 
-Mass is conserved exactly: the change in soil water equals effective rain + irrigation - ETa - drainage.
+Ponded fields (paddy rice, D-029): depletion may go *negative* down to ``-pond_max`` (standing water behind the bunds);
+water above that spills. While water stands, ``min(percolation, standing water)`` is lost to seepage and percolation each
+day. Without the pond parameters the model is the plain root-zone balance above, bit for bit.
+
+Mass is conserved exactly: the change in soil water equals effective rain + irrigation - ETa - drainage - percolation.
 """
 
 from __future__ import annotations
@@ -80,20 +84,31 @@ class WaterBalance:
     etc: np.ndarray
     peff: np.ndarray
     irrigation: np.ndarray
-    drainage: np.ndarray
-    depletion: np.ndarray  # root-zone depletion at the END of each day
+    drainage: (
+        np.ndarray
+    )  # deep drainage above field capacity, or spill over the bunds of a ponded field
+    depletion: np.ndarray  # root-zone depletion at the END of each day (negative = standing water)
     ks: np.ndarray
     taw: float
     initial_depletion: float
+    percolation: np.ndarray | None = (
+        None  # seepage and percolation of a ponded field (zeros elsewhere)
+    )
+    pond_max: float = 0.0
 
     def soil_water(self) -> np.ndarray:
-        """Stored water (TAW - depletion) at the end of each day."""
+        """Stored water (TAW - depletion) at the end of each day; above TAW only while water stands in a ponded field."""
         return self.taw - self.depletion
 
+    def pond(self) -> np.ndarray:
+        """Standing water depth (mm) at the end of each day (zero unless the field is ponded and flooded)."""
+        return np.maximum(-self.depletion, 0.0)
+
     def mass_balance_residual(self) -> np.ndarray:
-        """Per scenario: change in storage minus (effective rain + irrigation - ETa - drainage). Zero when conserved."""
+        """Per scenario: change in storage minus (effective rain + irrigation - ETa - drainage - percolation)."""
         storage_change = (self.taw - self.depletion[:, -1]) - (self.taw - self.initial_depletion)
-        flows = (self.peff + self.irrigation - self.eta - self.drainage).sum(axis=1)
+        loss = 0.0 if self.percolation is None else self.percolation
+        flows = (self.peff + self.irrigation - self.eta - self.drainage - loss).sum(axis=1)
         return storage_change - flows
 
 
@@ -106,6 +121,8 @@ def simulate(
     p: float,
     initial_depletion: float | None = None,
     glob: Globals | None = None,
+    pond_max: float = 0.0,
+    percolation: float = 0.0,
 ) -> WaterBalance:
     """Run the daily water balance for one or many scenarios.
 
@@ -116,6 +133,8 @@ def simulate(
         p: allowable depletion fraction before stress.
         initial_depletion: depletion at the start (mm); default ``initial_depletion_fraction x TAW``.
         glob: shared settings (rain efficiency etc.).
+        pond_max: bund height in mm for a ponded field (0 = ordinary root-zone balance).
+        percolation: seepage and percolation loss in mm/day while water stands (only with ``pond_max`` > 0).
     """
     glob = glob or load_globals()
     et0 = np.atleast_2d(np.asarray(et0, float))
@@ -134,28 +153,52 @@ def simulate(
     depletion = np.full(n, d0)
     eta, etc = np.zeros((n, t_len)), np.zeros((n, t_len))
     drainage, dr_hist, ks_hist = np.zeros((n, t_len)), np.zeros((n, t_len)), np.zeros((n, t_len))
+    perc_hist = np.zeros((n, t_len))
     for t in range(t_len):
         ks = np.where(depletion > raw, np.clip((taw - depletion) / (taw - raw), 0.0, 1.0), 1.0)
         etc_t = kc[t] * et0[:, t]
         eta_t = ks * etc_t
-        unclipped = depletion - peff[:, t] - irr[:, t] + eta_t
-        drainage[:, t] = np.maximum(-unclipped, 0.0)
-        depletion = np.clip(unclipped, 0.0, taw)
+        after_inputs = depletion - peff[:, t] - irr[:, t]
+        if pond_max > 0.0:  # seepage only draws on standing water
+            perc_hist[:, t] = np.minimum(percolation, np.maximum(-after_inputs, 0.0))
+        unclipped = after_inputs + eta_t + perc_hist[:, t]
+        drainage[:, t] = np.maximum(-unclipped - pond_max, 0.0)
+        depletion = np.clip(unclipped, -pond_max, taw)
         eta[:, t], etc[:, t], dr_hist[:, t], ks_hist[:, t] = eta_t, etc_t, depletion, ks
-    return WaterBalance(eta, etc, peff, irr, drainage, dr_hist, ks_hist, float(taw), float(d0))
+    return WaterBalance(
+        eta,
+        etc,
+        peff,
+        irr,
+        drainage,
+        dr_hist,
+        ks_hist,
+        float(taw),
+        float(d0),
+        perc_hist,
+        float(pond_max),
+    )
 
 
-def relative_yield(eta: np.ndarray, etc: np.ndarray, crop: CropParams) -> np.ndarray:
-    """FAO-33 multiplicative stage response ``Ya/Ym`` in [0, 1] per scenario."""
+def stage_factors(eta: np.ndarray, etc: np.ndarray, crop: CropParams) -> np.ndarray:
+    """FAO-33 factor of each growth stage, shape ``(n_scenarios, 4)``: ``1 - Ky_s (1 - ETa_s / ETc_s)`` clipped to [0, 1].
+
+    1 means the stage lost nothing; the product over the four stages is :func:`relative_yield`.
+    """
     stage = stage_index(crop)
-    result = np.ones(np.atleast_2d(eta).shape[0])
     eta, etc = np.atleast_2d(eta), np.atleast_2d(etc)
+    out = np.ones((eta.shape[0], 4))
     for s in range(4):
         sel = stage == s
         et_c, et_a = etc[:, sel].sum(axis=1), eta[:, sel].sum(axis=1)
         ratio = np.where(et_c > 0, et_a / np.maximum(et_c, 1e-9), 1.0)
-        result *= np.clip(1.0 - crop.ky[s] * (1.0 - ratio), 0.0, 1.0)
-    return np.clip(result, 0.0, 1.0)
+        out[:, s] = np.clip(1.0 - crop.ky[s] * (1.0 - ratio), 0.0, 1.0)
+    return out
+
+
+def relative_yield(eta: np.ndarray, etc: np.ndarray, crop: CropParams) -> np.ndarray:
+    """FAO-33 multiplicative stage response ``Ya/Ym`` in [0, 1] per scenario."""
+    return np.clip(stage_factors(eta, etc, crop).prod(axis=1), 0.0, 1.0)
 
 
 def to_weekly(daily: np.ndarray, n_weeks: int | None = None) -> np.ndarray:

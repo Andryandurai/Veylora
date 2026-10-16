@@ -12,7 +12,14 @@ Sources of each number:
   ``optimized`` irrigation is the Phase 6 weekly LP;
 * ``drought_p``: the Phase 5 drought model on scenario rainfall; ``heat_p``: the share of IMD-qualifying heatwave
   days under the temperature shift (not a model probability);
-* ``ndvi``: a **visual proxy** from the crop-coefficient curve and accumulated stress, NOT satellite NDVI.
+* ``ndvi``: a **visual proxy** from the crop-coefficient curve and accumulated stress, NOT satellite NDVI;
+* ``pond_mm`` / ``seepage_mm`` (paddy rice): standing water and seepage of the ponded-field water balance (D-029);
+* ``stage_rel``: the four FAO-33 stage factors of the water balance (their product is the relative yield);
+* ``reference_daily``: the observed daily weather of the reference year (unscaled; the page applies the sliders);
+* ``reference_ndvi``: satellite NDVI of the reference year, flagged ``is_synthetic`` while the dataset is synthetic;
+* ``elevation_m``: real relief of a 10 km window at the district centre (``simulator/terrain.py``), else the procedural
+  ``elevation_proxy`` is all there is and ``elevation_source`` says so;
+* ``development`` / ``senescence`` (per crop): a *visual* growth curve built from the stage lengths, not measured growth.
 """
 
 from __future__ import annotations
@@ -40,6 +47,7 @@ from analytics.prescriptive import scenario as S
 from analytics.prescriptive import water_balance as wb
 from analytics.prescriptive.params import load_crop, load_globals, taw_mm
 from config import ROOT, get_path, load_settings
+from simulator import terrain
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +77,16 @@ DEFINITIONS = {
     "stress_0_1": "1 - ETa/ETc for the week.",
     "drought_p": "Phase 5 drought model: probability that the SPI-3 of the week's month is <= -1, given data up to the end of the previous month, with rainfall scaled by the multiplier (temperature does not change it).",
     "heat_p": "Share of the week's days that qualify as IMD heatwave days under the temperature shift (Tmax >= 40 C and >= 4.5 C above the district normal). A deterministic indicator, not a model probability.",
-    "elevation_proxy": "Procedural relief 0-1 seeded by the district id; NOT real elevation.",
+    "elevation_proxy": "Procedural relief 0-1 seeded by the district id; NOT real elevation. Used only when elevation_m is absent.",
+    "elevation_m": "Real elevation (m) on a 32 x 32 lattice over a 10 km window at the district centre (row 0 = north), from open terrain tiles (SRTM and other public data). The scene draws it with vertical exaggeration; fields and plants are schematic.",
+    "pond_mm": "Standing water in a ponded field (paddy rice) at the end of the week (mm); 0 for upland crops.",
+    "pond_daily": "Daily standing water (mm) of the 112-day window for ponded crops only; the weekly pond_mm is its value on the last day of each week.",
+    "seepage_mm": "Seepage and percolation loss of a ponded field in the week (mm); 0 for upland crops.",
+    "stage_rel": "FAO-33 factor of each growth stage (1 = no loss), 1 - Ky_s (1 - ETa_s / ETc_s); the product is the relative yield of the water balance (before it is combined with the machine-learning yield).",
+    "reference_daily": "Observed daily rain (mm), Tmax and Tmin (C) of the reference year for the 16-week window, before the scenario multiplier and shift. The page applies the sliders; model state remains weekly.",
+    "reference_ndvi": "Weekly satellite NDVI of the reference year (mean of the 16-day composites in the week). is_synthetic is true while the satellite dataset is synthetic.",
+    "development": "VISUAL growth curve 0-1 by week built from the stage lengths (slow establishment, fast vegetative growth, plateau); not measured growth.",
+    "senescence": "VISUAL ripening 0-1 by week: progress through the last growth stage; drives the golden colour.",
     "tiles": "8x8 soil class per village tile (0 sandy loam, 1 loam, 2 clay loam, 3 clay); procedural, used for visual variation.",
 }
 DISCLAIMER = "Explanation tool: it visualises model outputs and what-if scenarios. It is not a physical crop growth simulation and not advice for farm decisions."
@@ -122,6 +139,78 @@ def soil_tiles(district_id: str) -> list[list[int]]:
     return np.digitize(field, edges).astype(int).tolist()
 
 
+def development_curves(stage_days: list[int], n_weeks: int = 16) -> tuple[list[float], list[float]]:
+    """Visual growth and ripening curves (0-1 per week) built from the four stage lengths.
+
+    Growth is slow during establishment, rises smoothly through the vegetative stage, plateaus in the mid-season and
+    stays at 1 afterwards; ripening is the progress through the last stage. Both are presentation curves, not growth data.
+    """
+    ini, dev, mid, late = stage_days
+    growth, ripening = [], []
+    for week in range(n_weeks):
+        day = 7 * week + 3.0
+        if day < ini:
+            g = 0.02 + 0.08 * day / ini
+        elif day < ini + dev:
+            t = (day - ini) / dev
+            g = 0.10 + 0.75 * t * t * (3.0 - 2.0 * t)
+        elif day < ini + dev + mid:
+            g = 0.85 + 0.15 * (day - ini - dev) / mid
+        else:
+            g = 1.0
+        growth.append(g)
+        ripening.append(float(np.clip((day - (ini + dev + mid)) / late, 0.0, 1.0)))
+    return growth, ripening
+
+
+def reference_daily(inputs: S.SeasonInputs) -> dict[str, list[float]]:
+    """Observed daily weather of the 16-week window (reference year, unscaled), rounded for the file."""
+    return {
+        "rain_mm": np.round(inputs.rain / inputs.rain_multiplier, 1).tolist(),
+        "tmax_c": np.round(inputs.tmax - inputs.temperature_delta, 1).tolist(),
+        "tmin_c": np.round(inputs.tmin - inputs.temperature_delta, 1).tolist(),
+    }
+
+
+def reference_ndvi(
+    satellite: pd.DataFrame, district_id: str, year: int, season: str, n_weeks: int = 16
+) -> dict[str, Any] | None:
+    """Weekly satellite NDVI of the reference year: the 16-day composite that covers each week's last day.
+
+    ``is_synthetic`` is true if any composite used is synthetic, so the page labels the line honestly.
+    """
+    start, _ = F.season_bounds(year, season)
+    group = (
+        satellite[satellite["district_id"] == district_id]
+        .sort_values("date")
+        .assign(
+            is_synthetic=lambda d: d["is_synthetic"].astype(float),
+            ndvi=lambda d: d["ndvi"].astype(float),
+        )
+    )
+    ends = pd.DataFrame({"end": [start + pd.Timedelta(days=7 * w + 6) for w in range(n_weeks)]})
+    merged = pd.merge_asof(
+        ends, group[["date", "ndvi", "is_synthetic"]], left_on="end", right_on="date"
+    )
+    stale = (merged["end"] - merged["date"]).dt.days > 16
+    merged.loc[stale, ["ndvi", "is_synthetic"]] = [np.nan, np.nan]
+    if merged["ndvi"].isna().all():
+        return None
+    values = [None if np.isnan(v) else float(np.clip(v, 0.0, 1.0)) for v in merged["ndvi"]]
+    return {
+        "weekly": values,
+        "is_synthetic": bool((merged["is_synthetic"].fillna(0.0) > 0).any()),
+    }
+
+
+def real_relief(lat: float, lon: float) -> dict[str, Any] | None:
+    """Elevation lattice and relief of a 10 km window at a district centre (None when the tiles are unavailable)."""
+    window = terrain.elevation_window(lat, lon)
+    if window is None:
+        return None
+    return {"elevation_m": np.round(window, 1).tolist(), **terrain.relief_stats(window)}
+
+
 def select_districts(n: int) -> list[str]:
     """One representative district per climate cluster (largest clusters first), preferring many crops incl. rice."""
     crops = pd.read_parquet(get_path("data_processed") / "crops_annual.parquet")
@@ -163,6 +252,8 @@ def weekly_records(
     weekly = lambda a: wb.to_weekly(a, n_weeks)  # noqa: E731
     rain_w, etc_w, eta_w = weekly(inputs.rain), weekly(sim.etc[row]), weekly(sim.eta[row])
     irr_w = weekly(sim.irrigation[row])
+    seep_w = weekly(sim.percolation[row]) if sim.percolation is not None else np.zeros(n_weeks)
+    pond_w = np.array([sim.pond()[row, 7 * w + 6] for w in range(n_weeks)])
     excess_w = weekly(sim.drainage[row]) + weekly(inputs.rain - sim.peff[row])
     tmax_w = inputs.tmax[: n_weeks * 7].reshape(n_weeks, 7).mean(axis=1)
     moisture = np.array(
@@ -190,6 +281,8 @@ def weekly_records(
             "irrigation_mm": float(irr_w[w]),
             "excess_mm": float(max(excess_w[w], 0.0)),
             "stress_0_1": float(stress[w]),
+            "pond_mm": float(pond_w[w]),
+            "seepage_mm": float(seep_w[w]),
             "drought_p": float(np.clip(drought_p[w], 0.0, 1.0)),
             "heat_p": float(np.clip(heat_p[w], 0.0, 1.0)),
         }
@@ -236,6 +329,8 @@ def crop_scenarios(
                 ratio = min(
                     float(table.loc[sim_name, "rel_yield"]) / max(reference, 1e-6), S.MAX_GAIN
                 )
+                row = names.index(sim_name)
+                sim = details["simulation"]
                 out[f"{district_id}|{crop}|{rain:g}|{temp:g}|{strategy}"] = {
                     "yield": {
                         "mean": ml["yield_t_ha"] * ratio,
@@ -243,10 +338,15 @@ def crop_scenarios(
                         "hi": ml["hi"] * ratio,
                     },
                     "water_used_mm": float(table.loc[sim_name, "water_used_mm"]),
-                    "weekly": weekly_records(
-                        inputs, details["simulation"], names.index(sim_name), drought, heat
-                    ),
+                    "stage_rel": [
+                        float(v) for v in wb.stage_factors(sim.eta[row], sim.etc[row], params)[0]
+                    ],
+                    "weekly": weekly_records(inputs, sim, row, drought, heat),
                 }
+                if params.ponded:  # daily standing water: the irrigation event on the first day of a week is visible in it
+                    out[f"{district_id}|{crop}|{rain:g}|{temp:g}|{strategy}"]["pond_daily"] = (
+                        np.round(sim.pond()[row], 1).tolist()
+                    )
 
 
 def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str, Any]:
@@ -263,6 +363,7 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
         "district_id"
     )
     crops_df = pd.read_parquet(get_path("data_processed") / "crops_annual.parquet")
+    satellite = pd.read_parquet(get_path("data_processed") / "satellite_16d.parquet")
     quality = json.loads((get_path("reports") / "data_quality.json").read_text(encoding="utf-8"))
     yield_meta = json.loads(
         (get_path("reports") / "yield_models.json").read_text(encoding="utf-8")
@@ -276,6 +377,7 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
         row = meta_districts.loc[district_id]
         available = []
         reference_year, budget, taw = {}, {}, {}
+        ref_daily, ref_ndvi = {}, {}
         for crop in settings["crops"]:
             season = settings["crop_season"][crop]
             rows = ((crops_df["district_id"] == district_id) & (crops_df["crop"] == crop)).sum()
@@ -291,11 +393,22 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
             reference_year[crop] = year
             budget[crop] = load_crop(crop).default_budget_mm
             taw[crop] = taw_mm(load_crop(crop))
+            cp = load_crop(crop)
+            growth, ripening = development_curves(list(cp.stage_days))
             crop_info[crop] = {
                 "season": season,
                 "note": YIELD_NOTES.get(crop, ""),
-                "stage_days": list(load_crop(crop).stage_days),
+                "stage_days": list(cp.stage_days),
+                "season_start": f"{F.season_bounds(2000, season)[0]:%m-%d}",
+                "ponded": cp.ponded,
+                "pond_max_mm": cp.pond_max_mm,
+                "percolation_mm_day": cp.percolation_mm_day,
+                "initial_pond_mm": cp.initial_pond_mm,
+                "development": growth,
+                "senescence": ripening,
             }
+            ref_daily[crop] = reference_daily(S.load_season_inputs(district_id, crop, season, year))
+            ref_ndvi[crop] = reference_ndvi(satellite, district_id, year, season)
             LOG.info("%s %s (year %d)", district_id, crop, year)
             crop_scenarios(district_id, crop, season, year, risk, scenarios)
         warnings_ew = {}
@@ -306,6 +419,7 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
             start, _ = F.season_bounds(year, season)
             as_of = (start + pd.Timedelta(days=56)).strftime("%Y-%m-%d")
             warnings_ew[season] = risk_forecast(district_id, as_of)
+        relief = real_relief(float(row["centroid_lat"]), float(row["centroid_lon"]))
         district_records.append(
             {
                 "id": district_id,
@@ -317,7 +431,21 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
                 "lon": float(row["centroid_lon"]),
                 "area_km2": float(row["area_km2"]),
                 "elevation_proxy": elevation_proxy(district_id),
+                **(
+                    {
+                        "elevation_m": relief["elevation_m"],
+                        "mean_elevation_m": relief["mean_elevation_m"],
+                        "relief_m": relief["relief_m"],
+                    }
+                    if relief
+                    else {}
+                ),
+                "elevation_source": terrain.ATTRIBUTION
+                if relief
+                else "procedural (real relief unavailable)",
                 "tiles": soil_tiles(district_id),
+                "reference_daily": ref_daily,
+                "reference_ndvi": ref_ndvi,
                 "crops": available,
                 "reference_year": reference_year,
                 "budget_mm": budget,
@@ -328,7 +456,7 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
     heat_served = extreme_meta["heatwave"].get("served", {}).get("source", "unknown")
     data = {
         "meta": {
-            "schema_version": 1,
+            "schema_version": 2,
             "generated_at": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
             "git_commit": git_commit(),
             "is_synthetic_inputs": {
@@ -349,6 +477,7 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
             "grid": {"rain_mult": GRID_RAIN, "temp_delta": GRID_TEMP, "strategies": STRATEGIES},
             "definitions": {**DEFINITIONS, "heat_p_basis": heat_threshold_note()},
             "disclaimer": DISCLAIMER,
+            "attribution": [terrain.ATTRIBUTION],
         },
         "crops": crop_info,
         "districts": district_records,

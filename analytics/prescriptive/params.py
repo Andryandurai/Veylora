@@ -28,6 +28,21 @@ class CropParams:
     p: float
     ky: tuple[float, float, float, float]
     default_budget_mm: float
+    # Ponded-field extension (docs/DECISIONS.md D-029). All zero = the plain root-zone model used for every upland crop.
+    pond_max_mm: float = 0.0  # bund height: standing water above this depth spills
+    percolation_mm_day: float = 0.0  # seepage and percolation loss while there is standing water
+    initial_pond_mm: float = (
+        0.0  # standing water at the start of the window (puddled, transplanted field)
+    )
+
+    @property
+    def ponded(self) -> bool:
+        """True for a flooded-field crop (paddy rice)."""
+        return self.pond_max_mm > 0.0
+
+    def initial_depletion_mm(self, taw: float, fraction: float) -> float:
+        """Depletion at the start of the window: a share of TAW, or *negative* (standing water) for a ponded crop."""
+        return -self.initial_pond_mm if self.ponded else fraction * taw
 
 
 @dataclass(frozen=True)
@@ -81,6 +96,14 @@ def load_crop(crop: str) -> CropParams:
     ky = tuple(float(k) for k in c["ky"])
     if len(ky) != N_STAGES:
         raise ValueError(f"{crop}: ky needs {N_STAGES} values")
+    paddy = c.get("paddy") or {}
+    ponded = bool(paddy.get("enabled", False))
+    pond_max = float(paddy.get("pond_max_mm", 0.0)) if ponded else 0.0
+    if ponded and pond_max <= 0.0:
+        raise ValueError(f"{crop}: paddy.pond_max_mm must be positive when paddy.enabled is true")
+    initial_pond = float(paddy.get("initial_pond_mm", 0.0)) if ponded else 0.0
+    if initial_pond > pond_max:
+        raise ValueError(f"{crop}: paddy.initial_pond_mm cannot exceed pond_max_mm")
     return CropParams(
         crop,
         float(c["kc"]["ini"]),
@@ -91,6 +114,9 @@ def load_crop(crop: str) -> CropParams:
         float(c["p"]),
         ky,
         float(c["default_budget_mm"]),
+        pond_max,
+        float(paddy.get("percolation_mm_day", 0.0)) if ponded else 0.0,
+        initial_pond,
     )  # type: ignore[arg-type]
 
 
