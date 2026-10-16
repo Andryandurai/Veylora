@@ -194,7 +194,13 @@ def render(
         f"<p>{r.text}</p></div>"
         for r in results
     )
-    brand_img = '<img src="logo.jpg" alt="" width="42" height="42">' if has_logo else ""
+    brand_img = '<img src="favicon.png" alt="" width="42" height="42">' if has_logo else ""
+    hero_logo = (
+        '<img class="hero-logo" src="logo.jpg" width="320" height="320" '
+        'alt="Veylora, climate resilience: a leaf shaped like a V around a paddy-field landscape">'
+        if has_logo
+        else ""
+    )
     icon = (
         '<link rel="icon" href="favicon.png" type="image/png">'
         if has_logo
@@ -255,7 +261,7 @@ def render(
 </div></header>
 <main>
 <div class="wrap">
-  <div class="hero">
+  <div class="hero"><div class="hero-grid"><div class="hero-text">
     <p class="eyebrow">Climate resilience, India</p>
     <h1>{SITE_NAME}</h1>
     <p class="lead">District-level early warning for heatwaves and drought, crop-yield forecasts with honest uncertainty,
@@ -266,7 +272,7 @@ def render(
     </div>
     {aside}
     {synthetic_note()}
-  </div>
+  </div>{hero_logo}</div></div>
   <ul class="facts" aria-label="At a glance">{facts}</ul>
 
   <section id="simulator">
@@ -322,8 +328,8 @@ def _write_logo_assets(out_dir: Path) -> bool:
         return False
     with Image.open(assets.LOGO_SOURCE) as source:
         small = source.convert("RGB")
-        small.thumbnail((256, 256), Image.Resampling.LANCZOS)
-        small.save(out_dir / "logo.jpg", "JPEG", quality=90, optimize=True)
+        small.thumbnail((640, 640), Image.Resampling.LANCZOS)
+        small.save(out_dir / "logo.jpg", "JPEG", quality=88, optimize=True)
     icon = assets.favicon()
     if icon is not None:
         icon.save(out_dir / "favicon.png", "PNG", optimize=True)

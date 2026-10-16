@@ -35,6 +35,8 @@ nav.site a:hover { color: var(--ink); border-bottom-color: var(--primary); }
 .eyebrow { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--primary-dark); font-weight: 700; margin: 0 0 1rem; display: flex; align-items: center; gap: 0.7rem; }
 .eyebrow::before { content: ""; width: 1.6rem; height: 1px; background: currentColor; }
 .hero h1 { font-size: clamp(3rem, 8vw, 5.4rem); line-height: 1; letter-spacing: -0.035em; margin: 0 0 1.2rem; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px); gap: 3rem; align-items: center; }
+.hero-logo { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--rule); }
 .lead { font-size: 1.2rem; color: var(--ink-2); max-width: 40rem; margin: 0 0 2rem; }
 .actions { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
 .btn { display: inline-block; padding: 0.75rem 1.3rem; border: 1px solid var(--rule); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.95rem; border-radius: 4px; }
@@ -81,6 +83,10 @@ ul.limits li { margin: 0.4rem 0; }
 footer.site { padding: 2.2rem 0 3.5rem; color: var(--muted); font-size: 0.86rem; }
 footer.site p { margin: 0.4rem 0; max-width: 54rem; }
 
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+  .hero-logo { display: none; }
+}
 @media (max-width: 640px) {
   .hero { padding: 2.6rem 0 2rem; }
   nav.site { gap: 1rem; }

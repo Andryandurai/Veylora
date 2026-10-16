@@ -15,7 +15,7 @@ ClimateResilience-India is a district-level decision-support system for four sou
 | Drought warning (2020-24) | F1 0.50, PR-AUC 0.38 vs climatology 0.09 (base rate 7.5%) | Real skill over climatology and persistence (0.13); validation F1 was 0.70 |
 | Heatwave warning (14 days) | LSTM PR-AUC 0.014 vs climatology 0.064 on 37 pooled onsets | No skill over climatology, so the **climatology** probability is served |
 | Irrigation optimizer (normal rain) | saves 61% of the 600 mm baseline water; keeps 98% of baseline yield | Modelled, not field-tested. Vs an even split: 161 mm less water, yield difference +0.013 (interval +0.0005 to +0.0268), worse in 7 of 20 cases |
-| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 2.0-2.7 s | Headless Chromium with software rendering |
+| Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.4-3.0 s | Headless Chromium with software rendering |
 | Advisory bot | 7 of 7 smoke checks passed | Dry run by default; translations unreviewed |
 | Tests | 352 automated tests | `make test`; in a clean Linux container: 327 passed, 9 skipped in 71.21s (0:01:11) |
 
@@ -65,8 +65,8 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 
 ## 7. Simulator, dashboards, advisory
 
-* **3D simulator** (Three.js, one self-contained page): crop-specific plant models that grow over the season, flooded and terraced paddies, soil that darkens when wet and cracks when dry, daily weather with dates, a time-of-day control, an uncertainty view and a by-stage stress panel; the relief is real (open terrain tiles) but fields, plants and soil classes are schematic. Checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 10 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
-* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 2.0-2.7 s.
+* **3D simulator** (Three.js, one self-contained page): crop-specific plant models that grow over the season, flooded and terraced paddies, soil that darkens when wet and cracks when dry, daily weather with dates, a time-of-day control, an uncertainty view and a by-stage stress panel; the relief is real (open terrain tiles) but fields, plants and soil classes are schematic. Checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 12 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
+* **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.4-3.0 s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; 7 of 7 bot smoke checks passed. Translation review: MISSING (no native-speaker review done).
 * **Container:** 7 of 7 checks passed (serving image 3,525 MB, non-root, health check answers, models run from the demo bundle, memory 172.5MiB / 8.729GiB); the full test suite inside a container built from `requirements.lock`: 327 passed, 9 skipped in 71.21s (0:01:11) (browser tests skip there: no Chromium or node in the image).
 * **Automated tests:** 352 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).

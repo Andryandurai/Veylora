@@ -24,12 +24,8 @@ LOGO_SOURCE = ROOT / "dashboards" / "assets" / "logo.png"
 LOGO_TARGET = ROOT / "dashboards" / "static" / "veylora-logo.jpg"
 LOGO_URL = "/app/static/veylora-logo.jpg"
 LOGO_WEB_PX = 640
-EMBLEM_BOX = (
-    0.135,
-    0.09,
-    0.845,
-    0.69,
-)  # emblem without the wordmark, as fractions of the logo (left, top, right, bottom)
+# emblem without the wordmark, as fractions of the logo (left, top, right, bottom)
+EMBLEM_BOX = (0.14, 0.09, 0.84, 0.66)
 ICON_PX = 96
 
 

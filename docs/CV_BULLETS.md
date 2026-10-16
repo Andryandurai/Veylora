@@ -14,7 +14,7 @@
 
 * Data engineering: idempotent ETL with provenance flags (`is_synthetic`), data-quality gate (all data-quality checks passed), warehouse with leakage-safe materialized views.
 * Statistics: two-way fixed-effects regression, Mann-Kendall trends, SPI drought index, calibrated probabilities with reliability checks, paired bootstrap against baselines.
-* Front ends: Streamlit app with 7 addresses (warm loads 2.0-2.7 s in headless Chromium), self-contained Three.js scene.
+* Front ends: Streamlit app with 7 addresses (warm loads 1.4-3.0 s in headless Chromium), self-contained Three.js scene.
 
 ## Not claimable (MISSING)
 
