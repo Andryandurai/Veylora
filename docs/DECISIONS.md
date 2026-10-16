@@ -190,3 +190,25 @@ MSP/FRP-order prices and costs in `config/economics.yaml` were entered from memo
 data units need conversion (ICRISAT rice is milled rice, MSP is for paddy: /0.67; cotton is lint, MSP is for seed cotton: /0.34).
 Sugarcane is excluded from the comparison because its yield unit looks like jaggery equivalent (D-007). Outputs carry a
 "decision-support estimate, not financial advice" disclaimer.
+
+## 2026-10-16 - Phase 7 (3D simulator)
+
+### D-023: What the simulator shows, and where fields that no model produces come from
+The simulator needs weekly values *for what-if scenarios*; several of them do not exist as model outputs, so each is defined explicitly
+in `meta.definitions` and the README:
+- `ndvi` is a **visual proxy** (crop-coefficient canopy x accumulated water stress), not satellite NDVI: the satellite dataset is synthetic
+  and the served models do not use it. The HUD labels it "greenness proxy (not satellite NDVI)".
+- `drought_p` is the Phase 5 drought model re-evaluated on scenario rainfall with the SPI reference distributions held fixed (new
+  `analytics/predictive/risk_scenarios.py`; SPI code refactored into fit/apply without changing outputs). Temperature does not
+  affect it: an earlier test showed +3 C *lowering* drought risk, a tree-extrapolation artefact of the Tmax-anomaly input.
+- `heat_p` is the share of days qualifying as IMD heatwave days under the temperature shift: a deterministic indicator, because the
+  served heatwave probability is climatology (D-019) and cannot react to a slider. The gauge says "heatwave days", not "probability".
+- Elevation and soil tiles are procedural (seeded by the district id), not SRTM or soil maps.
+- Three.js comes from jsDelivr (cdnjs does not host the r160 module build), is vendored in `simulator/vendor/` (MIT, SHA recorded) and
+  inlined by `python -m simulator.embed` so the page works offline from `file://`.
+- The plan's demo narrative ("optimized ... yield recovers") is **not** what the models show against the 600 mm baseline: the optimized
+  schedule saves water but usually yields slightly less. The simulator displays the model output; the Phase 10 demo script must follow
+  measured results.
+- Frame rate is measured in headless Chromium with software WebGL (about 15 fps at 1500x900); this is not a measurement on integrated
+  graphics and the 30+ fps acceptance criterion is **not verified here**. The code limits per-frame work (instancing, reused buffers,
+  adaptive rain count), but only a run on real hardware can confirm the criterion.

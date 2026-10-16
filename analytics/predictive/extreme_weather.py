@@ -420,11 +420,12 @@ def combine_levels(
     rank = {name: LEVELS.index(lv) for name, lv in levels.items()}
     if rank["heatwave"] != rank["drought"]:
         hazard = max(rank, key=rank.get)
-    else:  # same level: the hazard closer to escalating (larger share of its 'moderate' threshold)
+    else:  # same level: the hazard closer to escalating (larger share of its 'moderate' threshold; drought wins ties)
         hazard = max(
             ("heatwave", "drought"),
             key=lambda h: (
-                (heatwave_p if h == "heatwave" else drought_p) / thresholds[h]["moderate"]
+                (heatwave_p if h == "heatwave" else drought_p) / thresholds[h]["moderate"],
+                h == "drought",
             ),
         )
     return levels[hazard], hazard, HEAT_LEAD_DAYS if hazard == "heatwave" else DROUGHT_LEAD_DAYS

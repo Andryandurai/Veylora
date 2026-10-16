@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClimateResilience-India simulator data",
+  "type": "object",
+  "required": ["meta", "crops", "districts", "scenarios"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schema_version", "generated_at", "git_commit", "is_synthetic_inputs", "model_versions", "weeks", "risk_levels", "grid", "definitions", "disclaimer"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "generated_at": {"type": "string"},
+        "git_commit": {"type": "string"},
+        "is_synthetic_inputs": {
+          "type": "object",
+          "required": ["weather", "crop_labels", "satellite_dataset", "satellite_used_by_served_models"],
+          "properties": {
+            "weather": {"type": "boolean"},
+            "crop_labels": {"type": "boolean"},
+            "satellite_dataset": {"type": "boolean"},
+            "satellite_used_by_served_models": {"type": "boolean"}
+          }
+        },
+        "model_versions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "weeks": {"const": 16},
+        "grid": {
+          "type": "object",
+          "required": ["rain_mult", "temp_delta", "strategies"],
+          "properties": {
+            "rain_mult": {"type": "array", "items": {"type": "number"}, "minItems": 2},
+            "temp_delta": {"type": "array", "items": {"type": "number"}, "minItems": 2},
+            "strategies": {"type": "array", "items": {"enum": ["rainfed", "baseline", "optimized"]}, "minItems": 3}
+          }
+        },
+        "definitions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "risk_levels": {"type": "object"},
+        "disclaimer": {"type": "string"}
+      }
+    },
+    "crops": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["season", "note", "stage_days"],
+        "properties": {
+          "season": {"enum": ["kharif", "rabi"]},
+          "note": {"type": "string"},
+          "stage_days": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 4, "maxItems": 4}
+        }
+      }
+    },
+    "districts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "state", "cluster", "cluster_label", "lat", "lon", "area_km2", "elevation_proxy", "tiles", "crops", "reference_year", "budget_mm", "taw_mm", "early_warning"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "state": {"type": "string"},
+          "cluster": {"type": "integer"},
+          "cluster_label": {"type": "string"},
+          "lat": {"type": "number", "minimum": 6, "maximum": 38},
+          "lon": {"type": "number", "minimum": 66, "maximum": 100},
+          "area_km2": {"type": "number", "exclusiveMinimum": 0},
+          "elevation_proxy": {
+            "type": "array", "minItems": 32, "maxItems": 32,
+            "items": {"type": "array", "minItems": 32, "maxItems": 32, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+          },
+          "tiles": {
+            "type": "array", "minItems": 8, "maxItems": 8,
+            "items": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "integer", "minimum": 0, "maximum": 3}}
+          },
+          "crops": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "reference_year": {"type": "object", "additionalProperties": {"type": "integer"}},
+          "budget_mm": {"type": "object", "additionalProperties": {"type": "number"}},
+          "taw_mm": {"type": "object", "additionalProperties": {"type": "number"}},
+          "early_warning": {"type": "object"}
+        }
+      }
+    },
+    "scenarios": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z_]+__[a-z0-9_]+\\|[a-z]+\\|[0-9.]+\\|-?[0-9.]+\\|(rainfed|baseline|optimized)$": {
+          "type": "object",
+          "required": ["yield", "water_used_mm", "weekly"],
+          "properties": {
+            "yield": {
+              "type": "object",
+              "required": ["mean", "lo", "hi"],
+              "properties": {"mean": {"type": "number", "minimum": 0}, "lo": {"type": "number", "minimum": 0}, "hi": {"type": "number", "minimum": 0}}
+            },
+            "water_used_mm": {"type": "number", "minimum": 0},
+            "weekly": {
+              "type": "array", "minItems": 16, "maxItems": 16,
+              "items": {
+                "type": "object",
+                "required": ["week", "rain_mm", "tmax_c", "soil_moisture_0_1", "ndvi", "etc_mm", "eta_mm", "irrigation_mm", "excess_mm", "stress_0_1", "drought_p", "heat_p"],
+                "properties": {
+                  "week": {"type": "integer", "minimum": 1, "maximum": 16},
+                  "rain_mm": {"type": "number", "minimum": 0},
+                  "tmax_c": {"type": "number"},
+                  "soil_moisture_0_1": {"type": "number", "minimum": 0, "maximum": 1},
+                  "ndvi": {"type": "number", "minimum": 0, "maximum": 1},
+                  "etc_mm": {"type": "number", "minimum": 0},
+                  "eta_mm": {"type": "number", "minimum": 0},
+                  "irrigation_mm": {"type": "number", "minimum": 0},
+                  "excess_mm": {"type": "number", "minimum": 0},
+                  "stress_0_1": {"type": "number", "minimum": 0, "maximum": 1},
+                  "drought_p": {"type": "number", "minimum": 0, "maximum": 1},
+                  "heat_p": {"type": "number", "minimum": 0, "maximum": 1}
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

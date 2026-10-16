@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crop-Climate Simulator</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface: #fcfcfb; --page: #f9f9f7; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.12);
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --good: #006300; --warn: #7a5a00; --bad: #b02a2a; --accent: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface: #1a1a19; --page: #0d0d0d; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.12);
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+      --good: #0ca30c; --warn: #fab219; --bad: #ec835a; --accent: #3987e5;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #1a1a19; --page: #0d0d0d; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.12);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --good: #0ca30c; --warn: #fab219; --bad: #ec835a; --accent: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #app { display: grid; grid-template-columns: 290px minmax(0, 1fr) 340px; grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; gap: 12px; padding: 12px 16px; }
+  header { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; }
+  header .spacer { flex: 1; }
+  .chip { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); color: var(--ink-2); background: var(--surface); }
+  .chip.warn { color: var(--warn); border-color: var(--warn); }
+  button, select, input { font: inherit; color: inherit; }
+  button { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; width: 100%; }
+  #controls, #hud { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .card h2 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; color: var(--muted); font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--ink-2); margin: 6px 0 2px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .row input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .val { min-width: 4.2em; text-align: right; font-variant-numeric: tabular-nums; }
+  fieldset { border: 0; padding: 0; margin: 4px 0 0; }
+  fieldset legend { font-size: 12px; color: var(--ink-2); padding: 0; }
+  .radio { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+  #stage { position: relative; display: flex; gap: 8px; min-height: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .view { position: relative; flex: 1; min-width: 0; }
+  .view canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+  .view .badge { position: absolute; top: 8px; left: 8px; background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  #weekbadge { position: absolute; right: 10px; bottom: 8px; background: var(--surface); border: 1px solid var(--border); padding: 2px 10px; border-radius: 8px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .big { font-size: 34px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .unit { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .bar { position: relative; height: 10px; background: var(--grid); border-radius: 5px; margin: 8px 0 2px; }
+  .bar .range { position: absolute; top: 0; height: 100%; background: color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 5px; }
+  .bar .point { position: absolute; top: -3px; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+  .small { font-size: 12px; color: var(--ink-2); }
+  .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .gauge { text-align: center; }
+  .gauge svg { width: 100%; max-width: 130px; }
+  .gauge .glabel { font-size: 12px; color: var(--ink-2); }
+  .level { display: inline-block; margin-top: 2px; font-size: 12px; font-weight: 600; }
+  .charts canvas { width: 100%; height: 58px; display: block; }
+  .chart-title { font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; }
+  #explain { font-size: 13px; }
+  .delta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-variant-numeric: tabular-nums; }
+  .pos { color: var(--good); font-weight: 650; } .neg { color: var(--bad); font-weight: 650; }
+  footer { grid-column: 1 / -1; font-size: 12px; color: var(--ink-2); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  #banner { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 20; background: var(--surface); border: 1px solid var(--bad); color: var(--bad); padding: 8px 14px; border-radius: 10px; max-width: 80vw; display: none; }
+  #dropzone { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: color-mix(in srgb, var(--page) 92%, transparent); z-index: 30; }
+  #dropzone .box { border: 2px dashed var(--accent); border-radius: 16px; padding: 36px 44px; text-align: center; max-width: 520px; background: var(--surface); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 1100px) {
+    #app { height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; }
+    #stage { height: 62vh; } #controls, #hud { overflow: visible; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Crop-Climate Simulator</h1>
+    <span class="chip" id="chip-data">loading data...</span>
+    <span class="chip warn" id="chip-synthetic" hidden></span>
+    <span class="spacer"></span>
+    <button id="btn-compare" aria-pressed="false" aria-label="Compare baseline and optimized irrigation side by side" title="Compare (C)">Compare</button>
+    <button id="btn-palette" aria-pressed="false" aria-label="Use the colour-blind safe palette for soil moisture" title="Colour-blind safe soil palette">Colour-blind palette</button>
+    <button id="btn-shot" aria-label="Save a screenshot" title="Screenshot (S)">Screenshot</button>
+  </header>
+
+  <aside id="controls" aria-label="Scenario controls">
+    <div class="card">
+      <h2>Place and crop</h2>
+      <label for="sel-district">District</label>
+      <select id="sel-district" aria-label="District"></select>
+      <label for="sel-crop">Crop</label>
+      <select id="sel-crop" aria-label="Crop"></select>
+      <div class="small" id="crop-note" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h2>Weather scenario</h2>
+      <label for="rng-rain">Rainfall multiplier</label>
+      <div class="row"><input id="rng-rain" type="range" min="0.4" max="1.6" step="0.05" value="1" aria-label="Rainfall multiplier"><span class="val" id="val-rain">1.00x</span></div>
+      <label for="rng-temp">Temperature change</label>
+      <div class="row"><input id="rng-temp" type="range" min="-2" max="4" step="0.1" value="0" aria-label="Temperature change in degrees Celsius"><span class="val" id="val-temp">+0.0 C</span></div>
+      <fieldset id="fs-strategy">
+        <legend>Irrigation strategy</legend>
+        <label class="radio"><input type="radio" name="strategy" value="rainfed"> Rainfed (no irrigation)</label>
+        <label class="radio"><input type="radio" name="strategy" value="baseline"> Farmer baseline (50 mm / 10 d)</label>
+        <label class="radio"><input type="radio" name="strategy" value="optimized" checked> Optimized (LP schedule)</label>
+      </fieldset>
+    </div>
+    <div class="card">
+      <h2>Season</h2>
+      <div class="row">
+        <button id="btn-play" aria-label="Play or pause (space)" title="Space">Play</button>
+        <select id="sel-speed" aria-label="Playback speed" style="width:auto">
+          <option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option>
+        </select>
+        <span class="val" id="val-week" style="margin-left:auto">Week 1</span>
+      </div>
+      <label for="rng-week">Week of the season (1-16)</label>
+      <input id="rng-week" type="range" min="1" max="16" step="any" value="1" style="width:100%" aria-label="Week of the season">
+      <div class="small" style="margin-top:6px">Keys: <b>Space</b> play, <b>&larr; &rarr;</b> step a week, <b>C</b> compare, <b>S</b> screenshot. Drag to orbit, scroll to zoom, right-drag to pan.</div>
+    </div>
+    <div class="card">
+      <h2>Early warning</h2>
+      <div id="early" class="small">-</div>
+    </div>
+  </aside>
+
+  <main id="stage" aria-label="3D landscape">
+    <div class="view" id="view-a"><canvas aria-label="3D view of the district landscape for the selected scenario"></canvas><div class="badge" id="badge-a"></div></div>
+    <div class="view" id="view-b" hidden><canvas aria-label="3D view of the optimized irrigation scenario"></canvas><div class="badge" id="badge-b"></div></div>
+    <div id="weekbadge" aria-hidden="true">Week 1</div>
+  </main>
+
+  <aside id="hud" aria-label="Results" aria-live="off">
+    <div class="card">
+      <h2>Predicted yield</h2>
+      <div><span class="big" id="hud-yield" data-value="0">-</span> <span class="unit">t/ha</span></div>
+      <div class="bar" aria-hidden="true"><div class="range" id="yield-range"></div><div class="point" id="yield-point"></div></div>
+      <div class="small" id="yield-interval">80% interval</div>
+      <div class="small" id="yield-note" style="margin-top:4px"></div>
+    </div>
+    <div class="card" id="card-water">
+      <h2>Irrigation water</h2>
+      <div><span class="big" id="water-used" data-value="0">-</span> <span class="unit">mm per season</span></div>
+      <div class="small" id="water-todate"></div>
+    </div>
+    <div class="card" id="card-compare" hidden>
+      <h2>Baseline vs optimized</h2>
+      <div class="delta">
+        <div>Water, baseline<br><b id="compare-water-baseline" data-value="0">-</b></div>
+        <div>Water, optimized<br><b id="compare-water-optimized" data-value="0">-</b></div>
+        <div>Water saved<br><b id="compare-water-saved" data-value="0">-</b></div>
+        <div>Yield change<br><b id="compare-yield" data-value="0">-</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>This week</h2>
+      <div class="gauges">
+        <div class="gauge"><svg viewBox="0 0 120 72" role="img" aria-label="Drought risk gauge"><path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--grid)" stroke-width="10" stroke-linecap="round"></path><path id="arc-drought" d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--s2)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 200"></path><text id="txt-drought" x="60" y="58" text-anchor="middle" font-size="19" font-weight="650" fill="currentColor">0%</text></svg>
+          <div class="glabel">Drought risk (model)</div><div class="level" id="gauge-drought" data-value="0" role="meter" aria-label="Drought probability" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">-</div></div>
+        <div class="gauge"><svg viewBox="0 0 120 72" role="img" aria-label="Heat days gauge"><path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--grid)" stroke-width="10" stroke-linecap="round"></path><path id="arc-heat" d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--s4)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 200"></path><text id="txt-heat" x="60" y="58" text-anchor="middle" font-size="19" font-weight="650" fill="currentColor">0</text></svg>
+          <div class="glabel">Heatwave days this week</div><div class="level" id="gauge-heat" data-value="0" role="meter" aria-label="Share of heatwave days" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0">-</div></div>
+      </div>
+      <div class="small" id="stress-line" style="margin-top:6px"></div>
+    </div>
+    <div class="card"><h2>What is happening</h2><div id="explain" aria-live="polite">-</div></div>
+    <div class="card charts">
+      <h2>Season at a glance</h2>
+      <div class="chart-title"><span>Rainfall, mm per week</span><span id="ct-rain"></span></div><canvas id="chart-rain" aria-label="Weekly rainfall chart"></canvas>
+      <div class="chart-title"><span>Soil moisture, fraction of capacity</span><span id="ct-soil"></span></div><canvas id="chart-soil" aria-label="Weekly soil moisture chart"></canvas>
+      <div class="chart-title"><span>Greenness proxy (not satellite NDVI)</span><span id="ct-ndvi"></span></div><canvas id="chart-ndvi" aria-label="Weekly greenness proxy chart"></canvas>
+    </div>
+  </aside>
+
+  <footer>
+    <span id="foot-disclaimer">Explanation tool: it visualises model outputs and what-if scenarios. It is not a physical crop-growth simulation.</span>
+    <span id="foot-meta"></span>
+  </footer>
+</div>
+<div id="banner" role="alert"></div>
+<div id="dropzone"><div class="box"><h2 style="margin-top:0">Load the simulation data</h2><p>Opening this file directly from disk blocks automatic loading of <code>sim_data.json</code>. Drop the file here, or choose it:</p><input type="file" id="file-input" accept=".json,application/json" aria-label="Choose sim_data.json"></div></div>
+
+<script type="module">
+// ===================================================================================== helpers
+const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const $ = (id) => document.getElementById(id);
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FIELDS = ['rain_mm', 'tmax_c', 'soil_moisture_0_1', 'ndvi', 'etc_mm', 'eta_mm', 'irrigation_mm', 'excess_mm', 'stress_0_1', 'drought_p', 'heat_p'];
+const STAGE_NAMES = ['establishment', 'vegetative growth', 'flowering / mid-season', 'ripening'];
+// Visual styling only (not data): relative plant height and leaf colour per crop.
+const CROP_STYLE = { rice: { h: 0.36, w: 0.045, leaf: 0x7bc043 }, wheat: { h: 0.34, w: 0.035, leaf: 0xa9c244 }, cotton: { h: 0.42, w: 0.07, leaf: 0x5fb85f }, sugarcane: { h: 0.78, w: 0.04, leaf: 0x6bbf4e } };
+
+function showError(message) {
+  const b = $('banner'); b.textContent = message; b.style.display = 'block';
+  console.error(message);
+}
+window.addEventListener('error', (e) => showError('Error: ' + e.message));
+window.addEventListener('unhandledrejection', (e) => showError('Error: ' + (e.reason && e.reason.message || e.reason)));
+
+// ===================================================================================== data layer
+let DATA = null;
+let GRID = null;
+
+function bracket(arr, v) {
+  const n = arr.length;
+  if (v <= arr[0]) return [0, 0, 0];
+  if (v >= arr[n - 1]) return [n - 1, n - 1, 0];
+  let i = 0;
+  while (arr[i + 1] < v) i++;
+  return [i, i + 1, (v - arr[i]) / (arr[i + 1] - arr[i])];
+}
+const key = (d, c, r, t, s) => `${d}|${c}|${r}|${t}|${s}`;
+const interpCache = new Map();
+
+/** Bilinear interpolation of a scenario between the four surrounding grid points (rain x temperature). */
+function scenarioAt(districtId, crop, rain, temp, strategy) {
+  const ck = `${districtId}|${crop}|${rain.toFixed(3)}|${temp.toFixed(3)}|${strategy}`;
+  if (interpCache.has(ck)) return interpCache.get(ck);
+  const [r0, r1, rt] = bracket(GRID.rain_mult, rain);
+  const [t0, t1, tt] = bracket(GRID.temp_delta, temp);
+  const corners = [[r0, t0, (1 - rt) * (1 - tt)], [r1, t0, rt * (1 - tt)], [r0, t1, (1 - rt) * tt], [r1, t1, rt * tt]];
+  const out = { yield: { mean: 0, lo: 0, hi: 0 }, water_used_mm: 0, weekly: Array.from({ length: DATA.meta.weeks }, (_, i) => Object.assign({ week: i + 1 }, ...FIELDS.map((f) => ({ [f]: 0 })))) };
+  for (const [ri, ti, w] of corners) {
+    if (w <= 0) continue;
+    const sc = DATA.scenarios[key(districtId, crop, GRID.rain_mult[ri], GRID.temp_delta[ti], strategy)];
+    if (!sc) throw new Error('missing scenario ' + key(districtId, crop, GRID.rain_mult[ri], GRID.temp_delta[ti], strategy));
+    out.yield.mean += w * sc.yield.mean; out.yield.lo += w * sc.yield.lo; out.yield.hi += w * sc.yield.hi;
+    out.water_used_mm += w * sc.water_used_mm;
+    for (let k = 0; k < out.weekly.length; k++) for (const f of FIELDS) out.weekly[k][f] += w * sc.weekly[k][f];
+  }
+  if (interpCache.size > 600) interpCache.clear();
+  interpCache.set(ck, out);
+  return out;
+}
+
+function weekState(sc, wpos) {
+  // wpos in [1, weeks]: interpolate between the two surrounding weekly records.
+  const n = sc.weekly.length;
+  const x = clamp(wpos - 1, 0, n - 1);
+  const i = Math.min(Math.floor(x), n - 2), f = x - i;
+  const a = sc.weekly[i], b = sc.weekly[i + 1], out = { week: Math.round(clamp(wpos, 1, n)) };
+  for (const k of FIELDS) out[k] = lerp(a[k], b[k], f);
+  return out;
+}
+
+// ===================================================================================== three.js
+async function loadThree() {
+  const embedded = document.getElementById('three-src');
+  if (embedded) {
+    const blob = new Blob([embedded.textContent], { type: 'text/javascript' });
+    return import(URL.createObjectURL(blob));
+  }
+  return import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.min.js');
+}
+const THREE = await loadThree();
+
+const SIZE = 10, N = 128, TILES = 8, PLANTS_PER_TILE = 14;
+const MOIST_STOPS = {
+  standard: [[0, 0xc9a266], [0.35, 0x9c8554], [0.65, 0x5f8fa4], [1, 0x2a6db3]],
+  safe: [[0, 0xf1e2b6], [0.5, 0x9ec5d8], [1, 0x08306b]],
+};
+let paletteName = 'standard';
+const _c1 = new THREE.Color(), _c2 = new THREE.Color();
+function moistureColor(m, target) {
+  const stops = MOIST_STOPS[paletteName];
+  m = clamp(m);
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (m <= stops[i + 1][0]) {
+      const t = (m - stops[i][0]) / (stops[i + 1][0] - stops[i][0]);
+      return target.copy(_c1.setHex(stops[i][1])).lerp(_c2.setHex(stops[i + 1][1]), t);
+    }
+  }
+  return target.setHex(stops[stops.length - 1][1]);
+}
+function hash(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) { let s = seed >>> 0; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+function makeCrackTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 256);
+  const r = rng(7); g.strokeStyle = '#2b2118'; g.lineCap = 'round';
+  for (let i = 0; i < 38; i++) {
+    let x = r() * 256, y = r() * 256, a = r() * Math.PI * 2; g.lineWidth = 1 + r() * 1.6; g.beginPath(); g.moveTo(x, y);
+    for (let k = 0; k < 9; k++) { a += (r() - 0.5) * 1.1; x += Math.cos(a) * (10 + r() * 16); y += Math.sin(a) * (10 + r() * 16); g.lineTo(x, y); }
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+}
+function makeCloudTexture() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 160; const g = c.getContext('2d');
+  const r = rng(11);
+  for (let i = 0; i < 26; i++) {
+    const x = 40 + r() * 176, y = 40 + r() * 80, rad = 22 + r() * 34, grad = g.createRadialGradient(x, y, 0, x, y, rad);
+    grad.addColorStop(0, 'rgba(255,255,255,0.55)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad; g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill();
+  }
+  return new THREE.CanvasTexture(c);
+}
+const crackTexture = makeCrackTexture();
+const cloudTexture = makeCloudTexture();
+const camState = { theta: 0.9, phi: 0.95, radius: 15.5, target: new THREE.Vector3(0, 0.3, 0) };
+
+class View {
+  constructor(container, label) {
+    this.container = container; this.label = label;
+    this.canvas = container.querySelector('canvas');
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, preserveDrawingBuffer: false, powerPreference: 'low-power' });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.Fog(0x9ad0f5, 16, 46);
+    this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    this.hemi = new THREE.HemisphereLight(0xffffff, 0x8a7a5a, 1.05); this.scene.add(this.hemi);
+    this.sun = new THREE.DirectionalLight(0xffffff, 1.1); this.sun.position.set(-6, 9, -5); this.scene.add(this.sun);
+    this.heights = new Float32Array(N * N);
+    this.tileMoist = new Float32Array(TILES * TILES);
+    this.dirty = true; this.sc = null; this.wpos = 1; this.maxDrops = 3200; this.dropCount = 0; this.fps = 60;
+    this.time = 0; this.districtId = null; this.crop = null;
+    this._tmp = new THREE.Color(); this.noise = new Float32Array(N * N); { const rn = rng(9); for (let i = 0; i < N * N; i++) this.noise[i] = rn(); }
+    this.buildTerrain(); this.buildGridLines(); this.buildWater(); this.buildRain(); this.buildClouds(); this.buildJets();
+    this.sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff1c2 }));
+    this.sunMesh.position.set(-9, 8.5, -8); this.scene.add(this.sunMesh);
+    this.attachControls();
+    this.resize();
+  }
+  buildTerrain() {
+    const pos = new Float32Array(N * N * 3), uv = new Float32Array(N * N * 2), col = new Float32Array(N * N * 3);
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const k = j * N + i; pos[k * 3] = (i / (N - 1) - 0.5) * SIZE; pos[k * 3 + 2] = (j / (N - 1) - 0.5) * SIZE;
+      uv[k * 2] = i / (N - 1); uv[k * 2 + 1] = j / (N - 1);
+    }
+    const idx = new Uint32Array((N - 1) * (N - 1) * 6); let p = 0;
+    for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+      const a = j * N + i, b = a + 1, c = a + N, d = c + 1; idx.set([a, c, b, b, c, d], p); p += 6;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setIndex(new THREE.BufferAttribute(idx, 1));
+    this.terrainGeo = g;
+    const mat = new THREE.MeshLambertMaterial({ vertexColors: true, map: crackTexture });
+    this.crackUniform = { value: 0 };
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uCrack = this.crackUniform;
+      shader.fragmentShader = 'uniform float uCrack;\n' + shader.fragmentShader.replace('#include <map_fragment>',
+        '#ifdef USE_MAP\n vec4 sampledDiffuseColor = texture2D( map, vMapUv * 4.0 );\n diffuseColor.rgb *= mix( vec3( 1.0 ), mix( vec3(0.25), vec3(1.0), sampledDiffuseColor.r ), uCrack );\n#endif');
+    };
+    this.terrain = new THREE.Mesh(g, mat); this.scene.add(this.terrain);
+  }
+  buildGridLines() {
+    this.gridGeo = new THREE.BufferGeometry();
+    this.gridGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((TILES + 1) * 2 * (N - 1) * 6), 3));
+    this.gridLines = new THREE.LineSegments(this.gridGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28 }));
+    this.scene.add(this.gridLines);
+  }
+  buildWater() {
+    this.water = new THREE.Mesh(new THREE.PlaneGeometry(SIZE, SIZE), new THREE.MeshStandardMaterial({ color: 0x2f7fc4, transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0.1 }));
+    this.water.rotation.x = -Math.PI / 2; this.water.visible = false; this.scene.add(this.water);
+  }
+  buildRain() {
+    const n = 6400;
+    this.rainPos = new Float32Array(n * 6); this.rainVel = new Float32Array(6400);
+    const r = rng(3);
+    for (let i = 0; i < 6400; i++) {
+      const x = (r() - 0.5) * (SIZE + 4), y = r() * 7, z = (r() - 0.5) * (SIZE + 4);
+      this.rainPos.set([x, y, z, x, y - 0.35, z], i * 6); this.rainVel[i] = 9 + r() * 5;
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(this.rainPos, 3)); g.setDrawRange(0, 0);
+    this.rainGeo = g; this.rain = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x9cc7ff, transparent: true, opacity: 0.6 }));
+    this.rain.frustumCulled = false; this.scene.add(this.rain);
+  }
+  buildClouds() {
+    this.clouds = [];
+    for (let i = 0; i < 4; i++) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(7, 4.4), new THREE.MeshBasicMaterial({ map: cloudTexture, transparent: true, opacity: 0.3, depthWrite: false, fog: false }));
+      m.rotation.x = -Math.PI / 2; m.position.set((i - 1.5) * 4.2, 6 + i * 0.12, ((i * 7) % 5) - 2.5); this.scene.add(m); this.clouds.push(m);
+    }
+  }
+  buildJets() {
+    const n = TILES * TILES * 6; this.jetPos = new Float32Array(n * 3); this.jetSeed = new Float32Array(n * 3);
+    const r = rng(5); for (let i = 0; i < n; i++) { this.jetSeed[i * 3] = r() * 6.28; this.jetSeed[i * 3 + 1] = r(); this.jetSeed[i * 3 + 2] = 0.25 + r() * 0.3; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(this.jetPos, 3)); g.setDrawRange(0, 0);
+    this.jetGeo = g; this.jets = new THREE.Points(g, new THREE.PointsMaterial({ color: 0x4fb0ff, size: 0.09, transparent: true, opacity: 0.9 }));
+    this.jets.frustumCulled = false; this.scene.add(this.jets); this.jetCount = 0;
+  }
+  setDistrict(d, crop) {
+    this.districtId = d.id; this.crop = crop; this.tiles = d.tiles;
+    const e = d.elevation_proxy;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const u = (i / (N - 1)) * 31, v = (j / (N - 1)) * 31, i0 = Math.min(Math.floor(u), 30), j0 = Math.min(Math.floor(v), 30), fu = u - i0, fv = v - j0;
+      const h = lerp(lerp(e[j0][i0], e[j0][i0 + 1], fu), lerp(e[j0 + 1][i0], e[j0 + 1][i0 + 1], fu), fv);
+      this.heights[j * N + i] = 0.1 + h * 1.1;
+    }
+    const pos = this.terrainGeo.attributes.position;
+    for (let k = 0; k < N * N; k++) pos.setY(k, this.heights[k]);
+    pos.needsUpdate = true; this.terrainGeo.computeVertexNormals();
+    this.vertIdx = new Uint8Array(N * N * 4); this.vertW = new Float32Array(N * N * 4); this.vertShade = new Float32Array(N * N);
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const k = j * N + i, u = clamp((i / (N - 1)) * TILES - 0.5, 0, TILES - 1.001), v = clamp((j / (N - 1)) * TILES - 0.5, 0, TILES - 1.001);
+      const i0 = Math.floor(u), j0 = Math.floor(v), fu = u - i0, fv = v - j0, a = j0 * TILES + i0;
+      this.vertIdx.set([a, a + 1, a + TILES, a + TILES + 1], k * 4); this.vertW.set([(1 - fu) * (1 - fv), fu * (1 - fv), (1 - fu) * fv, fu * fv], k * 4);
+      this.vertShade[k] = 0.94 + 0.12 * this.noise[k] + 0.1 * (this.heights[k] - 0.5);
+    }
+    this.tileRGB = new Float32Array(TILES * TILES * 3);
+    this.updateGridLines();
+    this.buildCrops();
+    this.dirty = true;
+  }
+  heightAt(x, z) {
+    const u = clamp((x / SIZE + 0.5) * (N - 1), 0, N - 1.001), v = clamp((z / SIZE + 0.5) * (N - 1), 0, N - 1.001);
+    const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j, h = this.heights;
+    return lerp(lerp(h[j * N + i], h[j * N + i + 1], fu), lerp(h[(j + 1) * N + i], h[(j + 1) * N + i + 1], fu), fv);
+  }
+  updateGridLines() {
+    const p = this.gridGeo.attributes.position.array; let o = 0; const step = SIZE / TILES;
+    for (let t = 0; t <= TILES; t++) {
+      const c = -SIZE / 2 + t * step;
+      for (let s = 0; s < N - 1; s++) {
+        const a = -SIZE / 2 + (s / (N - 1)) * SIZE, b = -SIZE / 2 + ((s + 1) / (N - 1)) * SIZE;
+        p[o++] = a; p[o++] = this.heightAt(a, c) + 0.025; p[o++] = c; p[o++] = b; p[o++] = this.heightAt(b, c) + 0.025; p[o++] = c;
+        p[o++] = c; p[o++] = this.heightAt(c, a) + 0.025; p[o++] = a; p[o++] = c; p[o++] = this.heightAt(c, b) + 0.025; p[o++] = b;
+      }
+    }
+    this.gridGeo.attributes.position.needsUpdate = true;
+  }
+  buildCrops() {
+    if (this.stems) { this.scene.remove(this.stems, this.leaves); this.stems.dispose(); this.leaves.dispose(); }
+    const count = TILES * TILES * PLANTS_PER_TILE, style = CROP_STYLE[this.crop] || CROP_STYLE.rice;
+    const stemGeo = new THREE.CylinderGeometry(0.008, 0.012, 1, 5); stemGeo.translate(0, 0.5, 0);
+    const leafGeo = new THREE.ConeGeometry(1, 1, 6); leafGeo.translate(0, 0.5, 0);
+    this.stems = new THREE.InstancedMesh(stemGeo, new THREE.MeshLambertMaterial({ color: 0x8aa655 }), count);
+    this.leaves = new THREE.InstancedMesh(leafGeo, new THREE.MeshLambertMaterial({ color: 0xffffff }), count);
+    this.stems.frustumCulled = this.leaves.frustumCulled = false;
+    this.scene.add(this.stems, this.leaves);
+    const r = rng(hash(this.districtId + this.crop)), step = SIZE / TILES; this.plants = [];
+    for (let ty = 0; ty < TILES; ty++) for (let tx = 0; tx < TILES; tx++) for (let k = 0; k < PLANTS_PER_TILE; k++) {
+      const x = -SIZE / 2 + (tx + 0.1 + 0.8 * r()) * step, z = -SIZE / 2 + (ty + 0.1 + 0.8 * r()) * step;
+      this.plants.push({ x, z, y: this.heightAt(x, z), tile: ty * TILES + tx, phase: r() * 6.28, size: 0.8 + 0.4 * r() });
+    }
+    this.cropStyle = style; this._dummy = new THREE.Object3D(); this._col = new THREE.Color();
+  }
+  setScenario(sc, wpos) { this.sc = sc; this.wpos = wpos; this.dirty = true; }
+  setWeek(wpos) { if (Math.abs(wpos - this.wpos) > 0.03 || wpos === 1 || wpos === 16) { this.wpos = wpos; this.dirty = true; } }
+  applyState() {
+    const s = weekState(this.sc, this.wpos); this.state = s;
+    // terrain colours: smooth tile moisture field, modulated by the tile's soil class (visual device)
+    const classFactor = [0.86, 0.96, 1.04, 1.14];
+    for (let ty = 0; ty < TILES; ty++) for (let tx = 0; tx < TILES; tx++) this.tileMoist[ty * TILES + tx] = clamp(s.soil_moisture_0_1 * classFactor[this.tiles[ty][tx]]);
+    const col = this.terrainGeo.attributes.color, c = this._tmp, rgb = this.tileRGB, out = col.array;
+    for (let t = 0; t < TILES * TILES; t++) { moistureColor(this.tileMoist[t], c); rgb[t * 3] = c.r; rgb[t * 3 + 1] = c.g; rgb[t * 3 + 2] = c.b; }
+    const vi = this.vertIdx, vw = this.vertW, vs = this.vertShade;
+    for (let k = 0; k < N * N; k++) {
+      const a = vi[k * 4] * 3, b = vi[k * 4 + 1] * 3, c2 = vi[k * 4 + 2] * 3, d2 = vi[k * 4 + 3] * 3, w0 = vw[k * 4], w1 = vw[k * 4 + 1], w2 = vw[k * 4 + 2], w3 = vw[k * 4 + 3], sh = vs[k];
+      out[k * 3] = (rgb[a] * w0 + rgb[b] * w1 + rgb[c2] * w2 + rgb[d2] * w3) * sh;
+      out[k * 3 + 1] = (rgb[a + 1] * w0 + rgb[b + 1] * w1 + rgb[c2 + 1] * w2 + rgb[d2 + 1] * w3) * sh;
+      out[k * 3 + 2] = (rgb[a + 2] * w0 + rgb[b + 2] * w1 + rgb[c2 + 2] * w2 + rgb[d2 + 2] * w3) * sh;
+    }
+    col.needsUpdate = true;
+    this.crackUniform.value = clamp((0.42 - s.soil_moisture_0_1) / 0.32) ** 1.2;
+    // flood: heavy rain over the last three weeks on a saturated soil (rain-driven, so irrigation drainage never floods the field)
+    const recentRain = this.sc.weekly.slice(Math.max(0, Math.floor(this.wpos) - 3), Math.floor(this.wpos)).reduce((a, w) => a + w.rain_mm, 0);
+    const level = clamp((recentRain - 110) / 150) * clamp((s.soil_moisture_0_1 - 0.8) / 0.2);
+    this.water.visible = level > 0.02; this.water.position.y = 0.12 + level * 0.9;
+    // crops
+    const st = this.cropStyle, wilt = clamp((s.stress_0_1 - 0.35) / 0.5), greenness = clamp((s.ndvi - 0.15) / 0.65), d = this._dummy, cc = this._col;
+    for (let k = 0; k < this.plants.length; k++) {
+      const p = this.plants[k], tm = this.tileMoist[p.tile];
+      const growth = clamp(greenness * (0.82 + 0.3 * tm)), h = (0.06 + st.h * growth * p.size) * (1 - 0.38 * wilt);
+      d.position.set(p.x, p.y, p.z); d.rotation.set(0, p.phase, wilt * 0.55 * Math.sin(p.phase * 3)); d.scale.set(1, Math.max(h, 0.03), 1); d.updateMatrix();
+      this.stems.setMatrixAt(k, d.matrix);
+      d.position.y = p.y + h * 0.35; d.scale.set(st.w + 0.035 * growth, Math.max(h * 0.75, 0.03), st.w + 0.035 * growth); d.updateMatrix();
+      this.leaves.setMatrixAt(k, d.matrix);
+      cc.setHex(0xc9a94a).lerp(this._leaf.setHex(st.leaf), clamp((1 - wilt) * (0.35 + 0.65 * greenness))); this.leaves.setColorAt(k, cc);
+    }
+    this.stems.instanceMatrix.needsUpdate = this.leaves.instanceMatrix.needsUpdate = true;
+    if (this.leaves.instanceColor) this.leaves.instanceColor.needsUpdate = true;
+    // sky, sun, fog, clouds
+    const heat = clamp((s.tmax_c - 28) / 14), sky = _c1.setHex(0x8ec9f0).lerp(_c2.setHex(0xf0c690), heat);
+    const wet = clamp(s.rain_mm / 70); sky.lerp(_c2.setHex(0x8a97a6), wet * 0.6);
+    sky.lerp(_c2.setHex(0xffb46b), clamp(s.heat_p) * 0.5);
+    this.scene.background = this.scene.background || new THREE.Color(); this.scene.background.copy(sky); this.scene.fog.color.copy(sky);
+    this.sun.color.setHex(0xffffff).lerp(_c2.setHex(0xffc88a), heat); this.sun.intensity = 1.0 + 0.5 * heat - 0.4 * wet;
+    this.sunMesh.material.color.setHex(0xfff1c2).lerp(_c2.setHex(0xff9a3c), heat);
+    this.cloudOpacity = clamp(0.12 + wet * 0.75, 0, 0.85); this.clouds.forEach((m) => { m.material.opacity = this.cloudOpacity; m.material.color.setScalar(1 - 0.5 * wet); });
+    this.dropCount = Math.floor(Math.min(this.maxDrops, this.maxDrops * clamp(s.rain_mm / 90)));
+    this.rainGeo.setDrawRange(0, this.dropCount * 2);
+    this.jetCount = s.irrigation_mm > 0.5 ? Math.floor(clamp(0.25 + s.irrigation_mm / 60) * TILES * TILES * 6) : 0;
+    this.jetGeo.setDrawRange(0, this.jetCount); this.irrigationMm = s.irrigation_mm;
+    this.dirty = false;
+  }
+  attachControls() {
+    this._leaf = new THREE.Color(); let mode = null, lx = 0, ly = 0;
+    const el = this.canvas;
+    el.addEventListener('pointerdown', (e) => { mode = (e.button === 2 || e.shiftKey) ? 'pan' : 'rot'; lx = e.clientX; ly = e.clientY; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointerup', () => { mode = null; });
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    el.addEventListener('pointermove', (e) => {
+      if (!mode) return; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+      if (mode === 'rot') { camState.theta -= dx * 0.006; camState.phi = clamp(camState.phi - dy * 0.006, 0.12, 1.45); }
+      else { const k = camState.radius * 0.0016; camState.target.x -= (Math.cos(camState.theta) * dx) * k; camState.target.z += (Math.sin(camState.theta) * dx) * k; camState.target.x -= Math.sin(camState.theta) * dy * k; camState.target.z -= Math.cos(camState.theta) * dy * k; }
+    });
+    el.addEventListener('wheel', (e) => { e.preventDefault(); camState.radius = clamp(camState.radius * (1 + Math.sign(e.deltaY) * 0.08), 6, 30); }, { passive: false });
+  }
+  resize() {
+    const w = Math.max(this.container.clientWidth, 2), h = Math.max(this.container.clientHeight, 2);
+    this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
+  }
+  frame(dt, running) {
+    if (!this.sc) return;
+    if (this.dirty) this.applyState();
+    this.time += dt;
+    const ct = camState; this.camera.position.set(ct.target.x + ct.radius * Math.sin(ct.phi) * Math.sin(ct.theta), ct.target.y + ct.radius * Math.cos(ct.phi), ct.target.z + ct.radius * Math.sin(ct.phi) * Math.cos(ct.theta));
+    this.camera.lookAt(ct.target);
+    if (this.dropCount > 0) {
+      const a = this.rainPos, wind = 0.05; const speed = reducedMotion ? 0 : 1;
+      for (let i = 0; i < this.dropCount; i++) {
+        const o = i * 6; let y = a[o + 1] - this.rainVel[i] * dt * speed;
+        if (y < 0.2) { y = 6.5 + (i % 7) * 0.1; }
+        a[o + 1] = y; a[o + 4] = y - 0.35; a[o] += wind * dt * speed; a[o + 3] = a[o] - wind * 0.4;
+        if (a[o] > SIZE / 2 + 2) { a[o] -= SIZE + 4; a[o + 3] = a[o]; }
+      }
+      this.rainGeo.attributes.position.needsUpdate = true;
+    }
+    if (this.jetCount > 0 && !reducedMotion) {
+      const a = this.jetPos, s = this.jetSeed, step = SIZE / TILES;
+      for (let i = 0; i < this.jetCount; i++) {
+        const tile = Math.floor(i / 6), tx = tile % TILES, ty = Math.floor(tile / TILES), cx = -SIZE / 2 + (tx + 0.5) * step, cz = -SIZE / 2 + (ty + 0.5) * step;
+        const t = (this.time * 0.9 + s[i * 3 + 1]) % 1, ang = s[i * 3] + (i % 6) * 1.047, rad = s[i * 3 + 2] * step * 1.1 * t;
+        const x = cx + Math.cos(ang) * rad, z = cz + Math.sin(ang) * rad;
+        a[i * 3] = x; a[i * 3 + 1] = this.heightAt(x, z) + 0.12 + Math.sin(Math.PI * t) * 0.55; a[i * 3 + 2] = z;
+      }
+      this.jetGeo.attributes.position.needsUpdate = true;
+    } else if (this.jetCount > 0) { this.jetGeo.setDrawRange(0, 0); }
+    if (!reducedMotion) this.clouds.forEach((m, i) => { m.position.x += dt * (0.12 + i * 0.03); if (m.position.x > 9) m.position.x = -9; });
+    this.renderer.render(this.scene, this.camera);
+  }
+  adapt(fps) {
+    this.fps = fps;
+    if (fps < 30 && this.maxDrops > 800) { this.maxDrops = Math.max(800, Math.floor(this.maxDrops * 0.85)); this.dirty = true; }
+    else if (fps > 56 && this.maxDrops < 6400) { this.maxDrops = Math.min(6400, Math.floor(this.maxDrops * 1.05)); this.dirty = true; }
+  }
+}
+
+// ===================================================================================== app state and UI
+const state = { district: null, crop: null, rain: 1, temp: 0, strategy: 'optimized', wpos: 1, playing: false, speed: 1, compare: false };
+let viewA, viewB;
+
+function populate() {
+  const sd = $('sel-district'); sd.innerHTML = '';
+  for (const d of DATA.districts) { const o = document.createElement('option'); o.value = d.id; o.textContent = `${d.name} (${d.state})`; sd.appendChild(o); }
+  state.district = DATA.districts[0].id; sd.value = state.district; fillCrops();
+}
+function fillCrops() {
+  const d = DATA.districts.find((x) => x.id === state.district), sc = $('sel-crop'); sc.innerHTML = '';
+  for (const c of d.crops) { const o = document.createElement('option'); o.value = c; o.textContent = c[0].toUpperCase() + c.slice(1) + ` (${DATA.crops[c].season})`; sc.appendChild(o); }
+  if (!d.crops.includes(state.crop)) state.crop = d.crops[0]; sc.value = state.crop;
+}
+const districtOf = () => DATA.districts.find((x) => x.id === state.district);
+
+function pct(x) { return (100 * x).toFixed(0) + '%'; }
+function fmt(x, d = 1) { return Number(x).toFixed(d); }
+
+function refresh(full = true) {
+  const d = districtOf();
+  if (full) {
+    for (const v of [viewA, viewB]) if (v && (v.districtId !== d.id || v.crop !== state.crop)) v.setDistrict(d, state.crop);
+  }
+  const strategies = state.compare ? ['baseline', 'optimized'] : [state.strategy];
+  const scs = strategies.map((s) => scenarioAt(state.district, state.crop, state.rain, state.temp, s));
+  viewA.setScenario(scs[0], state.wpos); $('badge-a').textContent = state.compare ? 'Farmer baseline' : labelOf(state.strategy);
+  if (state.compare) { viewB.setScenario(scs[1], state.wpos); $('badge-b').textContent = 'Optimized'; }
+  state.scs = scs; state.strategies = strategies;
+  updateHud(); drawCharts();
+}
+const labelOf = (s) => ({ rainfed: 'Rainfed', baseline: 'Farmer baseline', optimized: 'Optimized' }[s]);
+
+function updateHud() {
+  const sc = state.scs[state.strategies.length - 1], d = districtOf(), meta = DATA.meta;
+  const y = sc.yield, ymax = Math.max(...['rainfed', 'baseline', 'optimized'].map((s) => scenarioAt(state.district, state.crop, state.rain, state.temp, s).yield.hi), 1e-6);
+  $('hud-yield').textContent = fmt(y.mean, 2); $('hud-yield').dataset.value = y.mean.toFixed(4);
+  $('yield-range').style.left = (100 * y.lo / ymax) + '%'; $('yield-range').style.width = (100 * (y.hi - y.lo) / ymax) + '%'; $('yield-point').style.left = `calc(${100 * y.mean / ymax}% - 2px)`;
+  $('yield-interval').textContent = `80% interval ${fmt(y.lo, 2)} to ${fmt(y.hi, 2)} t/ha (${labelOf(state.strategies[state.strategies.length - 1])})`;
+  $('yield-note').textContent = DATA.crops[state.crop].note || '';
+  $('water-used').textContent = fmt(sc.water_used_mm, 0); $('water-used').dataset.value = sc.water_used_mm.toFixed(3);
+  const wk = Math.floor(state.wpos), cum = sc.weekly.slice(0, wk).reduce((a, w) => a + w.irrigation_mm, 0);
+  $('water-todate').textContent = `${fmt(cum, 0)} mm applied up to week ${wk}`;
+  $('card-compare').hidden = !state.compare;
+  if (state.compare) {
+    const b = state.scs[0], o = state.scs[1], saved = b.water_used_mm - o.water_used_mm, dy = o.yield.mean - b.yield.mean;
+    $('compare-water-baseline').textContent = fmt(b.water_used_mm, 0) + ' mm'; $('compare-water-baseline').dataset.value = b.water_used_mm.toFixed(3);
+    $('compare-water-optimized').textContent = fmt(o.water_used_mm, 0) + ' mm'; $('compare-water-optimized').dataset.value = o.water_used_mm.toFixed(3);
+    $('compare-water-saved').textContent = `${fmt(saved, 0)} mm (${b.water_used_mm > 0 ? fmt(100 * saved / b.water_used_mm, 0) : '0'}%)`; $('compare-water-saved').dataset.value = saved.toFixed(3);
+    $('compare-yield').textContent = `${dy >= 0 ? '+' : ''}${fmt(dy, 2)} t/ha`; $('compare-yield').className = dy >= 0 ? 'pos' : 'neg'; $('compare-yield').dataset.value = dy.toFixed(4);
+  }
+  const w = weekState(sc, state.wpos);
+  setGauge('drought', clamp(w.drought_p), `${pct(w.drought_p)}`, levelOf(w.drought_p, meta.risk_levels.drought));
+  const days = w.heat_p * 7; setGauge('heat', clamp(w.heat_p), `${fmt(days, 1)}`, days < 0.5 ? 'none' : (days < 2 ? 'some' : 'many'), true);
+  $('stress-line').textContent = `Water stress ${pct(w.stress_0_1)} (1 - ETa/ETc), soil moisture ${pct(w.soil_moisture_0_1)} of capacity, Tmax ${fmt(w.tmax_c, 1)} C, rain ${fmt(w.rain_mm, 0)} mm.`;
+  $('val-week').textContent = 'Week ' + w.week; $('weekbadge').textContent = 'Week ' + w.week;
+  $('explain').textContent = explain(sc, d);
+  const ew = d.early_warning[DATA.crops[state.crop].season];
+  $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (hazard: ${ew.hazard}, lead ${ew.lead_days} d)<br>Heatwave ${pct(ew.heatwave_p)} (${ew.heatwave_source}), drought ${pct(ew.drought_p)}.<br><span class="small">Phase 5 early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
+}
+function levelOf(p, cfg) { return p >= cfg.severe ? 'severe' : p >= cfg.high ? 'high' : p >= cfg.moderate ? 'moderate' : 'low'; }
+function setGauge(name, frac, text, level, isHeat = false) {
+  const len = Math.PI * 50;
+  $('arc-' + name).setAttribute('stroke-dasharray', `${len * clamp(frac)} 400`);
+  $('txt-' + name).textContent = text;
+  const g = $('gauge-' + name); g.dataset.value = frac.toFixed(4); g.setAttribute('aria-valuenow', frac.toFixed(3));
+  g.textContent = isHeat ? `${level === 'none' ? 'no' : level} qualifying days` : `${level} risk`;
+}
+
+function stageOfWeek(crop, week) {
+  const days = DATA.crops[crop].stage_days, mid = (week - 1) * 7 + 3; let acc = 0;
+  for (let s = 0; s < 4; s++) { acc += days[s]; if (mid < acc) return s; }
+  return 3;
+}
+function explain(sc, d) {
+  const w = weekState(sc, state.wpos), wk = w.week, prev = sc.weekly[Math.max(0, wk - 2)], normal = scenarioAt(state.district, state.crop, 1, state.temp, state.strategies[state.strategies.length - 1]).weekly[wk - 1];
+  const stage = STAGE_NAMES[stageOfWeek(state.crop, wk)];
+  const rainPct = normal.rain_mm >= 3 ? `${Math.round(100 * w.rain_mm / normal.rain_mm)}% of normal` : (w.rain_mm >= 3 ? `${fmt(w.rain_mm, 0)} mm in a week that is normally almost dry` : 'negligible');
+  const dm = w.soil_moisture_0_1 - (wk > 1 ? prev.soil_moisture_0_1 : w.soil_moisture_0_1);
+  const trend = dm < -0.03 ? 'falling' : dm > 0.03 ? 'rising' : 'steady';
+  const baseCum = scenarioAt(state.district, state.crop, state.rain, state.temp, 'baseline').weekly.slice(0, wk).reduce((a, x) => a + x.irrigation_mm, 0);
+  const cum = sc.weekly.slice(0, wk).reduce((a, x) => a + x.irrigation_mm, 0), saved = baseCum - cum, strat = state.strategies[state.strategies.length - 1];
+  let t = `Week ${wk} (${stage}): rainfall is ${rainPct} and soil moisture is ${trend} at ${pct(w.soil_moisture_0_1)} of capacity. `;
+  if (strat === 'rainfed') t += 'No irrigation is applied. ';
+  else if (w.irrigation_mm > 1) t += `${labelOf(strat)} irrigation adds ${fmt(w.irrigation_mm, 0)} mm this week` + (strat === 'optimized' && stage.startsWith('flowering') ? ' to protect the most water-sensitive stage' : '') + '. ';
+  else t += `${labelOf(strat)} schedule applies no irrigation this week. `;
+  if (strat !== 'baseline' && baseCum > 0) t += saved >= 0 ? `So far it has used ${fmt(saved, 0)} mm less water than the farmer baseline.` : `So far it has used ${fmt(-saved, 0)} mm more water than the farmer baseline.`;
+  t += ` Water stress is ${pct(w.stress_0_1)}; drought risk ${pct(w.drought_p)}.`;
+  return t;
+}
+
+// ----- mini charts
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawChart(canvasId, series, kind, color, ymax) {
+  const c = $(canvasId), dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth, h = c.clientHeight; if (!w) return;
+  c.width = w * dpr; c.height = h * dpr; const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const n = series.length, l = 4, r = 4, t = 6, b = 14, pw = w - l - r, ph = h - t - b, top = ymax || Math.max(...series, 1e-6) * 1.1;
+  g.strokeStyle = cssVar('--grid'); g.lineWidth = 1; g.beginPath(); for (let i = 0; i <= 2; i++) { const y = t + ph * i / 2; g.moveTo(l, y); g.lineTo(w - r, y); } g.stroke();
+  g.fillStyle = cssVar('--muted'); g.font = '10px system-ui'; g.fillText(top.toFixed(top < 2 ? 1 : 0), l, t + 8); for (const k of [1, 4, 8, 12, 16]) g.fillText(k, l + pw * (k - 0.5) / n - 3, h - 2);
+  const x = (i) => l + pw * (i + 0.5) / n, y = (v) => t + ph * (1 - clamp(v / top));
+  g.strokeStyle = color; g.fillStyle = color; g.lineWidth = 2;
+  if (kind === 'bars') { series.forEach((v, i) => { const bw = pw / n * 0.62; g.fillRect(x(i) - bw / 2, y(v), bw, t + ph - y(v)); }); }
+  else { g.beginPath(); series.forEach((v, i) => (i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)))); g.stroke(); }
+  const cx = l + pw * (clamp(state.wpos, 1, n) - 0.5) / n; g.strokeStyle = cssVar('--ink'); g.lineWidth = 1; g.beginPath(); g.moveTo(cx, t); g.lineTo(cx, t + ph); g.stroke();
+}
+function drawCharts() {
+  if (!state.scs) return; const sc = state.scs[state.scs.length - 1];
+  drawChart('chart-rain', sc.weekly.map((w) => w.rain_mm), 'bars', cssVar('--s1'));
+  drawChart('chart-soil', sc.weekly.map((w) => w.soil_moisture_0_1), 'line', cssVar('--s3'), 1);
+  drawChart('chart-ndvi', sc.weekly.map((w) => w.ndvi), 'line', cssVar('--s4'), 1);
+  const w = weekState(sc, state.wpos);
+  $('ct-rain').textContent = `${fmt(w.rain_mm, 0)} mm`; $('ct-soil').textContent = pct(w.soil_moisture_0_1); $('ct-ndvi').textContent = fmt(w.ndvi, 2);
+}
+
+// ===================================================================================== wiring
+function setCompare(on) {
+  state.compare = on; $('btn-compare').setAttribute('aria-pressed', String(on)); $('view-b').hidden = !on;
+  for (const r of document.querySelectorAll('input[name=strategy]')) r.disabled = on;
+  if (on && !viewB) { viewB = new View($('view-b'), 'B'); }
+  requestAnimationFrame(() => { viewA.resize(); viewB && viewB.resize(); });
+  if (on) { viewB.setDistrict(districtOf(), state.crop); }
+  refresh();
+}
+function wire() {
+  $('sel-district').addEventListener('change', (e) => { state.district = e.target.value; fillCrops(); refresh(); });
+  $('sel-crop').addEventListener('change', (e) => { state.crop = e.target.value; refresh(); });
+  $('rng-rain').addEventListener('input', (e) => { state.rain = Number(e.target.value); $('val-rain').textContent = state.rain.toFixed(2) + 'x'; refresh(false); });
+  $('rng-temp').addEventListener('input', (e) => { state.temp = Number(e.target.value); $('val-temp').textContent = (state.temp >= 0 ? '+' : '') + state.temp.toFixed(1) + ' C'; refresh(false); });
+  for (const r of document.querySelectorAll('input[name=strategy]')) r.addEventListener('change', (e) => { state.strategy = e.target.value; refresh(false); });
+  $('rng-week').addEventListener('input', (e) => { state.wpos = Number(e.target.value); setWeek(state.wpos, false); });
+  $('btn-play').addEventListener('click', togglePlay);
+  $('sel-speed').addEventListener('change', (e) => { state.speed = Number(e.target.value); });
+  $('btn-compare').addEventListener('click', () => setCompare(!state.compare));
+  $('btn-palette').addEventListener('click', (e) => { paletteName = paletteName === 'standard' ? 'safe' : 'standard'; e.currentTarget.setAttribute('aria-pressed', String(paletteName === 'safe')); viewA.dirty = true; if (viewB) viewB.dirty = true; });
+  $('btn-shot').addEventListener('click', screenshot);
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName) && e.target.type !== 'range' && e.key !== ' ') return;
+    if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); setWeek(Math.min(DATA.meta.weeks, Math.floor(state.wpos) + 1)); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); setWeek(Math.max(1, Math.ceil(state.wpos) - 1)); }
+    else if (e.key === 'c' || e.key === 'C') setCompare(!state.compare);
+    else if (e.key === 's' || e.key === 'S') screenshot();
+  });
+  window.addEventListener('resize', () => { viewA.resize(); viewB && viewB.resize(); drawCharts(); });
+  document.addEventListener('visibilitychange', () => { hidden = document.hidden; });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawCharts);
+}
+function setWeek(w, updateSlider = true) {
+  state.wpos = clamp(w, 1, DATA.meta.weeks); if (updateSlider) $('rng-week').value = state.wpos;
+  viewA.setWeek(state.wpos); viewB && viewB.setWeek(state.wpos); updateHud(); drawCharts();
+}
+function togglePlay() { state.playing = !state.playing; $('btn-play').textContent = state.playing ? 'Pause' : 'Play'; }
+function screenshot() {
+  const views = state.compare && viewB ? [viewA, viewB] : [viewA]; for (const v of views) { v.frame(0, false); }
+  const w = views.reduce((a, v) => a + v.canvas.width, 0), h = Math.max(...views.map((v) => v.canvas.height)), out = document.createElement('canvas'); out.width = w; out.height = h;
+  const g = out.getContext('2d'); let x = 0; for (const v of views) { g.drawImage(v.canvas, x, 0); x += v.canvas.width; }
+  out.toBlob((blob) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `simulator_${state.district}_${state.crop}_week${Math.round(state.wpos)}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+}
+
+// ===================================================================================== data loading
+async function getData() {
+  const embedded = document.getElementById('sim-data');
+  if (embedded) return JSON.parse(embedded.textContent);
+  try { const r = await fetch('sim_data.json'); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
+  catch (e) { return await askForFile(); }
+}
+function askForFile() {
+  return new Promise((resolve) => {
+    const dz = $('dropzone'); dz.style.display = 'flex';
+    const take = async (file) => { try { const data = JSON.parse(await file.text()); dz.style.display = 'none'; resolve(data); } catch (err) { showError('That file is not valid JSON: ' + err.message); } };
+    $('file-input').addEventListener('change', (e) => e.target.files[0] && take(e.target.files[0]));
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) take(f); });
+  });
+}
+
+let hidden = false, last = performance.now(), fpsAcc = 0, fpsN = 0;
+window.__sim = { frames: 0, ready: false, state, get views() { return [viewA, viewB]; } };
+
+function loop(now) {
+  requestAnimationFrame(loop);
+  if (hidden) { last = now; return; }
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  if (state.playing && !reducedMotion) { setWeek(state.wpos + dt * state.speed / 1.2 > DATA.meta.weeks ? 1 : state.wpos + dt * state.speed / 1.2); }
+  viewA.frame(dt, state.playing); if (state.compare && viewB) viewB.frame(dt, state.playing);
+  window.__sim.frames++;
+  fpsAcc += dt; fpsN++; if (fpsAcc > 1) { const fps = fpsN / fpsAcc; window.__sim.fps = fps; viewA.adapt(fps); viewB && viewB.adapt(fps); fpsAcc = 0; fpsN = 0; }
+}
+
+async function main() {
+  DATA = await getData(); GRID = DATA.meta.grid;
+  $('chip-data').textContent = `${DATA.districts.length} districts, ${Object.keys(DATA.scenarios).length} scenarios, built ${DATA.meta.generated_at.slice(0, 10)} (${DATA.meta.git_commit})`;
+  const syn = DATA.meta.is_synthetic_inputs, flags = [];
+  if (syn.weather) flags.push('synthetic weather'); if (syn.crop_labels) flags.push('synthetic yields'); if (syn.satellite_dataset) flags.push('satellite dataset is synthetic (not used by the served models; greenness here is a proxy)');
+  if (flags.length) { $('chip-synthetic').hidden = false; $('chip-synthetic').textContent = 'Data note: ' + flags.join('; '); }
+  $('foot-disclaimer').textContent = DATA.meta.disclaimer;
+  $('foot-meta').textContent = Object.entries(DATA.meta.model_versions).map(([k, v]) => `${k}: ${v}`).join(' | ');
+  populate();
+  viewA = new View($('view-a'), 'A'); wire();
+  const params = new URLSearchParams(location.search);
+  if (params.get('district') && DATA.districts.some((d) => d.id === params.get('district'))) { state.district = params.get('district'); $('sel-district').value = state.district; fillCrops(); }
+  if (params.get('crop') && districtOf().crops.includes(params.get('crop'))) { state.crop = params.get('crop'); $('sel-crop').value = state.crop; }
+  viewA.setDistrict(districtOf(), state.crop);
+  refresh(false); viewA.resize();
+  window.__sim.ready = true; requestAnimationFrame(loop);
+}
+main().catch((e) => showError('Could not start the simulator: ' + e.message));
+</script>
+</body>
+</html>
