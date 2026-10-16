@@ -60,6 +60,7 @@ clearly documented, working implementation of the agreed interface, not a stub t
 - Tests must not need network or credentials (use tiny fixtures in `tests/fixtures/`); DB tests auto-skip
   when the database is unreachable.
 - Large/regenerable outputs (`data/`, `models/`) are git-ignored; `.env` is never committed.
+- Commits and pull requests carry the owner as sole author: no `Co-Authored-By` trailers and no tool or assistant attribution (owner preference; it would show up as a GitHub contributor).
 
 ## HARD RULES
 

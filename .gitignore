@@ -27,3 +27,6 @@ reports/figures/*.html
 simulator/sim_data.json
 simulator/index_embedded.html
 dashboards/static/simulator.html
+
+# Local assistant settings and memory: never part of the repository
+.claude/
