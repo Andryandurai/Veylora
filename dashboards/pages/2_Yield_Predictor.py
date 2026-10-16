@@ -187,12 +187,27 @@ def main() -> None:
             st.warning(
                 "The ranking changes when the pessimistic end of each interval is used: the best expected crop is not the safest."
             )
-        st.caption(
-            "Prices and costs in config/economics.yaml are approximate and must be verified before real decisions."
-        )
+        st.caption("Prices and costs are approximate and must be verified before real decisions.")
 
     with st.expander("Forecast details"):
-        details = pd.DataFrame([{k: v for k, v in forecast.items() if k != "overrides"}])
+        details = pd.DataFrame(
+            {
+                "Item": [
+                    "Forecast yield",
+                    "80% interval",
+                    "Reference weather year",
+                    "Forecast issued",
+                    "Method",
+                ],
+                "Value": [
+                    f"{forecast['yield_t_ha']:.2f} t/ha",
+                    f"{forecast['lo']:.2f} to {forecast['hi']:.2f} t/ha",
+                    str(forecast["reference_year"]),
+                    f"{forecast['lead_days']} days into the season",
+                    "Gradient-boosted trees on weather and yield history, with a conformal interval",
+                ],
+            }
+        )
         st.dataframe(details, hide_index=True, width="stretch")
 
 

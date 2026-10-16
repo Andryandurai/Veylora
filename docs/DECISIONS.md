@@ -384,3 +384,13 @@ design, its stylesheet, the palette switch (`CR_THEME`) and the launcher `dashbo
 they remain in git history at commit `da910b4` if a dark theme is wanted later. `theme.py` now holds a single palette; the simulator's own dark
 colours (used only by a browser in dark mode) were retuned from the almanac charcoal to a dark green family so the standalone page still matches the site.
 
+
+### D-035: No developer-facing text on the website
+
+Visitors no longer see commands, file paths, repository links, internal table names, flags or build ids. Missing-data and error messages are plain sentences (the
+operator hint goes to the log); the synthetic-data note and the Methodology table use reader names for the tables (`dashboards/components/labels.py`); the
+"Forecast details" table is a readable Item/Value list instead of a raw record; the simulator no longer shows its build date or commit, the model descriptions
+carry no timestamps or commit ids (and the exporter no longer writes them), and its fallback text and early-warning card use plain wording. The static site has no
+GitHub or source links and no command line. A browser scan of every page (all Methodology tabs), the simulator frame and the static site for commands, file names,
+paths, internal ids, hashes and timestamps finds nothing; Streamlit's menu, Deploy button and footer are not in the page. Technical terms that describe the
+method (XGBoost, SHAP, FAO-56) stay on the Methodology page: they document how the numbers were made.

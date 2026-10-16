@@ -8,13 +8,13 @@
 * Developed a drought early-warning model (XGBoost with isotonic calibration, time-based split) that reaches PR-AUC 0.38 against 0.09 for climatology on held-out 2020-24 data (F1 0.50); showed with rolling-origin evaluation that an LSTM heatwave model had no skill over climatology and served the baseline instead.
 * Evaluated crop-yield models with leakage-safe features, cluster-bootstrap confidence intervals and conformal 80% intervals (80% test coverage); reported honestly that they match but do not clearly beat district-trend and prior-mean baselines (relative RMSE 40.4% vs 40.9%).
 * Formulated a weekly irrigation LP on an FAO-56 water balance that cuts modelled water use by 61% against a 600 mm baseline (slowest case 0.12 s), with the yield trade-off (98% of baseline) reported alongside.
-* Engineered for safety and reproducibility: 355 automated tests, browser tests of the dashboards and simulator, signed WhatsApp webhook, dry-run-by-default messaging with rate limits and opt-out, seeded runs, Docker image, one-command pipeline.
+* Engineered for safety and reproducibility: 352 automated tests, browser tests of the dashboards and simulator, signed WhatsApp webhook, dry-run-by-default messaging with rate limits and opt-out, seeded runs, Docker image, one-command pipeline.
 
 ## Longer (for a project page)
 
 * Data engineering: idempotent ETL with provenance flags (`is_synthetic`), data-quality gate (all data-quality checks passed), warehouse with leakage-safe materialized views.
 * Statistics: two-way fixed-effects regression, Mann-Kendall trends, SPI drought index, calibrated probabilities with reliability checks, paired bootstrap against baselines.
-* Front ends: Streamlit app with 7 addresses (warm loads 1.1-1.9 s in headless Chromium), self-contained Three.js scene.
+* Front ends: Streamlit app with 7 addresses (warm loads 2.0-2.7 s in headless Chromium), self-contained Three.js scene.
 
 ## Not claimable (MISSING)
 

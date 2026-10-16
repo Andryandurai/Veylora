@@ -71,7 +71,7 @@ def main() -> None:
             )
         else:
             st.caption(
-                f"Heatwave probability source: {forecast['heatwave_source']} (the LSTM is not served unless it beats climatology; see Methodology)."
+                f"Heatwave probability source: {forecast['heatwave_source']} (the neural-network model is used only if it beats climatology; see Methodology)."
             )
         if not forecast["drought_relevant"]:
             st.caption(

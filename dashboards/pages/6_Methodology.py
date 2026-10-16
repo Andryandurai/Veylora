@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from analytics.prescriptive.wording import paired_phrase
-from dashboards.components import data, guards, layout
+from dashboards.components import guards, labels, layout
 
 
 def data_section() -> None:
@@ -28,7 +28,7 @@ def data_section() -> None:
         ("Crop yield, area, production", "ICRISAT DLD district database", "real", "2000-2017"),
         (
             "NDVI, soil moisture (satellite)",
-            "Synthetic placeholder: Earth Engine was not authenticated",
+            "Placeholder values, not real satellite observations",
             "SYNTHETIC",
             "2000-2017",
         ),
@@ -43,22 +43,21 @@ def data_section() -> None:
         verdict = (
             "all checks passed"
             if quality.get("passed")
-            else f"failed checks: {quality.get('failed_checks')}"
+            else f"{len(quality.get('failed_checks') or [])} check(s) failed"
         )
         st.markdown(
-            f"Data-quality report: {verdict}. Rows: "
-            + ", ".join(f"{name} {n:,}" for name, n in counts.items())
+            f"Data-quality report: {verdict}. Records: "
+            + ", ".join(f"{labels.table_label(name)} {n:,}" for name, n in counts.items())
             + f". Crop-to-district join coverage {quality.get('crop_join_coverage', 0):.0%}."
         )
         for table, share in quality.get("synthetic_share", {}).items():
             if share > 0:
                 st.warning(
-                    f"`{table}` is {share:.0%} synthetic (flagged `is_synthetic` in the warehouse). It is excluded from the served models."
+                    f"The {labels.table_label(table)} are {share:.0%} synthetic (placeholder values, marked as such in the data). They are excluded from the served models."
                 )
     st.markdown(
         "**District units.** ICRISAT reports yields for the 1966 parent districts, so the 114 current district polygons (geoBoundaries) were regrouped "
-        "into 51 yield-reporting units by name anchors, nearest anchor and a small override table (`config/district_name_map.csv`, `config/unit_overrides.csv`). "
-        f"Data source for the warehouse-backed tables in this session: **{data.data_source()}**."
+        "into 51 yield-reporting units by name anchors, nearest anchor and a small table of manual overrides."
     )
 
 
@@ -67,7 +66,7 @@ def yield_section() -> None:
     report = guards.read_report("yield_models.json")
     metrics_path = guards.ROOT / "reports" / "yield_metrics.csv"
     if not report or not metrics_path.exists():
-        st.info("Run `make train-yield` to produce the yield results.")
+        st.info("The yield results are not available right now.")
         return
     metrics = pd.read_csv(metrics_path)
     test = metrics[
@@ -134,7 +133,7 @@ def extreme_section() -> None:
     st.header("Early warning")
     report = guards.read_report("extreme_weather.json")
     if not report:
-        st.info("Run `make train-extreme` to produce the early-warning results.")
+        st.info("The early-warning results are not available right now.")
         return
     heat, drought = report["heatwave"], report["drought"]
     st.markdown(
@@ -188,7 +187,7 @@ def extreme_section() -> None:
     )
     st.dataframe(table.round(3), hide_index=True, width="stretch")
     st.caption(
-        "A drought signal for a month that is normally almost dry is shown but does not set the overall risk level (`early_warning.drought_min_month_rain_mm`)."
+        "A drought signal for a month that is normally almost dry is shown but does not set the overall risk level."
     )
     figure = guards.ROOT / "reports" / "figures" / "extreme_reliability.png"
     if figure.exists():
@@ -203,7 +202,7 @@ def prescriptive_section() -> None:
     st.header("Irrigation optimization")
     report = guards.read_report("prescriptive_results.json")
     if not report:
-        st.info("Run `make prescriptive-report` to produce the optimization results.")
+        st.info("The irrigation results are not available right now.")
         return
     st.markdown(
         "Daily FAO-56 soil-water balance (Hargreaves ET0, crop coefficients, stress factor Ks; paddy rice as a ponded field with seepage, approximate parameters) with an FAO-33 yield response, and a weekly linear programme (PuLP/CBC) that allocates a seasonal water budget. "
@@ -259,9 +258,9 @@ def limits_section() -> None:
     st.markdown(
         "- Yields are observed to 2017 only, so test years 2015-17 are the latest honest hold-out; nothing here is validated on recent seasons.\n"
         "- Forecast skill over simple baselines is small or unproven (see above). Use the intervals, not just the point forecast.\n"
-        "- The satellite table is synthetic; real NDVI and soil moisture need Earth Engine authentication (`earthengine authenticate`).\n"
-        "- Crop and price parameters (`config/crop_params.yaml`, `config/economics.yaml`) are approximate and not verified against current sources.\n"
-        "- Advisory translations (Hindi, Tamil, Telugu) are drafts and need native-speaker and agronomist review; SMS sending is a dry run by default.\n"
+        "- The satellite data (vegetation and soil moisture) is synthetic placeholder data, not real observations.\n"
+        "- Crop and price parameters are approximate and not verified against current sources.\n"
+        "- Advisory translations (Hindi, Tamil, Telugu) are drafts and need native-speaker and agronomist review; this site does not send messages.\n"
         "- The 3D simulator was tested with software rendering only; its frame rate on real hardware is not measured.\n"
         "- District units are 1966 parent districts; results are not village-level."
     )
@@ -273,7 +272,7 @@ def main() -> None:
         needs=("processed data",),
         crop=False,
         label="Evidence",
-        intro="How the numbers on the other pages were produced, and how far to trust them. Everything below is read from the files in `reports/`.",
+        intro="How the numbers on the other pages were produced, and how far to trust them. Everything below comes from the project's own evaluation results.",
     )
     tabs = st.tabs(["Data", "Yield", "Early warning", "Irrigation", "Limitations"])
     for tab, section in zip(

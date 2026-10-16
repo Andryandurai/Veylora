@@ -62,7 +62,7 @@ def test_page_runs_without_exception(page):
 
 def test_every_page_warns_about_synthetic_satellite_data():
     for page in ("home", "weather", "yield", "map", "advisory", "methodology"):
-        assert "Synthetic data in the pipeline" in text_of(run(page)), page
+        assert "Synthetic data in use" in text_of(run(page)), page
 
 
 def test_home_lists_scope_and_reads_measured_results():
@@ -165,7 +165,8 @@ def test_missing_artifacts_give_instructions_not_a_stack_trace(monkeypatch, tmp_
         at = run(page)
         assert not at.exception, page
         assert any("not been built yet" in e.value for e in at.error), page
-        assert any("make" in m.value for m in at.markdown), page
+        assert not any("make " in m.value or "README" in m.value for m in at.markdown), page
+        assert not any("make " in e.value for e in at.error), page
 
 
 def test_simulator_page_embeds_the_static_file_with_preselected_district(tmp_path):

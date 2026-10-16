@@ -365,9 +365,6 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
     crops_df = pd.read_parquet(get_path("data_processed") / "crops_annual.parquet")
     satellite = pd.read_parquet(get_path("data_processed") / "satellite_16d.parquet")
     quality = json.loads((get_path("reports") / "data_quality.json").read_text(encoding="utf-8"))
-    yield_meta = json.loads(
-        (get_path("reports") / "yield_models.json").read_text(encoding="utf-8")
-    )["meta"]
     extreme_meta = json.loads(
         (get_path("reports") / "extreme_weather.json").read_text(encoding="utf-8")
     )
@@ -466,11 +463,11 @@ def build(n_districts: int = 6, districts: list[str] | None = None) -> dict[str,
                 "satellite_used_by_served_models": False,
             },
             "model_versions": {
-                "yield": f"xgboost weather-only, temperature-monotone (trained {yield_meta['generated_at']}, commit {yield_meta['git_commit']})",
-                "drought": f"xgboost {extreme_meta['drought']['served_feature_set']} features, calibrated ({extreme_meta['meta']['generated_at']})",
-                "heatwave_early_warning": f"served probability: {heat_served}",
+                "yield": "gradient-boosted trees on weather only, temperature-monotone",
+                "drought": f"gradient-boosted trees on {extreme_meta['drought']['served_feature_set']} features, calibrated",
+                "heatwave_early_warning": f"probability from {heat_served}",
                 "water_balance": "FAO-56 daily root-zone balance, Hargreaves-Samani ET0",
-                "irrigation": "weekly LP (PuLP/CBC), end-of-week stress basis",
+                "irrigation": "weekly linear programme, end-of-week stress basis",
             },
             "weeks": glob.n_weeks,
             "risk_levels": settings["risk_levels"],

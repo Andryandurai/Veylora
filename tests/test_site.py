@@ -29,6 +29,10 @@ def test_site_is_named_veylora_and_has_no_placeholders(site):
     assert "<title>Veylora" in page and "<h1>Veylora</h1>" in page
     assert "ClimateResilience" not in page
     assert not re.search(r"TODO|lorem|MISSING", page, flags=re.I)
+    # nothing aimed at developers: no commands, repository links, file paths or internal table names
+    assert not re.search(
+        r"github|make [a-z]|\.yaml|\.json|reports/|satellite_16d|<code>", page, flags=re.I
+    )
     assert (site / "styles.css").is_file()
 
 
@@ -52,19 +56,20 @@ def test_headline_numbers_are_computed_from_the_result_files(site):
 
 def test_dashboards_link_only_when_a_url_is_given(site, tmp_path):
     assert "Open the dashboards" not in _page(site)
-    assert "not hosted on this page" in _page(site)
+    assert "not available from this page yet" in _page(site)
     out = tmp_path / "with-link"
     make_site.build(out, dashboards_url="https://example.invalid/app", copy_simulator=False)
     page = _page(out)
     assert 'href="https://example.invalid/app"' in page and "Open the dashboards" in page
-    assert "not hosted on this page" not in page
+    assert "not available from this page yet" not in page
 
 
 def test_synthetic_data_note_follows_the_data_quality_report(site):
     quality = json.loads((ROOT / "reports" / "data_quality.json").read_text(encoding="utf-8"))
     shares = [n for n, s in quality["synthetic_share"].items() if s > 0]
     page = _page(site)
-    assert ("Synthetic data in the pipeline" in page) == bool(shares)
+    assert ("Synthetic data in use" in page) == bool(shares)
+    assert "satellite_16d" not in page
 
 
 def test_missing_results_show_a_visible_marker(monkeypatch):

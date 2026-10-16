@@ -233,7 +233,7 @@
   </footer>
 </div>
 <div id="banner" role="alert"></div>
-<div id="dropzone"><div class="box"><h2 style="margin-top:0">Load the simulation data</h2><p>Opening this file directly from disk blocks automatic loading of <code>sim_data.json</code>. Drop the file here, or choose it:</p><input type="file" id="file-input" accept=".json,application/json" aria-label="Choose sim_data.json"></div></div>
+<div id="dropzone"><div class="box"><h2 style="margin-top:0">Load the simulation data</h2><p>Your browser does not let this page load its data when it is opened straight from a file. Drop the data file here, or choose it:</p><input type="file" id="file-input" accept=".json,application/json" aria-label="Choose the data file"></div></div>
 
 <script type="module">
 // ===================================================================================== helpers
@@ -243,6 +243,7 @@ const smooth = (t) => { t = clamp(t); return t * t * (3 - 2 * t); };
 const TAU = Math.PI * 2;
 const $ = (id) => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MODEL_LABELS = { yield: 'Yield', drought: 'Drought warning', heatwave_early_warning: 'Heatwave warning', water_balance: 'Water balance', irrigation: 'Irrigation' };
 { const theme = new URLSearchParams(location.search).get('theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; }   // the dashboards embed the page in light
 const FIELDS = ['rain_mm', 'tmax_c', 'soil_moisture_0_1', 'ndvi', 'etc_mm', 'eta_mm', 'irrigation_mm', 'excess_mm', 'stress_0_1', 'pond_mm', 'seepage_mm', 'drought_p', 'heat_p'];
 const STAGE_NAMES = ['establishment', 'vegetative growth', 'flowering / mid-season', 'ripening'];
@@ -923,7 +924,7 @@ function updateHud() {
   drawStageBars(sc, wk);
   $('explain').textContent = explain(sc, d);
   const ew = d.early_warning[info.season];
-  $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (hazard: ${ew.hazard}, lead ${ew.lead_days} d)<br>Heatwave ${pct(ew.heatwave_p)} (${ew.heatwave_source}), drought ${pct(ew.drought_p)}.<br><span class="small">Phase 5 early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
+  $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (main hazard: ${String(ew.hazard).replace(/_/g, ' ')}, ${ew.lead_days}-day lead)<br>Heatwave ${pct(ew.heatwave_p)} (${String(ew.heatwave_source).replace(/_/g, ' ')}), drought ${pct(ew.drought_p)}.<br><span class="small">Early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
 }
 function drawStageBars(sc, wk) {
   const box = $('stage-bars'), now = stageOfWeek(state.crop, wk), rel = sc.stage_rel;
@@ -1086,13 +1087,13 @@ function loop(now) {
 
 async function main() {
   DATA = await getData(); GRID = DATA.meta.grid;
-  $('chip-data').textContent = `${DATA.districts.length} districts, ${Object.keys(DATA.scenarios).length} scenarios, built ${DATA.meta.generated_at.slice(0, 10)} (${DATA.meta.git_commit})`;
+  $('chip-data').textContent = `${DATA.districts.length} districts, ${Object.keys(DATA.scenarios).length} scenarios`;
   const syn = DATA.meta.is_synthetic_inputs, flags = [];
   if (syn.weather) flags.push('synthetic weather'); if (syn.crop_labels) flags.push('synthetic yields'); if (syn.satellite_dataset) flags.push('satellite dataset is synthetic (not used by the served models; greenness here is a proxy)');
   if (flags.length) { $('chip-synthetic').hidden = false; $('chip-synthetic').textContent = 'Data note: ' + flags.join('; '); }
   $('foot-disclaimer').textContent = DATA.meta.disclaimer;
   $('foot-attribution').textContent = (DATA.meta.attribution || []).join(' ');
-  $('foot-meta').textContent = Object.entries(DATA.meta.model_versions).map(([k, v]) => `${k}: ${v}`).join(' | ');
+  $('foot-meta').textContent = Object.entries(DATA.meta.model_versions).map(([k, v]) => `${MODEL_LABELS[k] || k}: ${String(v).replace(/\s*\([^)]*\)/g, '')}`).join(' | ');
   populate();
   const params = new URLSearchParams(location.search);
   if (params.get('quality') && ['auto', 'high', 'low'].includes(params.get('quality'))) { state.quality = params.get('quality'); $('sel-quality').value = state.quality; }

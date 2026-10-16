@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -10,7 +11,9 @@ from typing import Any
 import streamlit as st
 
 from config import bundle
-from dashboards.components import ROOT, ui
+from dashboards.components import ROOT, labels, ui
+
+LOG = logging.getLogger(__name__)
 
 REQUIRED = {
     "processed data": (
@@ -45,13 +48,15 @@ def missing(groups: list[str]) -> list[tuple[str, str]]:
 
 
 def require(*groups: str) -> None:
-    """Stop the page with a clear instruction if required artefacts are absent."""
+    """Stop the page with a plain message if required artefacts are absent (the fix for the operator goes to the log)."""
     problems = missing(list(groups))
     if problems:
-        st.error("This page needs data or models that have not been built yet.")
         for group, hint in problems:
-            st.markdown(f"- **{group}**: {hint}")
-        st.info("See the README quickstart, or run `make pipeline` to build everything.")
+            LOG.warning("missing %s: %s", group, hint)
+        st.error(
+            "This page needs data or models that have not been built yet. "
+            "It is not available right now; please try again later."
+        )
         st.stop()
 
 
@@ -62,7 +67,8 @@ def run_guarded(body: Callable[[], Any]) -> None:
     except st.errors.StreamlitAPIException:
         raise
     except FileNotFoundError as exc:
-        st.error(f"A required file is missing: {exc}. Run the pipeline steps listed in the README.")
+        LOG.error("required file missing: %s", exc)
+        st.error("Something this page needs is not available right now. Please try again later.")
     except ValueError as exc:
         st.warning(f"This combination cannot be computed: {exc}")
     except Exception as exc:  # models/artefacts built by an older version, DB or library problems
@@ -85,10 +91,10 @@ def synthetic_banner() -> None:
     share = json.loads(path.read_text(encoding="utf-8")).get("synthetic_share", {})
     synthetic = {t: s for t, s in share.items() if s > 0}
     if synthetic:
-        parts = ", ".join(f"{t} ({s:.0%})" for t, s in synthetic.items())
+        parts = ", ".join(f"{labels.table_label(t)} ({s:.0%})" for t, s in synthetic.items())
         ui.note(
-            f"<b>Synthetic data in the pipeline: {parts}.</b> The forecasts shown use observed weather and "
-            "ICRISAT yields only; the synthetic satellite table appears only in an experimental comparison (see Methodology)."
+            f"<b>Synthetic data in use: {parts}.</b> The forecasts shown use observed weather and "
+            "ICRISAT yields only; the synthetic satellite data appears only in an experimental comparison (see Methodology)."
         )
 
 

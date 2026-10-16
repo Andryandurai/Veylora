@@ -21,7 +21,7 @@ def main() -> None:
         intro="A field-scale scene of the 16-week season. Inside the scene, move the rainfall, temperature and week sliders and compare irrigation strategies; the district and crop follow the sidebar where the simulator has them.",
     )
     if assets.ensure_simulator() is None:
-        st.error("The simulator file is missing: run `make export-sim embed-sim`.")
+        st.error("The simulator is not available right now. Please try again later.")
         return
     centroids, clusters = data.centroids_and_clusters()
     choice = assets.simulator_choice(district, crop, centroids, clusters)

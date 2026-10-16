@@ -29,7 +29,7 @@ from pathlib import Path
 from PIL import Image
 
 from config import load_settings
-from dashboards.components import assets, theme
+from dashboards.components import assets, labels, theme
 
 LOG = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +37,6 @@ WEB = ROOT / "web"
 REPORTS = ROOT / "reports"
 SIMULATOR_SOURCE = ROOT / "data" / "sample" / "simulator" / "index_embedded.html"
 PREVIEW_SOURCE = REPORTS / "figures" / "sim_week9.png"
-REPO_URL = "https://github.com/Andryandurai/Veylora"
 SITE_NAME = "Veylora"
 MISSING = '<span class="missing">MISSING</span>'
 BASELINES = ("naive_last_year", "district_trend", "prior_mean_3y")
@@ -132,16 +131,16 @@ def synthetic_note() -> str:
     """The data caveat (empty when no table contains synthetic rows)."""
     quality = _read_json("data_quality.json") or {}
     tables = [
-        f"{name} ({share:.0%})"
+        f"{labels.table_label(name)} ({share:.0%})"
         for name, share in quality.get("synthetic_share", {}).items()
         if share > 0
     ]
     if not tables:
         return ""
     return (
-        '<p class="note"><span class="tag">Note</span><b>Synthetic data in the pipeline: '
+        '<p class="note"><span class="tag">Note</span><b>Synthetic data in use: '
         f"{html.escape(', '.join(tables))}.</b> The forecasts use observed weather and ICRISAT yields only; "
-        "the synthetic satellite table appears only in an experimental comparison.</p>"
+        "the synthetic satellite data appears only in an experimental comparison.</p>"
     )
 
 
@@ -177,7 +176,6 @@ def _facts() -> list[tuple[str, str]]:
 def render(
     tokens: dict[str, str],
     dashboards_url: str | None,
-    repo_url: str,
     has_logo: bool,
     has_preview: bool,
 ) -> str:
@@ -215,8 +213,7 @@ def render(
     aside = (
         ""
         if dashboards_url
-        else '<p class="aside">The forecast, risk-map and advisory dashboards are a Streamlit app and are not hosted on '
-        "this page; run them with <code>make dashboards</code> (see the repository).</p>"
+        else '<p class="aside">The forecast, risk-map and advisory dashboards are not available from this page yet.</p>'
     )
     preview = (
         '<figure class="preview"><img src="preview.jpg" width="1400" height="840" loading="lazy" '
@@ -254,7 +251,6 @@ def render(
     {dashboards_nav}
     <a href="#results">Results</a>
     <a href="#limits">Limits</a>
-    <a href="{html.escape(repo_url)}" rel="noopener">GitHub</a>
   </nav>
 </div></header>
 <main>
@@ -267,7 +263,6 @@ def render(
     <div class="actions">
       <a class="btn primary" href="simulator">Open the 3D simulator</a>
       {dashboards_button}
-      <a class="btn" href="{html.escape(repo_url)}" rel="noopener">Source on GitHub</a>
     </div>
     {aside}
     {synthetic_note()}
@@ -312,8 +307,7 @@ def render(
 </main>
 <footer class="site"><div class="wrap">
   <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js.</p>
-  <p>Veylora is decision support with uncertainty, not a substitute for local agronomic advice.
-  <a href="{html.escape(repo_url)}" rel="noopener">Source code and licence notes</a>.</p>
+  <p>Veylora is decision support with uncertainty, not a substitute for local agronomic advice.</p>
 </div></footer>
 </body>
 </html>
@@ -351,7 +345,6 @@ def _write_preview(out_dir: Path) -> bool:
 def build(
     out_dir: Path = WEB,
     dashboards_url: str | None = None,
-    repo_url: str = REPO_URL,
     copy_simulator: bool = True,
 ) -> Path:
     """Write the site into ``out_dir`` and return the path of ``index.html``.
@@ -359,7 +352,6 @@ def build(
     Args:
         out_dir: output directory (``web/`` by default; ``styles.css`` is copied from there when different).
         dashboards_url: address of the hosted Streamlit dashboards, or None to say they are not hosted here.
-        repo_url: link to the source repository.
         copy_simulator: also copy the bundled simulator page to ``simulator.html`` (Vercel does this at build time).
     """
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -367,7 +359,7 @@ def build(
         shutil.copyfile(WEB / "styles.css", out_dir / "styles.css")
     has_logo = _write_logo_assets(out_dir)
     has_preview = _write_preview(out_dir)
-    page = render(theme.TOKENS, dashboards_url, repo_url, has_logo, has_preview)
+    page = render(theme.TOKENS, dashboards_url, has_logo, has_preview)
     target = out_dir / "index.html"
     target.write_text(page, encoding="utf-8")
     if copy_simulator and SIMULATOR_SOURCE.is_file():
@@ -390,13 +382,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dashboards-url", default=None, help="address of the hosted Streamlit dashboards"
     )
-    parser.add_argument("--repo-url", default=REPO_URL)
     parser.add_argument("--out", type=Path, default=WEB)
     parser.add_argument(
         "--no-simulator", action="store_true", help="do not copy the simulator page"
     )
     args = parser.parse_args(argv)
-    build(args.out, args.dashboards_url, args.repo_url, not args.no_simulator)
+    build(args.out, args.dashboards_url, not args.no_simulator)
     return 0
 
 
