@@ -1,0 +1,88 @@
+/* Veylora landing page. Colour tokens (--paper, --ink, --primary, ...) are written into index.html by
+   scripts/make_site.py from dashboards/components/theme.py, so the page matches the chosen dashboard design. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--primary-dark); text-underline-offset: 3px; }
+a:hover { color: var(--primary); }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+img { max-width: 100%; height: auto; display: block; }
+code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.9em; background: var(--card); border: 1px solid var(--line); padding: 0.05em 0.35em; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 1.5rem; }
+.serif, h1, h2, h3 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight: 500; }
+
+/* ---- header */
+header.site { border-bottom: 1px solid var(--line); }
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1rem; padding-bottom: 1rem; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--ink); }
+.brand img { width: 2.6rem; height: 2.6rem; border-radius: 6px; object-fit: cover; }
+.brand-name { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 1.55rem; letter-spacing: -0.01em; }
+nav.site { display: flex; gap: 1.4rem; font-size: 0.93rem; flex-wrap: wrap; }
+nav.site a { color: var(--ink-2); text-decoration: none; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+nav.site a:hover { color: var(--ink); border-bottom-color: var(--primary); }
+
+/* ---- hero */
+.hero { padding: 4.2rem 0 3rem; border-bottom: 1px solid var(--rule); }
+.eyebrow { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--primary-dark); font-weight: 700; margin: 0 0 1rem; display: flex; align-items: center; gap: 0.7rem; }
+.eyebrow::before { content: ""; width: 1.6rem; height: 1px; background: currentColor; }
+.hero h1 { font-size: clamp(3rem, 8vw, 5.4rem); line-height: 1; letter-spacing: -0.035em; margin: 0 0 1.2rem; }
+.lead { font-size: 1.2rem; color: var(--ink-2); max-width: 40rem; margin: 0 0 2rem; }
+.actions { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+.btn { display: inline-block; padding: 0.75rem 1.3rem; border: 1px solid var(--rule); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.95rem; border-radius: 4px; }
+.btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.btn.primary:hover { filter: brightness(1.08); color: var(--on-primary); }
+.aside { color: var(--muted); font-size: 0.9rem; margin: 1.2rem 0 0; max-width: 40rem; }
+
+/* ---- note */
+.note { border-left: 2px solid var(--amber); padding: 0.15rem 0 0.15rem 1rem; margin: 2rem 0 0; color: var(--ink-2); font-size: 0.93rem; max-width: 52rem; }
+.note b { color: var(--ink); }
+.note .tag { display: inline-block; margin-right: 0.7rem; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--amber); }
+
+/* ---- facts */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.2rem; padding: 2rem 0; margin: 0; list-style: none; border-bottom: 1px solid var(--line); }
+.facts li { border-top: 1px solid var(--rule); padding-top: 0.7rem; }
+.facts .v { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 2.1rem; line-height: 1.15; display: block; font-variant-numeric: lining-nums tabular-nums; }
+.facts .l { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+/* ---- sections */
+section { padding: 3rem 0; border-bottom: 1px solid var(--line); }
+section h2 { font-size: 1.9rem; letter-spacing: -0.015em; margin: 0 0 0.4rem; line-height: 1.2; }
+section .sub { color: var(--ink-2); margin: 0 0 1.8rem; max-width: 42rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem 2.2rem; }
+.item { border-top: 1px solid var(--rule); padding-top: 0.9rem; }
+.item .n { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-style: italic; color: var(--primary-dark); font-size: 0.95rem; }
+.item h3 { font-size: 1.35rem; margin: 0.2rem 0 0.4rem; letter-spacing: -0.01em; }
+.item p { margin: 0; color: var(--ink-2); font-size: 0.97rem; }
+
+.preview { margin: 0; }
+.preview img { border: 1px solid var(--rule); width: 100%; }
+.preview figcaption { color: var(--muted); font-size: 0.88rem; margin-top: 0.7rem; }
+
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem 2.2rem; }
+.result { border-top: 1px solid var(--rule); padding-top: 0.8rem; }
+.result .l { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.result .v { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 2.8rem; line-height: 1.15; letter-spacing: -0.02em; display: block; margin: 0.15rem 0 0.4rem; font-variant-numeric: lining-nums tabular-nums; }
+.result p { margin: 0; color: var(--ink-2); font-size: 0.93rem; }
+.missing { color: var(--amber); font-weight: 700; }
+
+ul.limits { margin: 0; padding-left: 1.2rem; color: var(--ink-2); max-width: 48rem; }
+ul.limits li { margin: 0.4rem 0; }
+
+footer.site { padding: 2.2rem 0 3.5rem; color: var(--muted); font-size: 0.86rem; }
+footer.site p { margin: 0.4rem 0; max-width: 54rem; }
+
+@media (max-width: 640px) {
+  .hero { padding: 2.6rem 0 2rem; }
+  nav.site { gap: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veylora: climate risk, yield forecasts and irrigation planning for southern India</title>
+<meta name="description" content="Veylora: district-level early warning for heatwaves and drought, crop-yield forecasts with honest uncertainty, and irrigation plans for Andhra Pradesh, Telangana, Karnataka and Tamil Nadu.">
+<meta property="og:title" content="Veylora">
+<meta property="og:description" content="Veylora: district-level early warning for heatwaves and drought, crop-yield forecasts with honest uncertainty, and irrigation plans for Andhra Pradesh, Telangana, Karnataka and Tamil Nadu.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#f4f1e8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231f6f5a'/%3E%3C/svg%3E">
+<style>:root { --paper: #f4f1e8; --card: #ffffff; --chart: #ffffff; --line: #e2dccb; --rule: #cfc8b3; --ink: #1a2420; --ink-2: #4f5a54; --muted: #5f6b64; --primary: #1f6f5a; --primary-dark: #123d33; --primary-soft: #e3eee8; --heat: #d65a2b; --rain: #2a86c0; --amber: #9a6a12; --amber-soft: #f8efd6; --red: #b3402a; --red-soft: #f8e4de; --on-primary: #ffffff; }</style>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="brand" href="/"><span class="brand-name">Veylora</span></a>
+  <nav class="site" aria-label="Main">
+    <a href="simulator">Simulator</a>
+    
+    <a href="#results">Results</a>
+    <a href="#limits">Limits</a>
+    <a href="https://github.com/Andryandurai/Veylora" rel="noopener">GitHub</a>
+  </nav>
+</div></header>
+<main>
+<div class="wrap">
+  <div class="hero">
+    <p class="eyebrow">Climate resilience, India</p>
+    <h1>Veylora</h1>
+    <p class="lead">District-level early warning for heatwaves and drought, crop-yield forecasts with honest uncertainty,
+    and irrigation plans for Andhra Pradesh, Telangana, Karnataka and Tamil Nadu.</p>
+    <div class="actions">
+      <a class="btn primary" href="simulator">Open the 3D simulator</a>
+      
+      <a class="btn" href="https://github.com/Andryandurai/Veylora" rel="noopener">Source on GitHub</a>
+    </div>
+    <p class="aside">The forecast, risk-map and advisory dashboards are a Streamlit app and are not hosted on this page; run them with <code>make dashboards</code> (see the repository).</p>
+    <p class="note"><span class="tag">Note</span><b>Synthetic data in the pipeline: satellite_16d (100%).</b> The forecasts use observed weather and ICRISAT yields only; the synthetic satellite table appears only in an experimental comparison.</p>
+  </div>
+  <ul class="facts" aria-label="At a glance"><li><span class="v">51</span><span class="l">Yield-reporting districts</span></li><li><span class="v">4</span><span class="l">Crops</span></li><li><span class="v">1991–2024</span><span class="l">Weather record</span></li><li><span class="v">2000–2017</span><span class="l">Yield record</span></li></ul>
+
+  <section id="simulator">
+    <h2>See a season, week by week</h2>
+    <p class="sub">The simulator runs in your browser, with no sign-in and nothing to install. Change rainfall and
+    temperature, compare irrigation strategies and watch yield, water use and stress respond.</p>
+    <figure class="preview"><img src="preview.jpg" width="1400" height="840" loading="lazy" alt="Screenshot of the Veylora 3D simulator: a paddy-field scene with sliders on the left and yield, water and stress panels on the right."><figcaption>The simulator: a rice field whose plants, ponded water and stress panels follow the rainfall, temperature and irrigation sliders. Software-rendered screenshot.</figcaption></figure>
+  </section>
+
+  <section id="what">
+    <h2>What Veylora does</h2>
+    <p class="sub">Four tools for one decision: what the coming weeks mean for a crop in a district.</p>
+    <div class="grid">
+      <div class="item"><span class="n">01</span><h3>Early warning</h3><p>Heatwave and drought probabilities for a district and date, replayed on observed history. No live forecast feed is connected.</p></div>
+      <div class="item"><span class="n">02</span><h3>Yield forecasts</h3><p>A forecast with an 80% interval, what-if rainfall and temperature, and a comparison with simple baselines.</p></div>
+      <div class="item"><span class="n">03</span><h3>Irrigation plans</h3><p>A weekly water plan from a soil-water balance and a linear programme; paddy rice is modelled as a ponded field.</p></div>
+      <div class="item"><span class="n">04</span><h3>Farmer advisories</h3><p>Short, template-driven messages in English, Hindi, Tamil and Telugu. The translations are drafts awaiting native-speaker review.</p></div>
+    </div>
+  </section>
+
+  <section id="results">
+    <h2>What the evaluation shows</h2>
+    <p class="sub">Measured on held-out years only, and reported as found. Intervals, baselines and the negative results are on the Methodology page of the dashboards.</p>
+    <div class="results"><div class="result"><span class="l">Yield forecast error, test 2015 to 2017</span><span class="v">40%</span><p>of mean yield (RMSE relative to each district's prior mean). That is about level with the best simple baseline (district trend, 41%).</p></div><div class="result"><span class="l">Drought warning, test 2020 to 2024</span><span class="v">F1 0.50</span><p>PR-AUC 0.38 against 0.09 for a climatology forecast.</p></div><div class="result"><span class="l">Irrigation plan, normal rainfall</span><span class="v">61% less water</span><p>than a 600 mm baseline, keeping 98% of its yield (20 district-season cases). Whether that trade-off is acceptable is for agronomists and farmers to decide.</p></div></div>
+  </section>
+
+  <section id="limits">
+    <h2>Read this before using a number</h2>
+    <ul class="limits">
+      <li>Units are the 51 district groups for which ICRISAT reports yields (1966 boundaries), not villages or today's districts.</li>
+      <li>Yields are observed to 2017 only, so the latest hold-out years are 2015 to 2017.</li>
+      <li>Forecast skill over simple baselines is small or unproven; use the intervals, not just the point forecast.</li>
+      <li>Crop and price parameters are approximate and have not been verified against current sources.</li>
+      <li>The simulator's frame rate was tested with software rendering only.</li>
+    </ul>
+  </section>
+</div>
+</main>
+<footer class="site"><div class="wrap">
+  <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js.</p>
+  <p>Veylora is decision support with uncertainty, not a substitute for local agronomic advice.
+  <a href="https://github.com/Andryandurai/Veylora" rel="noopener">Source code and licence notes</a>.</p>
+</div></footer>
+</body>
+</html>

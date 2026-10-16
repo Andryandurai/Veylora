@@ -1,4 +1,4 @@
-"""ClimateResilience India dashboards: navigation entry point (``streamlit run dashboards/app.py``)."""
+"""Veylora dashboards: navigation entry point (``streamlit run dashboards/app.py``)."""
 
 from __future__ import annotations
 

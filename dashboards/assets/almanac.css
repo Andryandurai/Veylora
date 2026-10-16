@@ -1,0 +1,112 @@
+/* "Almanac" design for the dashboards: a printed-report look on a warm charcoal page. Flat surfaces, no gradients
+   or glows; hairline rules instead of boxes; a serif display face for titles and numerals; a single saffron accent;
+   notes set like footnotes; the home page is a numbered contents list. Colour tokens (--paper, --rule, --primary, ...)
+   are injected from dashboards/components/theme.py ahead of this file by dashboards/components/ui.py. */
+
+html, body, [data-testid="stApp"] {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--ink);
+}
+[data-testid="stApp"] { background: var(--paper); }
+
+/* ---- chrome: header carries the navigation only; the current page is underlined, not boxed */
+[data-testid="stDecoration"], [data-testid="stToolbarActions"], [data-testid="stMainMenu"], footer, #MainMenu { display: none !important; }
+[data-testid="stHeader"] { background: var(--paper); border-bottom: 1px solid var(--line); height: 3.4rem; }
+[data-testid="stHeader"] a, [data-testid="stHeader"] button { font-size: 0.9rem; }
+[data-testid="stTopNav"] a { color: var(--ink-2); border-radius: 0; padding-bottom: 0.45rem; }
+[data-testid="stTopNav"] a:hover { color: var(--ink); text-decoration: none; background: transparent; }
+[data-testid="stTopNav"] a[aria-current="page"], [data-testid="stTopNav"] a[aria-selected="true"] { color: var(--ink); font-weight: 600; background: transparent; box-shadow: inset 0 -2px 0 var(--primary); }
+
+/* ---- sidebar: a plain column with a wordmark */
+[data-testid="stSidebar"] { background: #12110f; border-right: 1px solid #2a2722; }
+[data-testid="stSidebar"] [data-testid="stSidebarHeader"] { padding-bottom: 0; }
+[data-testid="stSidebar"] label p, [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p { color: var(--ink-2) !important; font-size: 0.8rem; }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { color: var(--muted) !important; }
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.9rem; }
+.brand { display: flex; align-items: center; gap: 0.75rem; margin: 0.2rem 0 1.8rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); color: var(--ink); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-size: 1.7rem; font-weight: 500; font-style: italic; letter-spacing: -0.02em; }
+.brand-sub { font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
+.brand-mark { width: 0.55rem; height: 0.55rem; background: var(--primary); flex: none; }
+.brand-logo { display: block; padding-bottom: 0; border-bottom: 0; margin: 0.1rem 0 1.6rem; }
+.brand-logo img { display: block; width: 100%; height: auto; border-radius: 2px; box-shadow: 0 0 0 1px var(--rule); }
+
+/* ---- page column */
+[data-testid="stMainBlockContainer"], .block-container { max-width: 1040px; padding: 3rem 2rem 5rem; counter-reset: tile; }
+[data-testid="stVerticalBlock"] { gap: 1.15rem; }
+
+/* ---- type: serif for titles, headings and numerals; sans for everything you read or click */
+h1, h2, h3 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif !important; color: var(--ink); font-weight: 500 !important; }
+h1 { font-size: 2.9rem !important; letter-spacing: -0.025em; line-height: 1.05; margin: 0.2rem 0 0.6rem; padding: 0; }
+h2 { font-size: 1.55rem !important; letter-spacing: -0.012em; margin: 2.6rem 0 0.3rem; padding: 0.9rem 0 0; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.2rem !important; margin: 1.8rem 0 0.2rem; padding: 0; }
+[data-testid="stHeadingWithActionElements"] a { display: none; }
+p, li { line-height: 1.65; }
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p { color: var(--ink-2) !important; opacity: 1 !important; font-size: 0.95rem; line-height: 1.6; }
+a { color: var(--primary); text-decoration: underline; text-decoration-color: rgba(233, 180, 76, 0.4); text-underline-offset: 3px; }
+a:hover { color: var(--primary-dark); text-decoration-color: currentColor; }
+.eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--primary); font-weight: 700; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
+.eyebrow::before { content: ""; width: 1.6rem; height: 1px; background: var(--primary); }
+hr, .hair { border: 0; border-top: 1px solid var(--rule); margin: 1.8rem 0; }
+
+/* ---- home header: large serif title over a single rule, no panel */
+.st-key-hero { padding: 1.4rem 0 2.2rem; border-bottom: 1px solid var(--rule); margin-bottom: 0.4rem; }
+.st-key-hero h1 { font-size: 4rem !important; line-height: 1; letter-spacing: -0.035em; margin-bottom: 1rem; }
+.st-key-hero [data-testid="stCaptionContainer"] p { font-size: 1.12rem; line-height: 1.6; color: var(--ink-2) !important; max-width: 38rem; }
+
+/* ---- numbers: a ruled table of figures, not cards */
+[data-testid="stMetric"] { background: transparent; border: 0; border-top: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 0.7rem 0 0.2rem; }
+[data-testid="stMetricLabel"], [data-testid="stMetricLabel"] p { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+[data-testid="stMetricValue"] { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-size: 2.5rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
+[data-testid="stMetricDelta"] { font-size: 0.8rem; }
+
+/* ---- notes: set like footnotes, a short rule in the margin and a small label */
+[data-testid="stAlert"] { background: transparent !important; border: 0 !important; border-left: 2px solid var(--rule) !important; border-radius: 0 !important; padding: 0.15rem 0 0.15rem 1rem !important; color: var(--ink-2); }
+[data-testid="stAlert"]:has([data-testid="stAlertContentInfo"]) { border-left-color: var(--primary) !important; }
+[data-testid="stAlert"]:has([data-testid="stAlertContentWarning"]) { border-left-color: var(--amber) !important; }
+[data-testid="stAlert"]:has([data-testid="stAlertContentError"]) { border-left-color: var(--red) !important; }
+[data-testid="stAlert"] p { font-size: 0.93rem; color: var(--ink-2); }
+[data-testid="stAlert"] svg { display: none; }
+[data-testid="stAlertContainer"] { padding: 0; background: transparent !important; color: var(--ink-2) !important; }
+[data-testid="stAlert"] code { background: var(--card); color: var(--ink); }
+.note-warn { border-left: 2px solid var(--amber); padding: 0.1rem 0 0.1rem 1rem; color: var(--ink-2); font-size: 0.9rem; line-height: 1.55; margin: 0.5rem 0 0.9rem; background: transparent; }
+.note-warn::before { content: "Note"; display: inline-block; margin-right: 0.7rem; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--amber); }
+.note-warn b { color: var(--ink); font-weight: 600; }
+
+/* ---- home contents: numbered entries under a rule */
+[class*="st-key-tile_"] { background: transparent; border: 0 !important; border-top: 1px solid var(--rule) !important; border-radius: 0; box-shadow: none; padding: 0.9rem 0.4rem 1.3rem 0; min-height: 0; gap: 0.2rem; }
+[class*="st-key-tile_"]::before { counter-increment: tile; content: counter(tile, decimal-leading-zero); display: block; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 0.95rem; font-style: italic; color: var(--primary); margin-bottom: 0; }
+[data-testid="stPageLink"] a { padding: 0; }
+[data-testid="stPageLink"] p { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight: 500; font-size: 1.45rem; letter-spacing: -0.01em; color: var(--ink); }
+[data-testid="stPageLink"] a:hover { text-decoration: none; }
+[data-testid="stPageLink"] a:hover p { color: var(--primary); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+
+/* ---- other surfaces: rules, not boxes */
+[data-testid="stExpander"] { border: 0; background: transparent; }
+[data-testid="stExpander"] details { background: transparent; border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--line); border-radius: 0; }
+[data-testid="stExpander"] summary { padding: 0.8rem 0; font-size: 0.95rem; font-weight: 500; }
+[data-testid="stVegaLiteChart"], [data-testid="stArrowVegaLiteChart"] { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding-top: 0.4rem; }
+
+/* ---- controls */
+[data-testid="stTabs"] [role="tablist"] { gap: 1.6rem; border-bottom: 1px solid var(--rule); }
+[data-testid="stTabs"] button[role="tab"] { padding: 0.55rem 0; font-size: 0.95rem; color: var(--ink-2); }
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] { color: var(--ink); font-weight: 600; }
+[data-testid="stSlider"] label p, [data-testid="stSelectbox"] label p, [data-testid="stDateInput"] label p { font-size: 0.8rem; color: var(--ink-2); }
+.stButton button, .stDownloadButton button { border-radius: 2px; border: 1px solid var(--rule); background: transparent; font-weight: 500; color: var(--ink); }
+.stButton button:hover, .stDownloadButton button:hover { border-color: var(--primary); color: var(--primary); }
+[data-baseweb="select"] > div, [data-testid="stDateInput"] [data-baseweb="input"] { border-radius: 2px; }
+
+/* ---- tables, code, images, the simulator frame */
+[data-testid="stDataFrame"] { border: 1px solid var(--line); border-radius: 0; overflow: hidden; }
+[data-testid="stCode"] pre, [data-testid="stCode"] { border-radius: 0; background: var(--card) !important; border: 1px solid var(--line); }
+[data-testid="stImage"] img { border-radius: 0; border: 1px solid var(--line); background: #fff; }
+iframe { border: 1px solid var(--rule); border-radius: 0; background: var(--paper); }
+* { scrollbar-width: thin; scrollbar-color: #3d382f transparent; }
+
+/* ---- small screens */
+@media (max-width: 700px) {
+  [data-testid="stMainBlockContainer"], .block-container { padding: 2rem 1rem 4rem; }
+  h1 { font-size: 2.1rem !important; }
+  .st-key-hero h1 { font-size: 2.6rem !important; }
+}

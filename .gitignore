@@ -27,6 +27,10 @@ reports/figures/*.html
 simulator/sim_data.json
 simulator/index_embedded.html
 dashboards/static/simulator.html
+dashboards/static/veylora-logo.jpg
 
 # Local assistant settings and memory: never part of the repository
 .claude/
+
+# static site: copied from the bundle by vercel.json at build time (scripts/make_site.py does the same locally)
+web/simulator.html

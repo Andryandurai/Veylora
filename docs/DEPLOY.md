@@ -44,7 +44,7 @@ the memory). If the build runs out of memory or disk, deploy with Docker (option
 
    ```yaml
    ---
-   title: ClimateResilience India
+   title: Veylora
    sdk: docker
    app_port: 8501
    pinned: false
@@ -72,3 +72,26 @@ the memory). If the build runs out of memory or disk, deploy with Docker (option
 | `ALLOW_UNSIGNED_WEBHOOK` | bot | `true` only for local tests |
 | `ADVISORY_AS_OF` | bot | Date used when a message names none (default: last observed day) |
 | `GEE_PROJECT` | ETL | Earth Engine project, after `earthengine authenticate` |
+
+## 4. Vercel (the static Veylora site) plus a Streamlit host for the dashboards
+
+Vercel cannot run the Streamlit dashboards: they need a long-lived websocket connection, which Vercel functions do not
+support, and the serving stack (PyTorch, XGBoost, SHAP, GeoPandas) is far larger than a function may be. Vercel hosts a
+**static site** instead (`web/`: landing page, the self-contained 3D simulator, the headline results and the limits), and the
+dashboards run on Streamlit Community Cloud (section 2), Hugging Face Spaces (section 3) or Docker (section 1).
+
+1. Build the site. Every number on the page is read from `reports/`; a missing result shows `MISSING`.
+   ```bash
+   python -m scripts.make_site --dashboards-url https://<your-app>.streamlit.app   # omit the flag until the dashboards are hosted
+   ```
+   `--design almanac` uses the dark editorial palette. Commit `web/` (the simulator page `web/simulator.html` is not committed:
+   `vercel.json` copies it from `data/sample/simulator/` at build time).
+2. Create the Vercel project named **veylora**, either
+   - in the dashboard: **Add New, Project**, import the GitHub repository, leave the framework preset on **Other**
+     (`vercel.json` already sets the build command and the output directory `web`), project name `veylora`; or
+   - with the CLI from the repository root: `npx vercel login`, `npx vercel link --project veylora`, `npx vercel deploy --prod`
+     (`.vercelignore` uploads only `web/`, `vercel.json` and the bundled simulator page).
+3. After the dashboards have a public address, rebuild the page with `--dashboards-url`, commit and push; Vercel redeploys.
+
+The simulator page contains weather series derived from IMD data; read `scripts/check_licenses.md` before making the site public.
+

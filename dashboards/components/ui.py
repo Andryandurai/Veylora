@@ -1,4 +1,4 @@
-"""Shared look of the dashboards: one stylesheet and a few helpers (minimal design, see ``assets/minimal.css``)."""
+"""Shared look of the dashboards: one stylesheet per design (see ``theme.py``) and a few helpers."""
 
 from __future__ import annotations
 
@@ -8,9 +8,11 @@ from pathlib import Path
 
 import streamlit as st
 
-from dashboards.components import theme
+from dashboards.components import assets, theme
 
-CSS_PATH = Path(__file__).resolve().parents[1] / "assets" / "minimal.css"
+SITE_NAME = "Veylora"
+SITE_TAGLINE = "Climate resilience, India"
+CSS_PATH = Path(__file__).resolve().parents[1] / "assets" / theme.CSS_FILE
 WIDE_CSS = (
     "[data-testid='stMainBlockContainer'], .block-container { max-width: 1480px !important; }"
 )
@@ -35,10 +37,19 @@ def eyebrow(text: str) -> None:
 
 
 def brand() -> None:
-    """The product name with a small mark, shown at the top of the sidebar."""
+    """The logo (or, without a logo file, the site name with a small mark and tagline) at the top of the sidebar."""
+    logo = assets.ensure_logo()
+    if logo:
+        alt = html.escape(f"{SITE_NAME}, {SITE_TAGLINE}")
+        st.markdown(
+            f'<div class="brand brand-logo"><img src="{logo}" alt="{alt}" title="{alt}"></div>',
+            unsafe_allow_html=True,
+        )
+        return
     st.markdown(
-        '<div class="brand"><span class="brand-mark"></span>'
-        '<span class="brand-name">ClimateResilience <b>India</b></span></div>',
+        '<div class="brand"><span class="brand-mark"></span><span class="brand-text">'
+        f'<span class="brand-name">{html.escape(SITE_NAME)}</span>'
+        f'<span class="brand-sub">{html.escape(SITE_TAGLINE)}</span></span></div>',
         unsafe_allow_html=True,
     )
 

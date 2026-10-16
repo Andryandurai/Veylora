@@ -1,5 +1,5 @@
 {
- "title": "Crop-Climate Simulator",
+ "title": "Crop-Climate Simulator \u00b7 Veylora",
  "scenarios_chip": "6 districts, 2772 scenarios, built 2026-10-16 (bd4998c)",
  "drought_gauge_normal_rain": 0.043,
  "drought_gauge_rain_0.4": 0.816,
@@ -7,7 +7,7 @@
  "heat_gauge_max_dT+4": 0.0,
  "compare_water_baseline_mm": 600.0,
  "compare_water_optimized_mm": 409.604,
- "average_fps_5s_headless_software_gl": 13.7,
+ "average_fps_5s_headless_software_gl": 12.2,
  "yield_shown_vs_file_optimized": [
   2.677,
   2.677

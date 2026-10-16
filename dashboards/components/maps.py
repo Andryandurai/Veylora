@@ -45,7 +45,7 @@ def choropleth(
     tooltip += [alt.Tooltip(f"properties.{name}:N", title=name.replace("_", " ")) for name in extra]
     chart = (
         alt.Chart(alt.Data(values=features))
-        .mark_geoshape(stroke=theme.CARD, strokeWidth=0.6)
+        .mark_geoshape(stroke=theme.CHART, strokeWidth=0.6)
         .encode(
             color=alt.Color(
                 f"properties.{column}:Q",
@@ -59,7 +59,7 @@ def choropleth(
         .properties(height=height, padding=PADDING)
     )
     return (
-        chart.configure(background=theme.CARD)
+        chart.configure(background=theme.CHART)
         .configure_view(stroke=None)
         .configure_legend(labelColor=theme.INK_2, titleColor=theme.INK_2)
     )

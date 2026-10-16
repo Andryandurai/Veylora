@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from dashboards.components import guards, state, ui
+from dashboards.components import assets, guards, state, ui
 
 
 def start(
@@ -24,7 +24,8 @@ def start(
     upper-case line above the title; ``wide`` lifts the width limit of the page column; ``hero`` puts the
     header in a tinted band (home page).
     """
-    st.set_page_config(page_title=f"{title} · ClimateResilience India", layout="wide")
+    page_title = ui.SITE_NAME if title == ui.SITE_NAME else f"{title} · {ui.SITE_NAME}"
+    st.set_page_config(page_title=page_title, page_icon=assets.favicon(), layout="wide")
     ui.inject_css(wide=wide)
     ui.page_header(title, intro, label, hero=hero)
     guards.require(*needs)

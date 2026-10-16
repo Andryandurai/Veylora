@@ -1,0 +1,9 @@
+# Vercel needs only the static site and the bundled simulator page that the build copies into it.
+*
+!vercel.json
+!web
+!web/**
+!data
+!data/sample
+!data/sample/simulator
+!data/sample/simulator/index_embedded.html

@@ -54,7 +54,7 @@ def _headline_numbers() -> list[tuple[str, str, str]]:
 
 def main() -> None:
     layout.start(
-        "ClimateResilience India",
+        ui.SITE_NAME,
         crop=False,
         hero=True,
         label="Climate risk · Crop yield · Irrigation",

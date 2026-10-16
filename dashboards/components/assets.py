@@ -1,4 +1,4 @@
-"""Static assets for the dashboards: the self-contained 3D simulator is copied into ``dashboards/static``."""
+"""Static assets for the dashboards: the 3D simulator page and the site logo are copied into ``dashboards/static``."""
 
 from __future__ import annotations
 
@@ -10,12 +10,27 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import urlencode
 
-from dashboards.components import ROOT
+from PIL import Image
+
+from dashboards.components import ROOT, theme
 
 SOURCE = ROOT / "simulator" / "index_embedded.html"
 SIM_DISTRICTS = ROOT / "simulator" / "sim_districts.json"
 TARGET = ROOT / "dashboards" / "static" / "simulator.html"
 URL = "/app/static/simulator.html"
+
+# The site logo: the original lives in dashboards/assets (committed); a web-sized copy is served from static.
+LOGO_SOURCE = ROOT / "dashboards" / "assets" / "logo.png"
+LOGO_TARGET = ROOT / "dashboards" / "static" / "veylora-logo.jpg"
+LOGO_URL = "/app/static/veylora-logo.jpg"
+LOGO_WEB_PX = 640
+EMBLEM_BOX = (
+    0.135,
+    0.09,
+    0.845,
+    0.69,
+)  # emblem without the wordmark, as fractions of the logo (left, top, right, bottom)
+ICON_PX = 96
 
 
 @dataclass(frozen=True)
@@ -91,4 +106,35 @@ def simulator_choice(
 
 def simulator_url(district_id: str, crop: str) -> str:
     """URL of the simulator with the district and crop preselected (the page reads these query parameters)."""
-    return f"{URL}?{urlencode({'district': district_id, 'crop': crop, 'theme': 'light'})}"
+    return f"{URL}?{urlencode({'district': district_id, 'crop': crop, 'theme': theme.SIMULATOR_THEME})}"
+
+
+def ensure_logo() -> str | None:
+    """Make a web-sized JPEG of the logo in the static folder and return its URL (None when there is no logo file)."""
+    if not LOGO_SOURCE.is_file():
+        return None
+    if not LOGO_TARGET.exists() or LOGO_TARGET.stat().st_mtime < LOGO_SOURCE.stat().st_mtime:
+        LOGO_TARGET.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(LOGO_SOURCE) as source:
+            web = source.convert("RGB")
+            web.thumbnail((LOGO_WEB_PX, LOGO_WEB_PX), Image.Resampling.LANCZOS)
+            web.save(LOGO_TARGET, "JPEG", quality=88, optimize=True)
+    return LOGO_URL
+
+
+@lru_cache(maxsize=1)
+def favicon() -> Image.Image | None:
+    """Square browser-tab icon cut from the emblem of the logo, padded with the logo's own background colour."""
+    if not LOGO_SOURCE.is_file():
+        return None
+    with Image.open(LOGO_SOURCE) as source:
+        rgb = source.convert("RGB")
+        width, height = rgb.size
+        left, top, right, bottom = EMBLEM_BOX
+        emblem = rgb.crop(
+            (round(left * width), round(top * height), round(right * width), round(bottom * height))
+        )
+        side = max(emblem.size)
+        canvas = Image.new("RGB", (side, side), rgb.getpixel((2, 2)))
+        canvas.paste(emblem, ((side - emblem.width) // 2, (side - emblem.height) // 2))
+        return canvas.resize((ICON_PX, ICON_PX), Image.Resampling.LANCZOS)

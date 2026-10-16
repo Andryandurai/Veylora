@@ -22,7 +22,7 @@ def style(chart: alt.Chart, height: int = 260) -> alt.Chart:
     """Apply the shared look: no frame, no axis lines or ticks, one hairline grid, quiet labels."""
     return (
         chart.properties(height=height, padding=PADDING)
-        .configure(background=theme.CARD)
+        .configure(background=theme.CHART)
         .configure_view(stroke=None)
         .configure_axis(
             domain=False,
@@ -159,7 +159,7 @@ def history_chart(history: pd.DataFrame, forecast: dict | None, year: int | None
         )
         layers.append(
             alt.Chart(point)
-            .mark_point(size=110, filled=True, color=ORANGE, stroke=theme.CARD, strokeWidth=2)
+            .mark_point(size=110, filled=True, color=ORANGE, stroke=theme.CHART, strokeWidth=2)
             .encode(
                 x="year:O",
                 y="yield:Q",
