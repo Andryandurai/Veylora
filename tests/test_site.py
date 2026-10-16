@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 @pytest.fixture(scope="module")
 def site(tmp_path_factory) -> Path:
     out = tmp_path_factory.mktemp("site")
-    make_site.build(out, dashboards_url=None, design="field", copy_simulator=False)
+    make_site.build(out, dashboards_url=None, copy_simulator=False)
     return out
 
 
@@ -77,13 +77,10 @@ def test_missing_results_show_a_visible_marker(monkeypatch):
         assert "MISSING" in result.value
 
 
-def test_both_designs_build_and_unknown_design_is_rejected(tmp_path):
-    for design in ("field", "almanac"):
-        out = tmp_path / design
-        make_site.build(out, design=design, copy_simulator=False)
-        assert "--paper:" in _page(out)
-    with pytest.raises(ValueError):
-        make_site.build(tmp_path / "x", design="neon", copy_simulator=False)
+def test_page_carries_the_dashboard_colour_tokens(site):
+    page = _page(site)
+    for name, value in make_site.theme.TOKENS.items():
+        assert f"--{name}: {value};" in page
 
 
 def test_vercel_config_serves_the_web_folder_and_copies_the_simulator():

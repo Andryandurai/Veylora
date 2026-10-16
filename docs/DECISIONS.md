@@ -377,3 +377,10 @@ as a JavaScript front end with a separate Python API was out of proportion for a
   URLs; `.vercelignore` limits the upload (checked with the `ignore` package that the Vercel CLI uses).
 - **Not done here:** creating the Vercel project and the Streamlit app needs the owner's accounts. The Vercel CLI was not installed and no token was available.
 
+### D-034: Final design is "paper and field"; the dark "almanac" alternative was dropped
+
+Two designs were built side by side (green paper and cards on port 8501, a flat dark editorial one on 8502) and the owner chose the first. The second
+design, its stylesheet, the palette switch (`CR_THEME`) and the launcher `dashboards/serve.py` were removed so only one design has to be maintained;
+they remain in git history at commit `da910b4` if a dark theme is wanted later. `theme.py` now holds a single palette; the simulator's own dark
+colours (used only by a browser in dark mode) were retuned from the almanac charcoal to a dark green family so the standalone page still matches the site.
+

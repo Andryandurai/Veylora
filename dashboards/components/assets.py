@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 from PIL import Image
 
-from dashboards.components import ROOT, theme
+from dashboards.components import ROOT
 
 SOURCE = ROOT / "simulator" / "index_embedded.html"
 SIM_DISTRICTS = ROOT / "simulator" / "sim_districts.json"
@@ -106,7 +106,7 @@ def simulator_choice(
 
 def simulator_url(district_id: str, crop: str) -> str:
     """URL of the simulator with the district and crop preselected (the page reads these query parameters)."""
-    return f"{URL}?{urlencode({'district': district_id, 'crop': crop, 'theme': theme.SIMULATOR_THEME})}"
+    return f"{URL}?{urlencode({'district': district_id, 'crop': crop, 'theme': 'light'})}"
 
 
 def ensure_logo() -> str | None:

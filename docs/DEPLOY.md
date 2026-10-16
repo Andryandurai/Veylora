@@ -84,7 +84,7 @@ dashboards run on Streamlit Community Cloud (section 2), Hugging Face Spaces (se
    ```bash
    python -m scripts.make_site --dashboards-url https://<your-app>.streamlit.app   # omit the flag until the dashboards are hosted
    ```
-   `--design almanac` uses the dark editorial palette. Commit `web/` (the simulator page `web/simulator.html` is not committed:
+   The page uses the dashboards' colour tokens. Commit `web/` (the simulator page `web/simulator.html` is not committed:
    `vercel.json` copies it from `data/sample/simulator/` at build time).
 2. Create the Vercel project named **veylora**, either
    - in the dashboard: **Add New, Project**, import the GitHub repository, leave the framework preset on **Other**

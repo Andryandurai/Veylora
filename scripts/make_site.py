@@ -3,13 +3,13 @@
 Vercel cannot run the Streamlit dashboards (no websockets, small function size limit), so it hosts a static site:
 a landing page, the self-contained 3D simulator and the headline results. The dashboards run on a Streamlit host and
 are linked with ``--dashboards-url``. Every number on the page is read from ``reports/*.json`` or ``reports/*.csv``;
-a missing result prints a visible ``MISSING`` marker instead of a value (CLAUDE.md hard rule 2).
+a missing result prints a visible ``MISSING`` marker instead of a value (CLAUDE.md hard rule 2). The page uses the
+dashboards' colour tokens (``dashboards/components/theme.py``).
 
 Usage::
 
     python -m scripts.make_site                                   # build web/ (no dashboards link)
     python -m scripts.make_site --dashboards-url https://veylora.streamlit.app
-    python -m scripts.make_site --design almanac                  # dark editorial palette
 
 ``web/simulator.html`` is a copy of the bundled simulator page; Vercel makes the same copy at build time
 (``vercel.json``), so it is not committed.
@@ -351,7 +351,6 @@ def _write_preview(out_dir: Path) -> bool:
 def build(
     out_dir: Path = WEB,
     dashboards_url: str | None = None,
-    design: str = "field",
     repo_url: str = REPO_URL,
     copy_simulator: bool = True,
 ) -> Path:
@@ -360,18 +359,15 @@ def build(
     Args:
         out_dir: output directory (``web/`` by default; ``styles.css`` is copied from there when different).
         dashboards_url: address of the hosted Streamlit dashboards, or None to say they are not hosted here.
-        design: dashboard design whose colours the page uses (``field`` or ``almanac``).
         repo_url: link to the source repository.
         copy_simulator: also copy the bundled simulator page to ``simulator.html`` (Vercel does this at build time).
     """
-    if design not in theme.THEMES:
-        raise ValueError(f"unknown design {design!r}; choose one of {sorted(theme.THEMES)}")
     out_dir.mkdir(parents=True, exist_ok=True)
     if out_dir.resolve() != WEB.resolve():
         shutil.copyfile(WEB / "styles.css", out_dir / "styles.css")
     has_logo = _write_logo_assets(out_dir)
     has_preview = _write_preview(out_dir)
-    page = render(theme.THEMES[design]["tokens"], dashboards_url, repo_url, has_logo, has_preview)
+    page = render(theme.TOKENS, dashboards_url, repo_url, has_logo, has_preview)
     target = out_dir / "index.html"
     target.write_text(page, encoding="utf-8")
     if copy_simulator and SIMULATOR_SOURCE.is_file():
@@ -394,14 +390,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dashboards-url", default=None, help="address of the hosted Streamlit dashboards"
     )
-    parser.add_argument("--design", choices=sorted(theme.THEMES), default="field")
     parser.add_argument("--repo-url", default=REPO_URL)
     parser.add_argument("--out", type=Path, default=WEB)
     parser.add_argument(
         "--no-simulator", action="store_true", help="do not copy the simulator page"
     )
     args = parser.parse_args(argv)
-    build(args.out, args.dashboards_url, args.design, args.repo_url, not args.no_simulator)
+    build(args.out, args.dashboards_url, args.repo_url, not args.no_simulator)
     return 0
 
 

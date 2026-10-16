@@ -1,21 +1,15 @@
 """Colour tokens of the dashboards: one palette shared by the stylesheet, the Altair charts and the maps.
 
-Two designs ship so they can be compared side by side; the environment variable ``CR_THEME`` picks one when
-the server starts (``python -m dashboards.serve --theme almanac``):
-
-* ``field`` (default): warm paper page, white cards, deep green brand colour, terracotta for heat and risk.
-* ``almanac``: flat, editorial, warm charcoal page; serif display type, hairline rules instead of boxes, one saffron accent.
-
-Two-series charts use ``RAIN`` and ``HEAT`` (checked for colour-vision separation against each design's
-surface); the brand green or teal is used for single series and the interface, never as a second category.
+The design is "paper and field": a warm paper page, white cards, a deep green brand colour and a terracotta accent
+for heat and risk. Two-series charts use ``RAIN`` and ``HEAT`` (checked for colour-vision separation); the brand
+green is used for single series and the interface, never as a second category next to terracotta.
+``.streamlit/config.toml`` repeats the page colours for Streamlit's own widgets, and ``scripts/make_site.py`` reuses the
+tokens for the static site, so the two stay in step.
 """
 
 from __future__ import annotations
 
-import os
-import re
-
-FIELD = {
+TOKENS = {
     "paper": "#f4f1e8",
     "card": "#ffffff",
     "chart": "#ffffff",
@@ -34,7 +28,9 @@ FIELD = {
     "red": "#b3402a",
     "red-soft": "#f8e4de",
 }
-FIELD_SEQ_RISK = [
+
+# Single-hue ramp (light to dark) for probabilities and vulnerability on the maps.
+SEQ_RISK = [
     "#fbefe0",
     "#f6d9ba",
     "#efbd91",
@@ -45,79 +41,7 @@ FIELD_SEQ_RISK = [
     "#6f2c15",
 ]
 
-ALMANAC = {
-    "paper": "#161513",
-    "card": "#1e1c19",
-    "chart": "#161513",
-    "line": "#34302a",
-    "rule": "#5b5549",
-    "ink": "#efe9dc",
-    "ink-2": "#bdb5a4",
-    "muted": "#968e7c",
-    "primary": "#e9b44c",
-    "primary-dark": "#f3cd7e",
-    "primary-soft": "#2b2412",
-    "heat": "#e8643a",
-    "rain": "#3399dd",
-    "amber": "#e9b44c",
-    "amber-soft": "#2b2412",
-    "red": "#ef7a6b",
-    "red-soft": "#33201d",
-}
-# Dark-surface ramp: low values sink into the page, high values brighten toward amber.
-ALMANAC_SEQ_RISK = [
-    "#2b261f",
-    "#463524",
-    "#664426",
-    "#8a5427",
-    "#b0672a",
-    "#d4802f",
-    "#eca047",
-    "#ffc56e",
-]
-
-THEMES = {
-    "field": {
-        "tokens": FIELD,
-        "seq_risk": FIELD_SEQ_RISK,
-        "css": "minimal.css",
-        "simulator": "light",
-        "streamlit": {},
-    },
-    "almanac": {
-        "tokens": ALMANAC,
-        "seq_risk": ALMANAC_SEQ_RISK,
-        "css": "almanac.css",
-        "simulator": "dark",
-        # Streamlit's own widgets read these at server start (they override .streamlit/config.toml).
-        "streamlit": {
-            "theme.base": "dark",
-            "theme.primaryColor": "#e9b44c",
-            "theme.backgroundColor": "#161513",
-            "theme.secondaryBackgroundColor": "#1e1c19",
-            "theme.textColor": "#efe9dc",
-            "theme.linkColor": "#e9b44c",
-            "theme.borderColor": "#34302a",
-            "theme.baseRadius": "4px",
-            "theme.showSidebarBorder": "true",
-            "theme.sidebar.backgroundColor": "#12110f",
-            "theme.sidebar.secondaryBackgroundColor": "#1e1c19",
-            "theme.sidebar.textColor": "#efe9dc",
-            "theme.sidebar.primaryColor": "#e9b44c",
-            "theme.sidebar.linkColor": "#e9b44c",
-            "theme.sidebar.borderColor": "#2a2722",
-        },
-    },
-}
-
-NAME = os.environ.get("CR_THEME", "field")
-if NAME not in THEMES:
-    NAME = "field"
-_ACTIVE = THEMES[NAME]
-TOKENS: dict[str, str] = _ACTIVE["tokens"]
-CSS_FILE: str = _ACTIVE["css"]
-SIMULATOR_THEME: str = _ACTIVE["simulator"]
-SEQ_RISK: list[str] = _ACTIVE["seq_risk"]
+CSS_FILE = "minimal.css"
 
 PAPER = TOKENS["paper"]
 CARD = TOKENS["card"]
@@ -142,14 +66,3 @@ def css_variables() -> str:
     """The tokens as a ``:root`` block of CSS custom properties (the stylesheet refers to them by name)."""
     body = " ".join(f"--{name}: {value};" for name, value in TOKENS.items())
     return f":root {{ {body} }}"
-
-
-def streamlit_environment(name: str) -> dict[str, str]:
-    """Environment variables that start a server in design ``name`` (theme choice plus Streamlit theme options)."""
-    if name not in THEMES:
-        raise ValueError(f"unknown theme {name!r}; choose one of {sorted(THEMES)}")
-    env = {"CR_THEME": name}
-    for option, value in THEMES[name]["streamlit"].items():
-        snake = re.sub(r"(?<=[a-z])(?=[A-Z])", "_", option.replace(".", "_"))
-        env["STREAMLIT_" + snake.upper()] = value
-    return env
