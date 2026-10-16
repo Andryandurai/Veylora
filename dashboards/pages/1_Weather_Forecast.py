@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from config import load_settings
-from dashboards.components import charts, data, guards, layout, models
+from dashboards.components import charts, data, guards, labels, layout, models
 
 LEVEL_HELP = {
     "low": "No action needed beyond routine monitoring.",
@@ -63,7 +63,7 @@ def main() -> None:
         cols[1].metric(
             "Drought next month",
             f"{forecast['drought_p']:.1%}",
-            help=f"Probability that the 3-month standardised precipitation index of the coming month is -1 or lower, using weather through {forecast['drought_month']}.",
+            help=f"Chance that rainfall over the coming months will be unusually low (a drought month), using weather up to {forecast['drought_month']}.",
         )
         if not forecast["heatwave_in_season"]:
             st.caption(
@@ -71,7 +71,7 @@ def main() -> None:
             )
         else:
             st.caption(
-                f"Heatwave probability source: {forecast['heatwave_source']} (the neural-network model is used only if it beats climatology; see Methodology)."
+                f"This heatwave chance is based on {labels.HEATWAVE_SOURCE.get(forecast['heatwave_source'], forecast['heatwave_source'])}. A more complex model was tested and did not do better (see Methodology)."
             )
         if not forecast["drought_relevant"]:
             st.caption(
@@ -109,7 +109,16 @@ def main() -> None:
         )
         with st.expander("Data table"):
             st.dataframe(
-                weather[["date", "rain_mm", "tmax_c", "tmin_c"]], hide_index=True, width="stretch"
+                weather[["date", "rain_mm", "tmax_c", "tmin_c"]].rename(
+                    columns={
+                        "date": "Date",
+                        "rain_mm": "Rain (mm)",
+                        "tmax_c": "Highest temperature (°C)",
+                        "tmin_c": "Lowest temperature (°C)",
+                    }
+                ),
+                hide_index=True,
+                width="stretch",
             )
     st.caption(
         "Weather: IMD gridded rainfall and temperature, area-weighted over the district unit."

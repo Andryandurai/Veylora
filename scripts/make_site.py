@@ -62,7 +62,7 @@ def _missing(label: str, what: str) -> Result:
 
 def yield_result() -> Result:
     """Held-out yield error (served XGBoost, 60-day lead) against the best simple baseline, worded from the numbers."""
-    label = "Yield forecast error, test 2015 to 2017"
+    label = "Yield forecast error, 2015 to 2017"
     path = REPORTS / "yield_metrics.csv"
     if not path.exists():
         return _missing(label, "the yield models")
@@ -86,14 +86,14 @@ def yield_result() -> Result:
     return Result(
         label,
         f"{ours:.0%}",
-        f"of mean yield (RMSE relative to each district's prior mean). That is {verdict} the best simple "
-        f"baseline ({best.replace('_', ' ')}, {theirs:.0%}).",
+        f"of the average yield. That is {verdict} the best simple method "
+        f"({labels.BASELINE_PHRASE.get(best, best.replace('_', ' '))}, {theirs:.0%}).",
     )
 
 
 def drought_result() -> Result:
-    """Drought-warning F1 and PR-AUC on the held-out years, against climatology."""
-    label = "Drought warning, test 2020 to 2024"
+    """Drought-warning score on the held-out years, against a guess from past averages."""
+    label = "Drought warning, 2020 to 2024"
     report = _read_json("extreme_weather.json")
     if not report:
         return _missing(label, "the early-warning models")
@@ -102,8 +102,8 @@ def drought_result() -> Result:
     clim = drought["baselines_test"]["climatology"]
     return Result(
         label,
-        f"F1 {test['f1']:.2f}",
-        f"PR-AUC {test['pr_auc']:.2f} against {clim['pr_auc']:.2f} for a climatology forecast.",
+        f"{test['f1']:.2f}",
+        f"Score out of 1.00 (higher is better). A guess from past averages scores {clim['f1']:.2f}.",
     )
 
 
@@ -134,7 +134,7 @@ def satellite_credit() -> str:
         return ""
     return (
         " Vegetation index: MODIS MOD13Q1 (NASA LP DAAC). Soil moisture: ERA5-Land, generated using "
-        "Copernicus Climate Change Service information. Both accessed through Google Earth Engine."
+        "Copernicus Climate Change Service information."
     )
 
 
@@ -298,15 +298,15 @@ def render(
     <p class="sub">Four tools for one decision: what the coming weeks mean for a crop in a district.</p>
     <div class="grid">
       <div class="item"><span class="n">01</span><h3>Early warning</h3><p>Heatwave and drought probabilities for a district and date, replayed on observed history. No live forecast feed is connected.</p></div>
-      <div class="item"><span class="n">02</span><h3>Yield forecasts</h3><p>A forecast with an 80% interval, what-if rainfall and temperature, and a comparison with simple baselines.</p></div>
-      <div class="item"><span class="n">03</span><h3>Irrigation plans</h3><p>A weekly water plan from a soil-water balance and a linear programme; paddy rice is modelled as a ponded field.</p></div>
+      <div class="item"><span class="n">02</span><h3>Yield forecasts</h3><p>A forecast with a likely range, what-if rainfall and temperature, and a comparison with simple methods.</p></div>
+      <div class="item"><span class="n">03</span><h3>Irrigation plans</h3><p>A weekly water plan that balances rainfall, crop water needs and soil moisture; paddy rice is treated as a flooded field.</p></div>
       <div class="item"><span class="n">04</span><h3>Farmer advisories</h3><p>Short, template-driven messages in English, Hindi, Tamil and Telugu. The translations are drafts awaiting native-speaker review.</p></div>
     </div>
   </section>
 
   <section id="results">
     <h2>What the evaluation shows</h2>
-    <p class="sub">Measured on held-out years only, and reported as found. Intervals, baselines and the negative results are on the Methodology page of the dashboards.</p>
+    <p class="sub">Checked on years the models never saw, and reported as found. The details, including what did not work, are on the Methodology page of the dashboards.</p>
     <div class="results">{result_html}</div>
   </section>
 

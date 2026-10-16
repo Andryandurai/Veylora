@@ -80,7 +80,8 @@ def test_pages_show_the_synthetic_data_note_exactly_when_the_report_says_so():
 
 def test_home_lists_scope_and_reads_measured_results():
     text = text_of(run("home"))
-    assert "51" in text and "Yield error vs mean yield" in text and "Drought-warning F1" in text
+    assert "51" in text and "Typical yield forecast error" in text
+    assert "Drought warning score" in text
 
 
 def test_weather_page_reports_levels_and_probabilities():
@@ -217,8 +218,11 @@ def test_home_compares_the_model_with_the_best_baseline_not_the_weakest():
         ("naive_last_year", "district_trend", "prior_mean_3y"), key=lambda b: sel.loc[b, "rmse_rel"]
     )
     text = text_of(run("home"))
+    from dashboards.components import labels
+
     assert (
-        f"best simple baseline ({best.replace('_', ' ')}): {sel.loc[best, 'rmse_rel']:.0%}" in text
+        f"Using {labels.BASELINE_PHRASE[best]} instead gives {sel.loc[best, 'rmse_rel']:.0%}."
+        in text
     )
 
 

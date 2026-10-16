@@ -15,7 +15,7 @@ from config import load_settings
 from dashboards.components import data
 
 
-@st.cache_resource(show_spinner="Loading models (first load only)…")
+@st.cache_resource(show_spinner="Loading…")
 def warm_up() -> bool:
     """Load the yield and early-warning artefacts once so that interactions afterwards are fast."""
     from analytics.predictive.extreme_weather import risk_forecast

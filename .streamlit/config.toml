@@ -26,6 +26,7 @@ borderColor = "#2b6554"
 
 [client]
 toolbarMode = "minimal"        # no Deploy button or menu
+showErrorDetails = "none"      # visitors never see tracebacks or exception text
 
 [server]
 headless = true

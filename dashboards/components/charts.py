@@ -6,7 +6,7 @@ import altair as alt
 import pandas as pd
 
 from analytics.predictive.features import HEAT_TMAX_C
-from dashboards.components import theme
+from dashboards.components import labels, theme
 
 BLUE, ORANGE = theme.RAIN, theme.HEAT
 PADDING = {
@@ -177,12 +177,13 @@ def contributions_chart(contributions: list[dict]) -> alt.Chart:
     """SHAP contributions in t/ha: blue raises, orange lowers the forecast relative to the base value."""
     frame = pd.DataFrame(contributions)
     frame["direction"] = frame["contribution_t_ha"].map(lambda v: "raises" if v >= 0 else "lowers")
+    frame["feature"] = frame["feature"].map(labels.feature_label)
     order = frame["feature"].tolist()
     return style(
         alt.Chart(frame)
         .mark_bar(size=14, cornerRadiusEnd=3)
         .encode(
-            y=alt.Y("feature:N", title=None, sort=order),
+            y=alt.Y("feature:N", title=None, sort=order, axis=alt.Axis(labelLimit=240)),
             x=alt.X("contribution_t_ha:Q", title="Effect on forecast (t/ha)"),
             color=alt.Color(
                 "direction:N",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import pandas as pd
 import streamlit as st
 
 from dashboards.components import charts, data, guards, layout, models
+
+LOG = logging.getLogger(__name__)
 
 LEADS = {
     30: "30 days into the season",
@@ -34,11 +37,11 @@ def _report_note() -> str | None:
         return None
     r = rows[0]
     verdict = (
-        "no clear improvement over"
+        "about as accurate as"
         if r["lo"] <= 1.0 <= r["hi"]
-        else ("better than" if r["hi"] < 1.0 else "worse than")
+        else ("more accurate than" if r["hi"] < 1.0 else "less accurate than")
     )
-    return f"On held-out years 2015-17 the served model shows {verdict} a simple district trend (relative-RMSE ratio {r['ratio']:.2f}, 95% interval {r['lo']:.2f}-{r['hi']:.2f})."
+    return f"On the latest years with known yields (2015-17) this forecast was {verdict} simply following the district's own trend."
 
 
 def _sensitivity_note() -> str | None:
@@ -51,9 +54,9 @@ def _sensitivity_note() -> str | None:
     if "rain x0.6" not in rows or "+4 C" not in rows:
         return None
     return (
-        f"Sensitivity check: across validation years the model moves the forecast by only {rows['rain x0.6']:+.1f}% "
-        f"for 40% less rain and {rows['+4 C']:+.1f}% for +4 °C. It learned yield mostly from each district's own history, "
-        "so read the sliders as a mild weather adjustment, not a crop-physiology simulation (see the irrigation results and the 3D simulator for water stress)."
+        f"Weather has a modest effect on this forecast: on average 40% less rain changes it by {rows['rain x0.6']:+.1f}% "
+        f"and 4 °C more heat by {rows['+4 C']:+.1f}%. The forecast mostly follows each district's own yield history, "
+        "so treat the sliders as a mild adjustment, not a crop simulation. The Simulator shows water stress in more detail."
     )
 
 
@@ -89,7 +92,7 @@ def main() -> None:
             4.0,
             0.0,
             0.5,
-            help="Added to every daily Tmax and Tmin. The model's response to warming is constrained to be non-increasing.",
+            help="Added to every daily maximum and minimum temperature of the reference season.",
         )
         lead = st.selectbox("Forecast issued", list(LEADS), index=1, format_func=LEADS.get)
         years = ["typical"] + models.yield_years()
@@ -108,12 +111,12 @@ def main() -> None:
     cols[0].metric(
         "Forecast yield",
         f"{forecast['yield_t_ha']:.2f} t/ha",
-        help="Point forecast of the served XGBoost model.",
+        help="The single best estimate of yield for the chosen weather.",
     )
     cols[1].metric(
         "80% interval",
         f"{forecast['lo']:.2f} - {forecast['hi']:.2f}",
-        help="Conformalised quantile interval; calibrated on 2012-14 and checked on 2015-17.",
+        help="The yield should fall inside this range about 8 times out of 10 (checked on past years).",
     )
     if mean5 is not None:
         change = forecast["yield_t_ha"] / mean5 - 1
@@ -128,7 +131,11 @@ def main() -> None:
         cols[3].metric(
             f"Observed {ref_year}",
             f"{observed.iloc[0]:.2f} t/ha",
-            help=f"{ref_year} belongs to the model's {models.split_of_year(ref_year)} years.",
+            help=(
+                "This year was not used to build the forecast model, so it is a fair check."
+                if models.split_of_year(ref_year) == "test"
+                else "This year was used to build the forecast model, so it is not an independent check."
+            ),
         )
     else:
         cols[3].metric("Reference weather year", ref_year)
@@ -149,14 +156,15 @@ def main() -> None:
         explanation = models.yield_explanation(district, crop, rain, delta, year, lead)
         st.altair_chart(charts.contributions_chart(explanation["contributions"]), width="stretch")
         st.caption(
-            f"Effects relative to the average forecast of {explanation['base_t_ha']:.2f} t/ha (SHAP values). Association, not proof of cause."
+            f"Each bar shows how much a factor raises (blue) or lowers (orange) the forecast compared with the average of {explanation['base_t_ha']:.2f} t/ha. These are statistical associations, not proof of cause."
         )
 
     st.subheader(f"Which {season} crop pays best here?")
     try:
         ranking = models.crop_ranking(district, season, rain, delta, year)
     except ValueError as exc:
-        st.info(f"No crop comparison available: {exc}")
+        LOG.warning("no crop comparison: %s", exc)
+        st.info("No crop comparison is available for this district and season.")
     else:
         st.altair_chart(charts.crop_ranking_chart(ranking), width="stretch")
         shown = ranking[
@@ -197,14 +205,12 @@ def main() -> None:
                     "80% interval",
                     "Reference weather year",
                     "Forecast issued",
-                    "Method",
                 ],
                 "Value": [
                     f"{forecast['yield_t_ha']:.2f} t/ha",
                     f"{forecast['lo']:.2f} to {forecast['hi']:.2f} t/ha",
                     str(forecast["reference_year"]),
                     f"{forecast['lead_days']} days into the season",
-                    "Gradient-boosted trees on weather and yield history, with a conformal interval",
                 ],
             }
         )

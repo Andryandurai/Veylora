@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from config import load_settings
-from dashboards.components import data, guards, layout, models, ui
+from dashboards.components import data, guards, labels, layout, models, ui
 
 
 def _headline_numbers() -> list[tuple[str, str, str]]:
@@ -33,10 +33,10 @@ def _headline_numbers() -> list[tuple[str, str, str]]:
             best = min(baselines, key=lambda name: sel.loc[name, "rmse_rel"])
             tiles.append(
                 (
-                    "Yield error vs mean yield (test 2015-17)",
+                    "Typical yield forecast error (2015-17)",
                     f"{sel.loc['xgboost', 'rmse_rel']:.0%}",
-                    f"best simple baseline ({best.replace('_', ' ')}): {sel.loc[best, 'rmse_rel']:.0%}; "
-                    f"pooled RMSE {sel.loc['xgboost', 'rmse']:.2f} t/ha, dominated by sugarcane",
+                    f"of the average yield. Using {labels.BASELINE_PHRASE[best]} instead gives "
+                    f"{sel.loc[best, 'rmse_rel']:.0%}.",
                 )
             )
     extreme = guards.read_report("extreme_weather.json")
@@ -44,9 +44,10 @@ def _headline_numbers() -> list[tuple[str, str, str]]:
         test = extreme["drought"]["feature_sets"][extreme["drought"]["served_feature_set"]]["test"]
         tiles.append(
             (
-                "Drought-warning F1 (test 2020-24)",
+                "Drought warning score (2020-24)",
                 f"{test['f1']:.2f}",
-                f"PR-AUC {test['pr_auc']:.2f} vs climatology {extreme['drought']['baselines_test']['climatology']['pr_auc']:.2f}",
+                f"Out of 1.00 (higher is better). A guess from past averages scores "
+                f"{extreme['drought']['baselines_test']['climatology']['f1']:.2f}.",
             )
         )
     return tiles
@@ -107,7 +108,7 @@ def main() -> None:
     if measured:
         st.subheader("Measured results")
         st.caption(
-            "Held-out years only. The yield model is level with the best simple baselines, not clearly better; Methodology has the intervals."
+            "Checked on years the models never saw. The yield forecast is about as good as simple methods, not clearly better; Methodology has the details."
         )
         for col, (label, value, note) in zip(st.columns(len(measured)), measured, strict=True):
             col.metric(label, value, help=note)

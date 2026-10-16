@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-16T16:08:02+00:00",
+  "created": "2026-10-16T16:30:53+00:00",
   "note": "derived district-level tables and serving models; satellite_16d is real (MODIS NDVI and ERA5-Land soil moisture from Google Earth Engine)",
   "files": {
     "processed/districts.parquet": {
@@ -35,8 +35,8 @@
       "sha256": "3eaf0d279422a85082511997cd1c5b76f35dcb50562b6c096c6d185d713d9ed9"
     },
     "simulator/index_embedded.html": {
-      "bytes": 11991133,
-      "sha256": "2fb2fd436c78ed64e71554831d248a764eb3e27074e98b870f127c299161ccbb"
+      "bytes": 11990994,
+      "sha256": "183e37aaf911e075cfd7bb66765977c8eb3692846943ffc88750d828232b33b9"
     },
     "simulator/sim_districts.json": {
       "bytes": 1004,

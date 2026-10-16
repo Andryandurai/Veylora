@@ -41,7 +41,7 @@ def test_headline_numbers_are_computed_from_the_result_files(site):
     extreme = json.loads((ROOT / "reports" / "extreme_weather.json").read_text(encoding="utf-8"))
     drought = extreme["drought"]
     f1 = drought["feature_sets"][drought["served_feature_set"]]["test"]["f1"]
-    assert f"F1 {f1:.2f}" in page
+    assert f'<span class="v">{f1:.2f}</span>' in page
     results = json.loads(
         (ROOT / "reports" / "prescriptive_results.json").read_text(encoding="utf-8")
     )

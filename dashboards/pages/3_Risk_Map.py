@@ -34,11 +34,11 @@ def early_warning_tab() -> None:
     table = table.assign(
         probability=table[column],
         level_label=table["level"].map(charts.LEVEL_LABEL),
-        counts_towards_level=table["drought_relevant"].map({True: "yes", False: "no (dry month)"})
+        sets_the_level=table["drought_relevant"].map({True: "yes", False: "no (dry month)"})
         if column == "drought_p"
         else "yes",
     ).merge(data.load_districts()[["district_id", "district", "state"]], on="district_id")
-    extra = ["counts_towards_level"]
+    extra = ["sets_the_level"]
     st.altair_chart(
         maps.choropleth(table, "probability", "Probability", (0.0, 1.0), extra),
         width="stretch",
@@ -56,12 +56,12 @@ def early_warning_tab() -> None:
             "The heatwave model covers March-June only; outside the season every probability is reported as 0."
         )
     top = table.sort_values("probability", ascending=False).head(10)[
-        ["district", "state", "probability", "level_label", "counts_towards_level"]
+        ["district", "state", "probability", "level_label", "sets_the_level"]
     ]
     with st.expander("Ten districts with the highest probability"):
         st.dataframe(
             top.rename(
-                columns={"level_label": "overall level", "counts_towards_level": "sets the level"}
+                columns={"level_label": "overall level", "sets_the_level": "sets the level"}
             ),
             hide_index=True,
             width="stretch",
@@ -100,7 +100,9 @@ def vulnerability_tab() -> None:
                 "drought_frequency": st.column_config.NumberColumn(
                     "drought years", format="percent"
                 ),
-                "rice_yield_cv": st.column_config.NumberColumn("rice yield CV", format="%.2f"),
+                "rice_yield_cv": st.column_config.NumberColumn(
+                    "rice yield variability", format="%.2f"
+                ),
                 "mean_heat_days": st.column_config.NumberColumn(
                     "heat days / kharif", format="%.1f"
                 ),

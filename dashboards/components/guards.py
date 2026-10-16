@@ -70,7 +70,8 @@ def run_guarded(body: Callable[[], Any]) -> None:
         LOG.error("required file missing: %s", exc)
         st.error("Something this page needs is not available right now. Please try again later.")
     except ValueError as exc:
-        st.warning(f"This combination cannot be computed: {exc}")
+        LOG.warning("combination cannot be computed: %s", exc)
+        st.warning("This combination of choices cannot be computed. Please try different settings.")
     except Exception as exc:  # models/artefacts built by an older version, DB or library problems
         if exc.__class__.__name__ in {
             "ModelNotTrainedError",
@@ -78,7 +79,8 @@ def run_guarded(body: Callable[[], Any]) -> None:
             "DatabaseUnavailableError",
             "NotImplementedError",
         }:
-            st.error(f"{exc}")
+            LOG.error("%s: %s", exc.__class__.__name__, exc)
+            st.error("This page is not available right now. Please try again later.")
         else:
             raise
 

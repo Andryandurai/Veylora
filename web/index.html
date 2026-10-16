@@ -51,16 +51,16 @@
     <p class="sub">Four tools for one decision: what the coming weeks mean for a crop in a district.</p>
     <div class="grid">
       <div class="item"><span class="n">01</span><h3>Early warning</h3><p>Heatwave and drought probabilities for a district and date, replayed on observed history. No live forecast feed is connected.</p></div>
-      <div class="item"><span class="n">02</span><h3>Yield forecasts</h3><p>A forecast with an 80% interval, what-if rainfall and temperature, and a comparison with simple baselines.</p></div>
-      <div class="item"><span class="n">03</span><h3>Irrigation plans</h3><p>A weekly water plan from a soil-water balance and a linear programme; paddy rice is modelled as a ponded field.</p></div>
+      <div class="item"><span class="n">02</span><h3>Yield forecasts</h3><p>A forecast with a likely range, what-if rainfall and temperature, and a comparison with simple methods.</p></div>
+      <div class="item"><span class="n">03</span><h3>Irrigation plans</h3><p>A weekly water plan that balances rainfall, crop water needs and soil moisture; paddy rice is treated as a flooded field.</p></div>
       <div class="item"><span class="n">04</span><h3>Farmer advisories</h3><p>Short, template-driven messages in English, Hindi, Tamil and Telugu. The translations are drafts awaiting native-speaker review.</p></div>
     </div>
   </section>
 
   <section id="results">
     <h2>What the evaluation shows</h2>
-    <p class="sub">Measured on held-out years only, and reported as found. Intervals, baselines and the negative results are on the Methodology page of the dashboards.</p>
-    <div class="results"><div class="result"><span class="l">Yield forecast error, test 2015 to 2017</span><span class="v">40%</span><p>of mean yield (RMSE relative to each district's prior mean). That is about level with the best simple baseline (district trend, 41%).</p></div><div class="result"><span class="l">Drought warning, test 2020 to 2024</span><span class="v">F1 0.50</span><p>PR-AUC 0.38 against 0.09 for a climatology forecast.</p></div><div class="result"><span class="l">Irrigation plan, normal rainfall</span><span class="v">61% less water</span><p>than a 600 mm baseline, keeping 98% of its yield (20 district-season cases). Whether that trade-off is acceptable is for agronomists and farmers to decide.</p></div></div>
+    <p class="sub">Checked on years the models never saw, and reported as found. The details, including what did not work, are on the Methodology page of the dashboards.</p>
+    <div class="results"><div class="result"><span class="l">Yield forecast error, 2015 to 2017</span><span class="v">40%</span><p>of the average yield. That is about level with the best simple method (the district trend, 41%).</p></div><div class="result"><span class="l">Drought warning, 2020 to 2024</span><span class="v">0.50</span><p>Score out of 1.00 (higher is better). A guess from past averages scores 0.13.</p></div><div class="result"><span class="l">Irrigation plan, normal rainfall</span><span class="v">61% less water</span><p>than a 600 mm baseline, keeping 98% of its yield (20 district-season cases). Whether that trade-off is acceptable is for agronomists and farmers to decide.</p></div></div>
   </section>
 
   <section id="limits">
@@ -76,7 +76,7 @@
 </div>
 </main>
 <footer class="site"><div class="wrap">
-  <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js. Vegetation index: MODIS MOD13Q1 (NASA LP DAAC). Soil moisture: ERA5-Land, generated using Copernicus Climate Change Service information. Both accessed through Google Earth Engine.</p>
+  <p>Data: IMD gridded rainfall and temperature, NASA POWER, ICRISAT district-level database, geoBoundaries. Relief: AWS Terrain Tiles (USGS 3DEP, GMTED2010, SRTM). 3D: three.js. Vegetation index: MODIS MOD13Q1 (NASA LP DAAC). Soil moisture: ERA5-Land, generated using Copernicus Climate Change Service information.</p>
   <p>Veylora is decision support with uncertainty, not a substitute for local agronomic advice.</p>
 </div></footer>
 </body>

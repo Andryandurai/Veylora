@@ -38,7 +38,7 @@ def data_section() -> None:
             "NDVI, soil moisture (satellite)",
             "Placeholder values, not real satellite observations"
             if synthetic_satellite
-            else "MODIS NDVI and ERA5-Land soil moisture (Earth Engine)",
+            else "MODIS vegetation index and ERA5-Land soil moisture, averaged per district",
             "SYNTHETIC" if synthetic_satellite else "real",
             f"{satellite_years['start']}-{satellite_years['end']}",
         ),
@@ -91,6 +91,7 @@ def yield_section() -> None:
     )
     st.dataframe(
         test[["model", "rmse", "mae", "r2", "rmse_rel"]]
+        .assign(model=lambda d: d["model"].map(labels.model_label))
         .rename(
             columns={
                 "rmse": "RMSE t/ha",
@@ -113,6 +114,10 @@ def yield_section() -> None:
     )
     st.dataframe(
         boot[["model", "baseline", "ratio", "lo", "hi", "p_not_better"]]
+        .assign(
+            model=lambda d: d["model"].map(labels.model_label),
+            baseline=lambda d: d["baseline"].map(labels.model_label),
+        )
         .rename(columns={"lo": "ratio low", "hi": "ratio high", "p_not_better": "P(not better)"})
         .round(3),
         hide_index=True,
@@ -132,11 +137,6 @@ def yield_section() -> None:
         "Plain reading: the models improve clearly on repeating last year's yield, but they do not clearly beat a simple per-district trend or the prior-three-year mean (the intervals above include or touch 1.0). "
         "Treat the forecast as a weather-adjusted baseline with an honest interval, not as a precise prediction."
     )
-    figure = guards.ROOT / "reports" / "figures" / "yield_shap_summary_lead60.png"
-    if figure.exists():
-        st.image(
-            str(figure), caption="SHAP summary of the served model (60-day lead).", width="stretch"
-        )
 
 
 def extreme_section() -> None:
@@ -152,14 +152,25 @@ def extreme_section() -> None:
     pooled = pd.DataFrame(heat["pooled_metrics"])
     pooled = pooled[pooled["horizon_days"] == 14]
     st.dataframe(
-        pooled[
-            ["forecast", "n_positive", "f1", "pr_auc", "roc_auc", "brier_skill_vs_climatology"]
-        ].round(3),
+        pooled[["forecast", "n_positive", "f1", "pr_auc", "roc_auc", "brier_skill_vs_climatology"]]
+        .assign(forecast=lambda d: d["forecast"].map(labels.model_label))
+        .rename(
+            columns={
+                "forecast": "forecast",
+                "n_positive": "events",
+                "f1": "F1",
+                "pr_auc": "PR-AUC",
+                "roc_auc": "ROC-AUC",
+                "brier_skill_vs_climatology": "Brier skill vs climatology",
+            }
+        )
+        .round(3),
         hide_index=True,
         width="stretch",
     )
     st.info(
-        f"Served heatwave probability: **{heat['served']['source']}**. {heat['served']['reason']}."
+        f"Served heatwave probability: **{labels.model_label(heat['served']['source'])}**. "
+        "The neural-network forecast showed no skill beyond past averages at 14 days, so the past-averages probability is used."
     )
     served = drought["served_feature_set"]
     test = drought["feature_sets"][served]["test"]
@@ -170,7 +181,7 @@ def extreme_section() -> None:
     table = pd.DataFrame(
         [
             {
-                "forecast": "XGBoost (served)",
+                "forecast": labels.model_label("xgboost"),
                 "F1": test["f1"],
                 "precision": test["precision"],
                 "recall": test["recall"],
@@ -178,7 +189,7 @@ def extreme_section() -> None:
                 "Brier": test["brier"],
             },
             {
-                "forecast": "climatology",
+                "forecast": labels.model_label("climatology"),
                 "F1": base["climatology"]["f1"],
                 "precision": base["climatology"]["precision"],
                 "recall": base["climatology"]["recall"],
@@ -186,7 +197,7 @@ def extreme_section() -> None:
                 "Brier": base["climatology"]["brier"],
             },
             {
-                "forecast": "persistence",
+                "forecast": labels.model_label("persistence"),
                 "F1": base["persistence"]["f1"],
                 "precision": base["persistence"]["precision"],
                 "recall": base["persistence"]["recall"],
@@ -230,6 +241,7 @@ def prescriptive_section() -> None:
                 "yield_vs_baseline",
             ]
         ]
+        .assign(strategy=lambda d: d["strategy"].map(labels.model_label))
         .rename(
             columns={
                 "water_used_mm": "water mm",

@@ -410,3 +410,18 @@ method (XGBoost, SHAP, FAO-56) stay on the Methodology page: they document how t
 - **Bug found by the real data.** `simulator.export_sim_data.reference_ndvi` failed on the parquet date resolution (ns) against Python timestamps (us); fixed and tested.
 - **Everything that said "synthetic satellite" now follows the data**: the pages' note, Methodology table, report and demo-script sentences, the bundle manifest note and the
   site's data credit. The synthetic generator remains the fallback when Earth Engine is unavailable, and those texts switch back automatically.
+
+### D-037: Plain language on the website, second pass (supersedes the scope of D-035)
+
+D-035 removed commands, paths, ids and build tags. A reading of the pages found more developer-oriented text, now replaced:
+- **Internal ids never reach the screen.** Feature names in the "What drives this forecast" chart (`prev_year_rel`, `rain_d60`, ...), model and baseline ids in the Methodology
+  tables (`xgboost_unconstrained`, `naive_last_year`), irrigation strategy ids, and the weather "Data table" column names now use plain labels (`dashboards/components/labels.py`).
+  The SHAP summary image (it shows raw feature names) was removed from the Methodology page.
+- **Jargon in the visitor-facing pages** (Home, Early warning, Yield, Advisory, Simulator and the Vercel page): "relative-RMSE ratio", "served model", "held-out", "conformalised", "SHAP",
+  "GSM-7", "FAO-33", "SPI", "LP schedule", "lead", "PR-AUC" and "frame rate on your own GPU" are replaced by what they mean. The Methodology page keeps the method names
+  (RMSE, PR-AUC, gradient-boosted trees) because it documents how the numbers were made; it no longer shows raw ids.
+- **Simulator.** The footer that listed model internals is empty; greenness options say "estimated from the sliders" and "satellite greenness of the reference year".
+- **Streamlit chrome and errors.** The "Running" status widget is hidden, `client.showErrorDetails = "none"` keeps tracebacks and exception text away from visitors, the loading text is "Loading...",
+  and expected failures show one plain sentence while the exception goes to the log.
+- **Guarded by tests.** `tests/test_plain_language.py` reads every string a visitor can see on every page (including tooltips, table headers and cells, with Streamlit's display names)
+  and fails on commands, file names, internal ids, hashes and, outside Methodology, model and library names.

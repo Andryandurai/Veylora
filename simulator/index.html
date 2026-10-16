@@ -126,7 +126,7 @@
         <legend>Irrigation strategy</legend>
         <label class="radio"><input type="radio" name="strategy" value="rainfed"> Rainfed (no irrigation)</label>
         <label class="radio"><input type="radio" name="strategy" value="baseline"> Farmer baseline (50 mm / 10 d)</label>
-        <label class="radio"><input type="radio" name="strategy" value="optimized" checked> Optimized (LP schedule)</label>
+        <label class="radio"><input type="radio" name="strategy" value="optimized" checked> Optimized schedule</label>
       </fieldset>
     </div>
     <div class="card">
@@ -151,8 +151,8 @@
       <select id="sel-quality" aria-label="Level of detail"><option value="auto" selected>Automatic</option><option value="high">High</option><option value="low">Low (fast)</option></select>
       <fieldset id="fs-green" hidden>
         <legend>Greenness shown in the scene</legend>
-        <label class="radio"><input type="radio" name="green" value="proxy" checked> Model proxy (follows the sliders)</label>
-        <label class="radio"><input type="radio" name="green" value="observed"> Observed NDVI of the reference year</label>
+        <label class="radio"><input type="radio" name="green" value="proxy" checked> Estimated from the sliders</label>
+        <label class="radio"><input type="radio" name="green" value="observed"> Satellite greenness of the reference year</label>
       </fieldset>
       <div class="small" style="margin-top:6px">Plants, plots and the time of day are illustrations: plants are enlarged and the plots are schematic.</div>
     </div>
@@ -221,7 +221,7 @@
       <div class="chart-title"><span>Rainfall, mm per week</span><span id="ct-rain"></span></div><canvas id="chart-rain" aria-label="Weekly rainfall chart"></canvas>
       <div class="chart-title"><span>Soil moisture, fraction of capacity</span><span id="ct-soil"></span></div><canvas id="chart-soil" aria-label="Weekly soil moisture chart"></canvas>
       <div id="wrap-pond" hidden><div class="chart-title"><span>Standing water in the paddy at the end of each week, mm</span><span id="ct-pond"></span></div><canvas id="chart-pond" aria-label="Weekly standing water chart"></canvas></div>
-      <div class="chart-title"><span>Greenness: model proxy (not satellite NDVI)</span><span id="ct-ndvi"></span></div><canvas id="chart-ndvi" aria-label="Weekly greenness chart"></canvas>
+      <div class="chart-title"><span>Greenness: estimated from the sliders</span><span id="ct-ndvi"></span></div><canvas id="chart-ndvi" aria-label="Weekly greenness chart"></canvas>
       <div class="legend" id="ndvi-legend"></div>
     </div>
   </aside>
@@ -924,7 +924,7 @@ function updateHud() {
   drawStageBars(sc, wk);
   $('explain').textContent = explain(sc, d);
   const ew = d.early_warning[info.season];
-  $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (main hazard: ${String(ew.hazard).replace(/_/g, ' ')}, ${ew.lead_days}-day lead)<br>Heatwave ${pct(ew.heatwave_p)} (${String(ew.heatwave_source).replace(/_/g, ' ')}), drought ${pct(ew.drought_p)}.<br><span class="small">Early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
+  $('early').innerHTML = ew ? `<b>${ew.level.toUpperCase()}</b> (main hazard: ${String(ew.hazard).replace(/_/g, ' ')}, ${ew.lead_days}-day outlook)<br>Heatwave ${pct(ew.heatwave_p)} (${String(ew.heatwave_source).replace(/_/g, ' ')}), drought ${pct(ew.drought_p)}.<br><span class="small">Early-warning card for ${ew.as_of} (observed weather of the reference year ${d.reference_year[state.crop]}); it does not change with the sliders.</span>` : '-';
 }
 function drawStageBars(sc, wk) {
   const box = $('stage-bars'), now = stageOfWeek(state.crop, wk), rel = sc.stage_rel;
@@ -932,7 +932,7 @@ function drawStageBars(sc, wk) {
   let worst = 0;
   rel.forEach((f, s) => { if (1 - f > 1 - rel[worst]) worst = s; const row = box.children[s]; row.classList.toggle('now', s === now); row.dataset.value = f.toFixed(4); row.querySelector('.fill').style.width = (100 * f).toFixed(1) + '%'; row.querySelector('.loss').textContent = f >= 0.9995 ? 'none' : '-' + ((1 - f) * 100).toFixed(0) + '%'; });
   const loss = 1 - rel[worst];
-  $('stage-note').textContent = loss < 0.005 ? 'No stage loses yield to water stress in this scenario.' : `Largest loss: ${STAGE_NAMES[worst]} (${(loss * 100).toFixed(0)}% of that stage's yield potential). Bars are the FAO-33 water-stress factors; the highlighted row is the stage the week falls in.`;
+  $('stage-note').textContent = loss < 0.005 ? 'No stage loses yield to water stress in this scenario.' : `Largest loss: ${STAGE_NAMES[worst]} (${(loss * 100).toFixed(0)}% of that stage's yield potential). Bars show how much of its yield each stage keeps; the highlighted row is the stage this week falls in.`;
 }
 function levelOf(p, cfg) { return p >= cfg.severe ? 'severe' : p >= cfg.high ? 'high' : p >= cfg.moderate ? 'moderate' : 'low'; }
 function setGauge(name, frac, text, level, isHeat = false) {
@@ -988,7 +988,7 @@ function drawCharts() {
   $('wrap-pond').hidden = !ponded; if (ponded) drawChart('chart-pond', sc.weekly.map((w) => w.pond_mm), 'line', cssVar('--s1'), DATA.crops[state.crop].pond_max_mm);
   const ref = d.reference_ndvi && d.reference_ndvi[state.crop];
   drawChart('chart-ndvi', sc.weekly.map((w) => w.ndvi), 'line', cssVar('--s4'), 1, ref ? ref.weekly : null);
-  $('ndvi-legend').innerHTML = `<span><i style="border-color:${cssVar('--s4')}"></i>model proxy (follows the sliders)</span>` + (ref ? `<span><i style="border-color:${cssVar('--s2')};border-top-style:dashed"></i>satellite NDVI, reference year${ref.is_synthetic ? ' (SYNTHETIC)' : ' (observed)'}</span>` : '');
+  $('ndvi-legend').innerHTML = `<span><i style="border-color:${cssVar('--s4')}"></i>estimated from the sliders</span>` + (ref ? `<span><i style="border-color:${cssVar('--s2')};border-top-style:dashed"></i>satellite greenness, reference year${ref.is_synthetic ? ' (SYNTHETIC)' : ' (observed)'}</span>` : '');
   const w = weekState(sc, state.wpos);
   $('ct-rain').textContent = `${fmt(w.rain_mm, 0)} mm`; $('ct-soil').textContent = pct(w.soil_moisture_0_1); $('ct-ndvi').textContent = fmt(w.ndvi, 2); if (ponded) $('ct-pond').textContent = `${fmt(w.pond_mm, 0)} mm`;
 }
@@ -1089,11 +1089,11 @@ async function main() {
   DATA = await getData(); GRID = DATA.meta.grid;
   $('chip-data').textContent = `${DATA.districts.length} districts, ${Object.keys(DATA.scenarios).length} scenarios`;
   const syn = DATA.meta.is_synthetic_inputs, flags = [];
-  if (syn.weather) flags.push('synthetic weather'); if (syn.crop_labels) flags.push('synthetic yields'); if (syn.satellite_dataset) flags.push('satellite dataset is synthetic (not used by the served models; greenness here is a proxy)');
+  if (syn.weather) flags.push('synthetic weather'); if (syn.crop_labels) flags.push('synthetic yields'); if (syn.satellite_dataset) flags.push('satellite data is synthetic (the forecasts do not use it; greenness here is an estimate)');
   if (flags.length) { $('chip-synthetic').hidden = false; $('chip-synthetic').textContent = 'Data note: ' + flags.join('; '); }
   $('foot-disclaimer').textContent = DATA.meta.disclaimer;
   $('foot-attribution').textContent = (DATA.meta.attribution || []).join(' ');
-  $('foot-meta').textContent = Object.entries(DATA.meta.model_versions).map(([k, v]) => `${MODEL_LABELS[k] || k}: ${String(v).replace(/\s*\([^)]*\)/g, '')}`).join(' | ');
+  $('foot-meta').textContent = '';
   populate();
   const params = new URLSearchParams(location.search);
   if (params.get('quality') && ['auto', 'high', 'low'].includes(params.get('quality'))) { state.quality = params.get('quality'); $('sel-quality').value = state.quality; }
