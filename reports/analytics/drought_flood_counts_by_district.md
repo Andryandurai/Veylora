@@ -1,104 +1,104 @@
 | district_id | season | seasons | drought_events | wet_seasons | flood_risk_events | state | district |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| andhra_pradesh__ananthapur | kharif | 34 | 7 | 7 | 0 | Andhra Pradesh | Ananthapur |
-| andhra_pradesh__ananthapur | rabi | 33 | 17 | 11 | 0 | Andhra Pradesh | Ananthapur |
-| andhra_pradesh__chittoor | kharif | 34 | 4 | 7 | 0 | Andhra Pradesh | Chittoor |
-| andhra_pradesh__chittoor | rabi | 33 | 13 | 8 | 0 | Andhra Pradesh | Chittoor |
-| andhra_pradesh__east_godavari | kharif | 34 | 7 | 7 | 1 | Andhra Pradesh | East Godavari |
-| andhra_pradesh__east_godavari | rabi | 33 | 15 | 10 | 0 | Andhra Pradesh | East Godavari |
-| andhra_pradesh__guntur | kharif | 34 | 5 | 7 | 0 | Andhra Pradesh | Guntur |
-| andhra_pradesh__guntur | rabi | 33 | 12 | 9 | 0 | Andhra Pradesh | Guntur |
-| andhra_pradesh__kadapa_ysr | kharif | 34 | 4 | 5 | 0 | Andhra Pradesh | Kadapa YSR |
-| andhra_pradesh__kadapa_ysr | rabi | 33 | 13 | 8 | 0 | Andhra Pradesh | Kadapa YSR |
-| andhra_pradesh__krishna | kharif | 34 | 6 | 5 | 1 | Andhra Pradesh | Krishna |
-| andhra_pradesh__krishna | rabi | 33 | 16 | 10 | 0 | Andhra Pradesh | Krishna |
-| andhra_pradesh__kurnool | kharif | 34 | 8 | 6 | 0 | Andhra Pradesh | Kurnool |
-| andhra_pradesh__kurnool | rabi | 33 | 13 | 11 | 0 | Andhra Pradesh | Kurnool |
-| andhra_pradesh__s_p_s_nellore | kharif | 34 | 8 | 7 | 1 | Andhra Pradesh | S.P.S. Nellore |
-| andhra_pradesh__s_p_s_nellore | rabi | 33 | 13 | 10 | 0 | Andhra Pradesh | S.P.S. Nellore |
-| andhra_pradesh__srikakulam | kharif | 34 | 4 | 3 | 0 | Andhra Pradesh | Srikakulam |
-| andhra_pradesh__srikakulam | rabi | 33 | 15 | 8 | 0 | Andhra Pradesh | Srikakulam |
-| andhra_pradesh__visakhapatnam | kharif | 34 | 5 | 3 | 0 | Andhra Pradesh | Visakhapatnam |
-| andhra_pradesh__visakhapatnam | rabi | 33 | 13 | 11 | 0 | Andhra Pradesh | Visakhapatnam |
-| andhra_pradesh__west_godavari | kharif | 34 | 8 | 6 | 0 | Andhra Pradesh | West Godavari |
-| andhra_pradesh__west_godavari | rabi | 33 | 13 | 10 | 0 | Andhra Pradesh | West Godavari |
-| karnataka__bangalore | kharif | 34 | 8 | 9 | 0 | Karnataka | Bangalore |
-| karnataka__bangalore | rabi | 33 | 14 | 9 | 0 | Karnataka | Bangalore |
-| karnataka__belgaum | kharif | 34 | 6 | 5 | 0 | Karnataka | Belgaum |
-| karnataka__belgaum | rabi | 33 | 18 | 9 | 0 | Karnataka | Belgaum |
-| karnataka__bellary | kharif | 34 | 8 | 7 | 0 | Karnataka | Bellary |
-| karnataka__bellary | rabi | 33 | 19 | 11 | 0 | Karnataka | Bellary |
-| karnataka__bidar | kharif | 34 | 5 | 7 | 0 | Karnataka | Bidar |
-| karnataka__bidar | rabi | 33 | 13 | 9 | 0 | Karnataka | Bidar |
-| karnataka__chickmagalur | kharif | 34 | 8 | 6 | 1 | Karnataka | Chickmagalur |
-| karnataka__chickmagalur | rabi | 33 | 16 | 9 | 0 | Karnataka | Chickmagalur |
-| karnataka__chitradurga | kharif | 34 | 6 | 8 | 0 | Karnataka | Chitradurga |
-| karnataka__chitradurga | rabi | 33 | 16 | 11 | 0 | Karnataka | Chitradurga |
-| karnataka__coorg | kharif | 34 | 5 | 5 | 0 | Karnataka | Coorg |
-| karnataka__coorg | rabi | 33 | 16 | 9 | 0 | Karnataka | Coorg |
-| karnataka__dakshina_kannada | kharif | 34 | 2 | 4 | 3 | Karnataka | Dakshina Kannada |
-| karnataka__dakshina_kannada | rabi | 33 | 15 | 9 | 0 | Karnataka | Dakshina Kannada |
-| karnataka__dharwad | kharif | 34 | 5 | 7 | 0 | Karnataka | Dharwad |
-| karnataka__dharwad | rabi | 33 | 19 | 11 | 0 | Karnataka | Dharwad |
-| karnataka__hassan | kharif | 34 | 7 | 7 | 0 | Karnataka | Hassan |
-| karnataka__hassan | rabi | 33 | 15 | 8 | 0 | Karnataka | Hassan |
-| karnataka__kalaburagi | kharif | 34 | 8 | 7 | 0 | Karnataka | Kalaburagi |
-| karnataka__kalaburagi | rabi | 33 | 18 | 12 | 0 | Karnataka | Kalaburagi |
-| karnataka__kolar | kharif | 34 | 8 | 6 | 0 | Karnataka | Kolar |
-| karnataka__kolar | rabi | 33 | 13 | 10 | 0 | Karnataka | Kolar |
-| karnataka__mandya | kharif | 34 | 5 | 4 | 0 | Karnataka | Mandya |
-| karnataka__mandya | rabi | 33 | 13 | 9 | 0 | Karnataka | Mandya |
-| karnataka__mysore | kharif | 34 | 4 | 4 | 0 | Karnataka | Mysore |
-| karnataka__mysore | rabi | 33 | 15 | 10 | 0 | Karnataka | Mysore |
-| karnataka__raichur | kharif | 34 | 5 | 5 | 0 | Karnataka | Raichur |
-| karnataka__raichur | rabi | 33 | 17 | 10 | 0 | Karnataka | Raichur |
-| karnataka__shimoge | kharif | 34 | 2 | 3 | 0 | Karnataka | Shimoge |
-| karnataka__shimoge | rabi | 33 | 18 | 8 | 0 | Karnataka | Shimoge |
-| karnataka__tumkur | kharif | 34 | 9 | 5 | 0 | Karnataka | Tumkur |
-| karnataka__tumkur | rabi | 33 | 13 | 8 | 0 | Karnataka | Tumkur |
-| karnataka__uttara_kannada | kharif | 34 | 4 | 5 | 1 | Karnataka | Uttara Kannada |
-| karnataka__uttara_kannada | rabi | 33 | 17 | 9 | 0 | Karnataka | Uttara Kannada |
-| karnataka__vijayapura | kharif | 34 | 4 | 7 | 0 | Karnataka | Vijayapura |
-| karnataka__vijayapura | rabi | 33 | 14 | 11 | 0 | Karnataka | Vijayapura |
-| tamil_nadu__coimbatore | kharif | 34 | 3 | 5 | 0 | Tamil Nadu | Coimbatore |
-| tamil_nadu__coimbatore | rabi | 33 | 11 | 8 | 0 | Tamil Nadu | Coimbatore |
-| tamil_nadu__cuddalore | kharif | 34 | 4 | 5 | 0 | Tamil Nadu | Cuddalore |
-| tamil_nadu__cuddalore | rabi | 33 | 12 | 10 | 0 | Tamil Nadu | Cuddalore |
-| tamil_nadu__kanchipuram | kharif | 34 | 7 | 4 | 0 | Tamil Nadu | Kanchipuram |
-| tamil_nadu__kanchipuram | rabi | 33 | 13 | 9 | 1 | Tamil Nadu | Kanchipuram |
-| tamil_nadu__kanyakumari | kharif | 34 | 14 | 9 | 0 | Tamil Nadu | Kanyakumari |
-| tamil_nadu__kanyakumari | rabi | 33 | 12 | 9 | 0 | Tamil Nadu | Kanyakumari |
-| tamil_nadu__madurai | kharif | 34 | 7 | 4 | 0 | Tamil Nadu | Madurai |
-| tamil_nadu__madurai | rabi | 33 | 13 | 8 | 0 | Tamil Nadu | Madurai |
-| tamil_nadu__ramananthapuram | kharif | 34 | 10 | 6 | 0 | Tamil Nadu | Ramananthapuram |
-| tamil_nadu__ramananthapuram | rabi | 33 | 13 | 9 | 0 | Tamil Nadu | Ramananthapuram |
-| tamil_nadu__salem | kharif | 34 | 5 | 2 | 0 | Tamil Nadu | Salem |
-| tamil_nadu__salem | rabi | 33 | 12 | 9 | 0 | Tamil Nadu | Salem |
-| tamil_nadu__thanjavur | kharif | 34 | 2 | 6 | 0 | Tamil Nadu | Thanjavur |
-| tamil_nadu__thanjavur | rabi | 33 | 11 | 8 | 0 | Tamil Nadu | Thanjavur |
-| tamil_nadu__the_nilgiris | kharif | 34 | 4 | 1 | 0 | Tamil Nadu | The Nilgiris |
-| tamil_nadu__the_nilgiris | rabi | 33 | 11 | 10 | 0 | Tamil Nadu | The Nilgiris |
-| tamil_nadu__thirunelveli | kharif | 34 | 13 | 9 | 0 | Tamil Nadu | Thirunelveli |
-| tamil_nadu__thirunelveli | rabi | 33 | 11 | 8 | 0 | Tamil Nadu | Thirunelveli |
-| tamil_nadu__trichy | kharif | 34 | 2 | 5 | 0 | Tamil Nadu | Trichy |
-| tamil_nadu__trichy | rabi | 33 | 12 | 10 | 0 | Tamil Nadu | Trichy |
-| tamil_nadu__vellore | kharif | 34 | 6 | 3 | 0 | Tamil Nadu | Vellore |
-| tamil_nadu__vellore | rabi | 33 | 13 | 10 | 0 | Tamil Nadu | Vellore |
-| telangana__adilabad | kharif | 34 | 3 | 5 | 0 | Telangana | Adilabad |
-| telangana__adilabad | rabi | 33 | 16 | 10 | 0 | Telangana | Adilabad |
-| telangana__hyderabad | kharif | 34 | 5 | 6 | 0 | Telangana | Hyderabad |
-| telangana__hyderabad | rabi | 33 | 12 | 8 | 0 | Telangana | Hyderabad |
-| telangana__karimnagar | kharif | 34 | 4 | 6 | 0 | Telangana | Karimnagar |
-| telangana__karimnagar | rabi | 33 | 14 | 10 | 0 | Telangana | Karimnagar |
-| telangana__khammam | kharif | 34 | 6 | 3 | 0 | Telangana | Khammam |
-| telangana__khammam | rabi | 33 | 14 | 10 | 0 | Telangana | Khammam |
-| telangana__mahabubnagar | kharif | 34 | 6 | 6 | 0 | Telangana | Mahabubnagar |
-| telangana__mahabubnagar | rabi | 33 | 13 | 9 | 0 | Telangana | Mahabubnagar |
-| telangana__medak | kharif | 34 | 5 | 7 | 0 | Telangana | Medak |
-| telangana__medak | rabi | 33 | 13 | 8 | 0 | Telangana | Medak |
+| andhra_pradesh__ananthapur | kharif | 34 | 9 | 8 | 0 | Andhra Pradesh | Ananthapur |
+| andhra_pradesh__ananthapur | rabi | 33 | 16 | 9 | 0 | Andhra Pradesh | Ananthapur |
+| andhra_pradesh__chittoor | kharif | 34 | 5 | 7 | 0 | Andhra Pradesh | Chittoor |
+| andhra_pradesh__chittoor | rabi | 33 | 14 | 8 | 0 | Andhra Pradesh | Chittoor |
+| andhra_pradesh__east_godavari | kharif | 34 | 4 | 3 | 0 | Andhra Pradesh | East Godavari |
+| andhra_pradesh__east_godavari | rabi | 33 | 14 | 9 | 0 | Andhra Pradesh | East Godavari |
+| andhra_pradesh__guntur | kharif | 34 | 7 | 6 | 0 | Andhra Pradesh | Guntur |
+| andhra_pradesh__guntur | rabi | 33 | 14 | 14 | 0 | Andhra Pradesh | Guntur |
+| andhra_pradesh__kadapa_ysr | kharif | 34 | 9 | 6 | 0 | Andhra Pradesh | Kadapa YSR |
+| andhra_pradesh__kadapa_ysr | rabi | 33 | 14 | 9 | 0 | Andhra Pradesh | Kadapa YSR |
+| andhra_pradesh__krishna | kharif | 34 | 4 | 4 | 0 | Andhra Pradesh | Krishna |
+| andhra_pradesh__krishna | rabi | 33 | 15 | 10 | 0 | Andhra Pradesh | Krishna |
+| andhra_pradesh__kurnool | kharif | 34 | 4 | 6 | 0 | Andhra Pradesh | Kurnool |
+| andhra_pradesh__kurnool | rabi | 33 | 17 | 11 | 0 | Andhra Pradesh | Kurnool |
+| andhra_pradesh__s_p_s_nellore | kharif | 34 | 6 | 5 | 0 | Andhra Pradesh | S.P.S. Nellore |
+| andhra_pradesh__s_p_s_nellore | rabi | 33 | 13 | 10 | 1 | Andhra Pradesh | S.P.S. Nellore |
+| andhra_pradesh__srikakulam | kharif | 34 | 2 | 3 | 0 | Andhra Pradesh | Srikakulam |
+| andhra_pradesh__srikakulam | rabi | 33 | 13 | 10 | 0 | Andhra Pradesh | Srikakulam |
+| andhra_pradesh__visakhapatnam | kharif | 34 | 2 | 3 | 0 | Andhra Pradesh | Visakhapatnam |
+| andhra_pradesh__visakhapatnam | rabi | 33 | 13 | 9 | 0 | Andhra Pradesh | Visakhapatnam |
+| andhra_pradesh__west_godavari | kharif | 34 | 4 | 6 | 0 | Andhra Pradesh | West Godavari |
+| andhra_pradesh__west_godavari | rabi | 33 | 14 | 8 | 0 | Andhra Pradesh | West Godavari |
+| karnataka__bangalore | kharif | 34 | 7 | 6 | 0 | Karnataka | Bangalore |
+| karnataka__bangalore | rabi | 33 | 12 | 10 | 0 | Karnataka | Bangalore |
+| karnataka__belgaum | kharif | 34 | 5 | 4 | 0 | Karnataka | Belgaum |
+| karnataka__belgaum | rabi | 33 | 17 | 10 | 0 | Karnataka | Belgaum |
+| karnataka__bellary | kharif | 34 | 9 | 9 | 0 | Karnataka | Bellary |
+| karnataka__bellary | rabi | 33 | 18 | 9 | 0 | Karnataka | Bellary |
+| karnataka__bidar | kharif | 34 | 8 | 7 | 0 | Karnataka | Bidar |
+| karnataka__bidar | rabi | 33 | 18 | 9 | 0 | Karnataka | Bidar |
+| karnataka__chickmagalur | kharif | 34 | 4 | 2 | 0 | Karnataka | Chickmagalur |
+| karnataka__chickmagalur | rabi | 33 | 17 | 9 | 0 | Karnataka | Chickmagalur |
+| karnataka__chitradurga | kharif | 34 | 9 | 7 | 0 | Karnataka | Chitradurga |
+| karnataka__chitradurga | rabi | 33 | 18 | 9 | 0 | Karnataka | Chitradurga |
+| karnataka__coorg | kharif | 34 | 3 | 4 | 0 | Karnataka | Coorg |
+| karnataka__coorg | rabi | 33 | 13 | 7 | 0 | Karnataka | Coorg |
+| karnataka__dakshina_kannada | kharif | 34 | 2 | 1 | 1 | Karnataka | Dakshina Kannada |
+| karnataka__dakshina_kannada | rabi | 33 | 17 | 8 | 0 | Karnataka | Dakshina Kannada |
+| karnataka__dharwad | kharif | 34 | 7 | 6 | 0 | Karnataka | Dharwad |
+| karnataka__dharwad | rabi | 33 | 20 | 9 | 0 | Karnataka | Dharwad |
+| karnataka__hassan | kharif | 34 | 5 | 3 | 0 | Karnataka | Hassan |
+| karnataka__hassan | rabi | 33 | 16 | 8 | 0 | Karnataka | Hassan |
+| karnataka__kalaburagi | kharif | 34 | 7 | 5 | 0 | Karnataka | Kalaburagi |
+| karnataka__kalaburagi | rabi | 33 | 16 | 9 | 0 | Karnataka | Kalaburagi |
+| karnataka__kolar | kharif | 34 | 8 | 7 | 0 | Karnataka | Kolar |
+| karnataka__kolar | rabi | 33 | 12 | 7 | 0 | Karnataka | Kolar |
+| karnataka__mandya | kharif | 34 | 6 | 5 | 0 | Karnataka | Mandya |
+| karnataka__mandya | rabi | 33 | 12 | 6 | 0 | Karnataka | Mandya |
+| karnataka__mysore | kharif | 34 | 6 | 5 | 0 | Karnataka | Mysore |
+| karnataka__mysore | rabi | 33 | 12 | 6 | 0 | Karnataka | Mysore |
+| karnataka__raichur | kharif | 34 | 10 | 7 | 0 | Karnataka | Raichur |
+| karnataka__raichur | rabi | 33 | 20 | 8 | 0 | Karnataka | Raichur |
+| karnataka__shimoge | kharif | 34 | 7 | 3 | 1 | Karnataka | Shimoge |
+| karnataka__shimoge | rabi | 33 | 17 | 8 | 0 | Karnataka | Shimoge |
+| karnataka__tumkur | kharif | 34 | 6 | 7 | 0 | Karnataka | Tumkur |
+| karnataka__tumkur | rabi | 33 | 15 | 7 | 0 | Karnataka | Tumkur |
+| karnataka__uttara_kannada | kharif | 34 | 4 | 2 | 2 | Karnataka | Uttara Kannada |
+| karnataka__uttara_kannada | rabi | 33 | 17 | 10 | 0 | Karnataka | Uttara Kannada |
+| karnataka__vijayapura | kharif | 34 | 8 | 6 | 0 | Karnataka | Vijayapura |
+| karnataka__vijayapura | rabi | 33 | 18 | 10 | 0 | Karnataka | Vijayapura |
+| tamil_nadu__coimbatore | kharif | 34 | 7 | 5 | 0 | Tamil Nadu | Coimbatore |
+| tamil_nadu__coimbatore | rabi | 33 | 12 | 9 | 0 | Tamil Nadu | Coimbatore |
+| tamil_nadu__cuddalore | kharif | 34 | 5 | 9 | 0 | Tamil Nadu | Cuddalore |
+| tamil_nadu__cuddalore | rabi | 33 | 13 | 10 | 2 | Tamil Nadu | Cuddalore |
+| tamil_nadu__kanchipuram | kharif | 34 | 7 | 6 | 0 | Tamil Nadu | Kanchipuram |
+| tamil_nadu__kanchipuram | rabi | 33 | 12 | 10 | 1 | Tamil Nadu | Kanchipuram |
+| tamil_nadu__kanyakumari | kharif | 34 | 9 | 8 | 0 | Tamil Nadu | Kanyakumari |
+| tamil_nadu__kanyakumari | rabi | 33 | 9 | 10 | 0 | Tamil Nadu | Kanyakumari |
+| tamil_nadu__madurai | kharif | 34 | 6 | 4 | 0 | Tamil Nadu | Madurai |
+| tamil_nadu__madurai | rabi | 33 | 15 | 11 | 0 | Tamil Nadu | Madurai |
+| tamil_nadu__ramananthapuram | kharif | 34 | 6 | 6 | 0 | Tamil Nadu | Ramananthapuram |
+| tamil_nadu__ramananthapuram | rabi | 33 | 11 | 11 | 0 | Tamil Nadu | Ramananthapuram |
+| tamil_nadu__salem | kharif | 34 | 5 | 4 | 0 | Tamil Nadu | Salem |
+| tamil_nadu__salem | rabi | 33 | 14 | 11 | 0 | Tamil Nadu | Salem |
+| tamil_nadu__thanjavur | kharif | 34 | 9 | 6 | 0 | Tamil Nadu | Thanjavur |
+| tamil_nadu__thanjavur | rabi | 33 | 11 | 11 | 1 | Tamil Nadu | Thanjavur |
+| tamil_nadu__the_nilgiris | kharif | 34 | 6 | 5 | 0 | Tamil Nadu | The Nilgiris |
+| tamil_nadu__the_nilgiris | rabi | 33 | 10 | 8 | 1 | Tamil Nadu | The Nilgiris |
+| tamil_nadu__thirunelveli | kharif | 34 | 11 | 8 | 0 | Tamil Nadu | Thirunelveli |
+| tamil_nadu__thirunelveli | rabi | 33 | 9 | 10 | 0 | Tamil Nadu | Thirunelveli |
+| tamil_nadu__trichy | kharif | 34 | 7 | 4 | 0 | Tamil Nadu | Trichy |
+| tamil_nadu__trichy | rabi | 33 | 11 | 10 | 0 | Tamil Nadu | Trichy |
+| tamil_nadu__vellore | kharif | 34 | 6 | 6 | 0 | Tamil Nadu | Vellore |
+| tamil_nadu__vellore | rabi | 33 | 12 | 10 | 0 | Tamil Nadu | Vellore |
+| telangana__adilabad | kharif | 34 | 5 | 5 | 0 | Telangana | Adilabad |
+| telangana__adilabad | rabi | 33 | 15 | 11 | 0 | Telangana | Adilabad |
+| telangana__hyderabad | kharif | 34 | 6 | 7 | 0 | Telangana | Hyderabad |
+| telangana__hyderabad | rabi | 33 | 14 | 10 | 0 | Telangana | Hyderabad |
+| telangana__karimnagar | kharif | 34 | 7 | 6 | 0 | Telangana | Karimnagar |
+| telangana__karimnagar | rabi | 33 | 14 | 12 | 0 | Telangana | Karimnagar |
+| telangana__khammam | kharif | 34 | 5 | 4 | 0 | Telangana | Khammam |
+| telangana__khammam | rabi | 33 | 17 | 10 | 0 | Telangana | Khammam |
+| telangana__mahabubnagar | kharif | 34 | 7 | 5 | 0 | Telangana | Mahabubnagar |
+| telangana__mahabubnagar | rabi | 33 | 13 | 12 | 0 | Telangana | Mahabubnagar |
+| telangana__medak | kharif | 34 | 6 | 8 | 0 | Telangana | Medak |
+| telangana__medak | rabi | 33 | 15 | 10 | 0 | Telangana | Medak |
 | telangana__nalgonda | kharif | 34 | 6 | 4 | 0 | Telangana | Nalgonda |
-| telangana__nalgonda | rabi | 33 | 13 | 9 | 0 | Telangana | Nalgonda |
-| telangana__nizamabad | kharif | 34 | 6 | 5 | 0 | Telangana | Nizamabad |
-| telangana__nizamabad | rabi | 33 | 15 | 10 | 0 | Telangana | Nizamabad |
-| telangana__warangal | kharif | 34 | 7 | 6 | 0 | Telangana | Warangal |
-| telangana__warangal | rabi | 33 | 13 | 8 | 0 | Telangana | Warangal |
+| telangana__nalgonda | rabi | 33 | 13 | 8 | 0 | Telangana | Nalgonda |
+| telangana__nizamabad | kharif | 34 | 6 | 7 | 1 | Telangana | Nizamabad |
+| telangana__nizamabad | rabi | 33 | 17 | 10 | 0 | Telangana | Nizamabad |
+| telangana__warangal | kharif | 34 | 5 | 5 | 0 | Telangana | Warangal |
+| telangana__warangal | rabi | 33 | 15 | 10 | 0 | Telangana | Warangal |

@@ -4,85 +4,85 @@
     2024
   ],
   "n_districts": 51,
-  "kharif_cv_mean": 0.2589873219383252,
-  "kharif_cv_median": 0.25219107231241206,
-  "rabi_cv_mean": 0.6379448296092955,
+  "kharif_cv_mean": 0.2843636473676899,
+  "kharif_cv_median": 0.2734056993588368,
+  "rabi_cv_mean": 0.7071216517493087,
   "kharif_cv_by_state": {
-    "Andhra Pradesh": 0.24839082564972664,
-    "Karnataka": 0.26813132222815617,
-    "Tamil Nadu": 0.26733874068135915,
-    "Telangana": 0.2414993695773685
+    "Andhra Pradesh": 0.25521755333188906,
+    "Karnataka": 0.2593287750456219,
+    "Tamil Nadu": 0.37534530414302497,
+    "Telangana": 0.2515291726131429
   },
   "top_cv_districts": [
     {
-      "district_id": "tamil_nadu__kanyakumari",
-      "district": "Kanyakumari",
-      "cv": 0.4411517716920025,
-      "mean_rain_mm": 804.0306502941175
-    },
-    {
       "district_id": "tamil_nadu__thirunelveli",
       "district": "Thirunelveli",
-      "cv": 0.41676706120792545,
-      "mean_rain_mm": 852.1544982352941
+      "cv": 0.5917736759213944,
+      "mean_rain_mm": 320.66444864705886
+    },
+    {
+      "district_id": "tamil_nadu__madurai",
+      "district": "Madurai",
+      "cv": 0.4783854711554588,
+      "mean_rain_mm": 509.43308970588237
+    },
+    {
+      "district_id": "tamil_nadu__trichy",
+      "district": "Trichy",
+      "cv": 0.4462462061459452,
+      "mean_rain_mm": 467.5127861764706
     },
     {
       "district_id": "tamil_nadu__ramananthapuram",
       "district": "Ramananthapuram",
-      "cv": 0.35228623064585696,
-      "mean_rain_mm": 497.61824382352944
+      "cv": 0.44199898333484333,
+      "mean_rain_mm": 433.87924529411765
     },
     {
-      "district_id": "karnataka__tumkur",
-      "district": "Tumkur",
-      "cv": 0.31320274615730515,
-      "mean_rain_mm": 597.0164620588235
-    },
-    {
-      "district_id": "karnataka__kolar",
-      "district": "Kolar",
-      "cv": 0.3097125618420218,
-      "mean_rain_mm": 589.8405570588235
+      "district_id": "tamil_nadu__thanjavur",
+      "district": "Thanjavur",
+      "cv": 0.4188848619675272,
+      "mean_rain_mm": 496.89819852941173
     }
   ],
   "lowest_cv_district": {
     "district_id": "karnataka__dakshina_kannada",
     "district": "Dakshina Kannada",
-    "cv": 0.17402777287503354
+    "cv": 0.14242201595679102
   },
   "spearman_meanrain_vs_cv": {
-    "rho": -0.23447963800904978,
-    "p": 0.09768425437488451
+    "rho": -0.763710407239819,
+    "p": 7.123042626820738e-11
   },
   "driest_regional_years": [
     {
-      "year": 2018,
-      "mean_anomaly_pct": -28.48676927852335,
-      "share_districts_below_normal": 0.9411764705882353
+      "year": 2002,
+      "mean_anomaly_pct": -36.9263101347299,
+      "share_districts_below_normal": 1.0
     },
     {
-      "year": 2015,
-      "mean_anomaly_pct": -26.10965659312122,
-      "share_districts_below_normal": 0.9411764705882353
+      "year": 2003,
+      "mean_anomaly_pct": -23.253323703521332,
+      "share_districts_below_normal": 0.803921568627451
     },
     {
-      "year": 2016,
-      "mean_anomaly_pct": -22.740048459335853,
-      "share_districts_below_normal": 0.7647058823529411
+      "year": 2023,
+      "mean_anomaly_pct": -19.61577709925207,
+      "share_districts_below_normal": 0.803921568627451
     }
   ],
   "wettest_regional_years": [
     {
-      "year": 2020,
-      "mean_anomaly_pct": 31.440626709839616
-    },
-    {
-      "year": 2005,
-      "mean_anomaly_pct": 29.391377479600163
-    },
-    {
       "year": 2022,
-      "mean_anomaly_pct": 24.817776546138067
+      "mean_anomaly_pct": 28.36347245615585
+    },
+    {
+      "year": 2020,
+      "mean_anomaly_pct": 27.703860463202947
+    },
+    {
+      "year": 2019,
+      "mean_anomaly_pct": 22.618192046664504
     }
   ]
 }

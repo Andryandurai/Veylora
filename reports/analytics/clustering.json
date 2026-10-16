@@ -2,116 +2,129 @@
   "train_years_up_to": 2011,
   "n_districts": 51,
   "silhouette_by_k": {
-    "3": 0.2542432490870476,
-    "4": 0.289146592137112,
-    "5": 0.3298317018513161,
-    "6": 0.33090441096038636,
-    "7": 0.27243921471865923,
-    "8": 0.2634863207384717
+    "3": 0.29556954731103313,
+    "4": 0.29282239555371886,
+    "5": 0.30507986630103673,
+    "6": 0.3537407397263979,
+    "7": 0.3696667459264417,
+    "8": 0.33621428550135407
   },
-  "chosen_k": 6,
-  "chosen_silhouette": 0.33090441096038636,
+  "chosen_k": 7,
+  "chosen_silhouette": 0.3696667459264417,
   "clusters": [
     {
       "cluster_id": 0,
-      "label": "dry-hot",
+      "label": "dry-hot-variable-rain-long-dry-spells",
       "n_districts": 3,
       "example_districts": [
-        "Coimbatore",
-        "Thanjavur",
+        "Madurai",
+        "Thirunelveli",
         "Trichy"
       ],
-      "mean_rain_mm": 433.04648841269847,
-      "rain_cv": 0.18612502914104734,
-      "mean_tmax_c": 33.098570389821326,
-      "heat_days": 0.2698412698412699,
-      "dry_spell_days": 30.825396825396822,
-      "yield_cv": 0.2030500690275252
+      "mean_rain_mm": 431.1295559365079,
+      "rain_cv": 0.5138161016648622,
+      "mean_tmax_c": 32.85091537968698,
+      "heat_days": 0.0,
+      "dry_spell_days": 33.079365079365076,
+      "yield_cv": 0.11184004810171311
     },
     {
       "cluster_id": 1,
-      "label": "moderate-warm-variable-rain-volatile-yield",
-      "n_districts": 5,
+      "label": "dry-hot-variable-rain-long-dry-spells-volatile-yield",
+      "n_districts": 2,
+      "example_districts": [
+        "Ramananthapuram",
+        "Thanjavur"
+      ],
+      "mean_rain_mm": 455.88096523809526,
+      "rain_cv": 0.4654932191109703,
+      "mean_tmax_c": 34.12164634416084,
+      "heat_days": 0.0,
+      "dry_spell_days": 29.404761904761905,
+      "yield_cv": 0.3441845590401722
+    },
+    {
+      "cluster_id": 2,
+      "label": "moderate-warm",
+      "n_districts": 15,
+      "example_districts": [
+        "Ananthapur",
+        "Bellary",
+        "Chittoor",
+        "Coimbatore"
+      ],
+      "mean_rain_mm": 544.8166653015874,
+      "rain_cv": 0.3110293183302732,
+      "mean_tmax_c": 32.38409944014475,
+      "heat_days": 0.5333333333333332,
+      "dry_spell_days": 22.92063492063492,
+      "yield_cv": 0.11749881620517245
+    },
+    {
+      "cluster_id": 3,
+      "label": "moderate-warm-stable-rain",
+      "n_districts": 7,
       "example_districts": [
         "Belgaum",
         "Bidar",
         "Dharwad",
         "Kalaburagi"
       ],
-      "mean_rain_mm": 653.3272583809523,
-      "rain_cv": 0.24422821630314703,
-      "mean_tmax_c": 30.49529785277352,
-      "heat_days": 0.9238095238095239,
-      "dry_spell_days": 18.41904761904762,
-      "yield_cv": 0.3100214622759664
-    },
-    {
-      "cluster_id": 2,
-      "label": "moderate-warm-variable-rain",
-      "n_districts": 27,
-      "example_districts": [
-        "Ananthapur",
-        "Bangalore",
-        "Bellary",
-        "Chitradurga"
-      ],
-      "mean_rain_mm": 674.090079611993,
-      "rain_cv": 0.2461934238727037,
-      "mean_tmax_c": 30.988163244436937,
-      "heat_days": 0.7389770723104058,
-      "dry_spell_days": 18.368606701940035,
-      "yield_cv": 0.10641998130909401
-    },
-    {
-      "cluster_id": 3,
-      "label": "moderate-warm-stable-rain",
-      "n_districts": 6,
-      "example_districts": [
-        "Adilabad",
-        "Karimnagar",
-        "Khammam",
-        "Nalgonda"
-      ],
-      "mean_rain_mm": 810.2678293650794,
-      "rain_cv": 0.19675978740784714,
-      "mean_tmax_c": 31.294725589750218,
-      "heat_days": 4.682539682539682,
-      "dry_spell_days": 16.984126984126984,
-      "yield_cv": 0.12332266024488944
+      "mean_rain_mm": 746.2631023809524,
+      "rain_cv": 0.2270571824647626,
+      "mean_tmax_c": 30.60134975638069,
+      "heat_days": 0.7755102040816326,
+      "dry_spell_days": 14.918367346938776,
+      "yield_cv": 0.24648062680799418
     },
     {
       "cluster_id": 4,
-      "label": "moderate-cool",
-      "n_districts": 6,
+      "label": "moderate-hot",
+      "n_districts": 13,
       "example_districts": [
-        "Hassan",
-        "Mandya",
-        "Mysore",
-        "The Nilgiris"
+        "Adilabad",
+        "East Godavari",
+        "Guntur",
+        "Hyderabad"
       ],
-      "mean_rain_mm": 1037.8926108730159,
-      "rain_cv": 0.17461153462421317,
-      "mean_tmax_c": 27.329017537054973,
-      "heat_days": 0.02380952380952417,
-      "dry_spell_days": 12.865079365079366,
-      "yield_cv": 0.12886977606158384
+      "mean_rain_mm": 833.9121624542124,
+      "rain_cv": 0.2264963493468674,
+      "mean_tmax_c": 32.694730347643386,
+      "heat_days": 4.153846153846154,
+      "dry_spell_days": 15.915750915750916,
+      "yield_cv": 0.11160664870777157
     },
     {
       "cluster_id": 5,
-      "label": "wet-cool",
-      "n_districts": 4,
+      "label": "moderate-cool",
+      "n_districts": 9,
       "example_districts": [
+        "Bangalore",
         "Chickmagalur",
-        "Coorg",
-        "Dakshina Kannada",
-        "Shimoge"
+        "Chitradurga",
+        "Coorg"
       ],
-      "mean_rain_mm": 2746.1756321428575,
-      "rain_cv": 0.16136825316720216,
-      "mean_tmax_c": 26.268855439514674,
+      "mean_rain_mm": 880.3625215873016,
+      "rain_cv": 0.22579080557186634,
+      "mean_tmax_c": 28.070298306323696,
+      "heat_days": -2.220446049250313e-16,
+      "dry_spell_days": 16.058201058201057,
+      "yield_cv": 0.079948346903572
+    },
+    {
+      "cluster_id": 6,
+      "label": "wet-cool",
+      "n_districts": 2,
+      "example_districts": [
+        "Dakshina Kannada",
+        "Uttara Kannada"
+      ],
+      "mean_rain_mm": 3154.760588095238,
+      "rain_cv": 0.15122241115487223,
+      "mean_tmax_c": 28.33083318721606,
       "heat_days": 0.0,
-      "dry_spell_days": 10.511904761904763,
-      "yield_cv": 0.08590761291601909
+      "dry_spell_days": 9.571428571428571,
+      "yield_cv": 0.10361231742932657
     }
   ]
 }

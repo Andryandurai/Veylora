@@ -107,3 +107,41 @@ now drops rows where (1) reported and recomputed yield disagree by more than 50 
 plausible per-crop range (`settings.yaml: etl.min/max_plausible_yield_t_ha`; sugarcane has no bound because its unit is
 unclear, D-007). 7 of 4 293 rows (0.16 percent) were dropped; they are listed in `docs/DATA_QUALITY.md`. The bounds
 are physical/agronomic limits chosen before looking at model results, not tuned on the test years.
+
+## 2026-10-16 - Phase 4 (yield models)
+
+### D-013: Serving model uses weather features only
+NDVI / soil moisture cannot be recomputed when a what-if changes rainfall or temperature, and they are synthetic
+(derived from rainfall) until Earth Engine is authenticated. `predict_yield` therefore serves an XGBoost trained on the
+`weather` feature set; `weather+satellite` models are trained and reported for comparison only. Overrides are applied
+to the *daily* weather of a reference year and all season features are recomputed with the same code as the SQL
+view (`analytics/predictive/features.py`, checked against the view in tests), so scenarios stay internally consistent.
+
+### D-014: Temperature features are monotone-constrained in the shipped XGBoost
+The first full run gave a what-if response where +4 C *raised* forecast yield by ~9 percent on average (96 percent of
+district-years), because trees cannot extrapolate beyond the historical temperature range. Phase 3's fixed-effects
+regressions show heat lowering rice and cotton yield, so XGBoost (point and quantile models) now carries monotone
+non-increasing constraints on mean Tmax, heat-day and degree-day features. Cost: validation relative RMSE 0.342 vs
+0.339 unconstrained, test 0.410 vs 0.404 (reported in `reports/yield_model_comparison.md`). The constraint is a domain
+assumption (it would be wrong for cool highland districts at some temperatures), not a learned fact.
+
+### D-015: Baselines and what the models achieve
+Besides the plan's naive last-year baseline, two weather-free baselines were added: a per-district linear trend (planned
+before the first run) and the previous-3-year mean (added after the first evaluation round, when the first test numbers
+had been seen; it can only make claims more conservative). Result on the test years 2015-2017: the models beat naive last
+year clearly (about 17 percent lower relative RMSE) but are **statistically indistinguishable from the trend and 3-year-mean
+baselines**, consistent with Phase 3 (weather adds very little beyond district and year effects). Validation-year skill
+(relative RMSE ~0.34) did not carry over to the test years (~0.41), so the numbers should not be quoted without the baselines.
+The plan's hypothesis targets (RMSE 2.9, R2 0.82, F1 0.75) are not reproduced and are not claimed.
+
+### D-016: Serving models are fitted on train years only
+The shipped models are the ones that were evaluated (fitted on crop years <= 2011, tuned on 2012-2014), not refit on
+validation or test years, so reported metrics describe exactly what `predict_yield` runs. Conformal intervals are
+calibrated on 2012-2014; test coverage is slightly below the 80 percent target (see the report).
+
+### D-017: IMD is the primary weather source; POWER differs mainly in extremes
+After the IMD download completed (all 34 years of rain, Tmax and Tmin), rain, Tmax and Tmin are 100 percent IMD and only
+humidity, wind and solar come from NASA POWER. Comparing the two on the same districts: daily rain correlation 0.61,
+annual district rain correlation 0.81, daily Tmax correlation 0.85 (POWER 0.19 C cooler on average), but **heat days (Tmax >= 40 C)
+average 10.6 per district-year in IMD versus 21.9 in POWER**. Results that were first produced from the POWER stand-in
+(Phase 3 findings, Phase 4 first runs) were regenerated on IMD before the phases were tagged.

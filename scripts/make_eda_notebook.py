@@ -49,12 +49,22 @@ def build() -> nbformat.NotebookNode:
     ]
     for name, title in FIGURES:
         cells.append(new_markdown_cell(f"## {title}"))
-        cells.append(new_code_cell(f"display(Image(filename=str(ROOT / 'reports' / 'figures' / '{name}.png')))"))
+        cells.append(
+            new_code_cell(
+                f"display(Image(filename=str(ROOT / 'reports' / 'figures' / '{name}.png')))"
+            )
+        )
     for name, title in TABLES:
         cells.append(new_markdown_cell(f"## {title}"))
-        cells.append(new_code_cell(f"pd.read_csv(ROOT / 'reports' / 'analytics' / '{name}.csv').round(4)"))
+        cells.append(
+            new_code_cell(f"pd.read_csv(ROOT / 'reports' / 'analytics' / '{name}.csv').round(4)")
+        )
     notebook = new_notebook(cells=cells)
-    notebook.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
+    notebook.metadata["kernelspec"] = {
+        "display_name": "Python 3",
+        "language": "python",
+        "name": "python3",
+    }
     return notebook
 
 
@@ -62,7 +72,9 @@ def main() -> None:
     """Build, execute (so outputs are embedded) and save the notebook."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     notebook = build()
-    NotebookClient(notebook, timeout=600, kernel_name="python3", resources={"metadata": {"path": str(ROOT)}}).execute()
+    NotebookClient(
+        notebook, timeout=600, kernel_name="python3", resources={"metadata": {"path": str(ROOT)}}
+    ).execute()
     target = ROOT / "notebooks" / "01_eda.ipynb"
     target.parent.mkdir(exist_ok=True)
     nbformat.write(notebook, target)

@@ -1,0 +1,1055 @@
+{
+  "metrics_file": "reports/yield_metrics.csv",
+  "best_by_validation": {
+    "weather|30": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.34607467979964335
+    },
+    "weather|60": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.3429242715757709
+    },
+    "weather|90": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.3424091505514246
+    },
+    "weather+satellite|30": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.3475730696044131
+    },
+    "weather+satellite|60": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.33681487266318316
+    },
+    "weather+satellite|90": {
+      "model": "lstm",
+      "valid_rmse_rel": 0.3330844040228189
+    }
+  },
+  "bootstrap_vs_baseline": [
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.0909254994095954,
+      "lead_days": 30,
+      "lo": 0.9819369358615542,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.924,
+      "ratio": 1.0401778242243696,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8928394631635073,
+      "lead_days": 30,
+      "lo": 0.828767122742909,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.858753361065295,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 1.0495571100287282,
+      "lead_days": 30,
+      "lo": 0.9744049941151406,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.698,
+      "ratio": 1.0099423621540318,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.031902889967396,
+      "lead_days": 30,
+      "lo": 0.9418650760477041,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.301,
+      "ratio": 0.9889074489380328,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8652588747913288,
+      "lead_days": 30,
+      "lo": 0.7730254766818119,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8164253993698498,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 0.9982883224821607,
+      "lead_days": 30,
+      "lo": 0.9222860552788436,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0215,
+      "ratio": 0.9601622930934195,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.0944870951798462,
+      "lead_days": 60,
+      "lo": 0.9881320872799072,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.94,
+      "ratio": 1.0460915756347517,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8916721235410191,
+      "lead_days": 60,
+      "lo": 0.8381661787460504,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8636356550172519,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 1.0518556181207028,
+      "lead_days": 60,
+      "lo": 0.9826978268002043,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.823,
+      "ratio": 1.015684215065621,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.032775298459329,
+      "lead_days": 60,
+      "lo": 0.9363795441120155,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.2945,
+      "ratio": 0.9871518978927168,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8637030607067381,
+      "lead_days": 60,
+      "lo": 0.7734779035528088,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8149760458789589,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 1.0006267108938531,
+      "lead_days": 60,
+      "lo": 0.9174646861747718,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0255,
+      "ratio": 0.958457771685351,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.0973770776275211,
+      "lead_days": 90,
+      "lo": 0.9956302825858031,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9635,
+      "ratio": 1.0503749138205825,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8972609885510033,
+      "lead_days": 90,
+      "lo": 0.8403122283244525,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.867171907163758,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 1.0578753299457435,
+      "lead_days": 90,
+      "lo": 0.9869816611649777,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.877,
+      "ratio": 1.019843046935093,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather",
+      "hi": 1.0393318591817473,
+      "lead_days": 90,
+      "lo": 0.9411403612414583,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.3335,
+      "ratio": 0.9888860926530745,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather",
+      "hi": 0.8635862336638914,
+      "lead_days": 90,
+      "lo": 0.7782043677279546,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8164077679792734,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather",
+      "hi": 1.0087845722914,
+      "lead_days": 90,
+      "lo": 0.918695065223845,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.064,
+      "ratio": 0.9601415575841868,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.117316909348009,
+      "lead_days": 30,
+      "lo": 1.006050285924494,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9845,
+      "ratio": 1.0678593397715594,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.912099263733337,
+      "lead_days": 30,
+      "lo": 0.853691616525924,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.881606755900218,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 1.0780522308676945,
+      "lead_days": 30,
+      "lo": 0.9967669313280895,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9675,
+      "ratio": 1.0368192427687277,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.0332674162645026,
+      "lead_days": 30,
+      "lo": 0.929450865162406,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.27,
+      "ratio": 0.9854084954440624,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.8618401459979705,
+      "lead_days": 30,
+      "lo": 0.7708421621127384,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8135367220656601,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 1.0015897760727646,
+      "lead_days": 30,
+      "lo": 0.9157583383008464,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0295,
+      "ratio": 0.9567650457435226,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.1069250966169422,
+      "lead_days": 60,
+      "lo": 0.998548661701468,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9725,
+      "ratio": 1.0602353059297496,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.9049629887560391,
+      "lead_days": 60,
+      "lo": 0.8432560567188554,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8753124814655444,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 1.06906367037834,
+      "lead_days": 60,
+      "lo": 0.987387686507711,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9125,
+      "ratio": 1.0294168212134698,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.0295064334031476,
+      "lead_days": 60,
+      "lo": 0.9345503067512547,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.277,
+      "ratio": 0.9866060495071871,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.8625146756614515,
+      "lead_days": 60,
+      "lo": 0.7724444966797956,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8145254026093283,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 0.997358306088056,
+      "lead_days": 60,
+      "lo": 0.9187585269269914,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.019,
+      "ratio": 0.9579277897966572,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.109004430572296,
+      "lead_days": 90,
+      "lo": 0.9974057455751942,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.971,
+      "ratio": 1.0595823784363383,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.9056964379645986,
+      "lead_days": 90,
+      "lo": 0.8426726253261426,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8747734354808667,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 1.0683593455048617,
+      "lead_days": 90,
+      "lo": 0.9889470050920821,
+      "model": "lstm",
+      "n": 457,
+      "p_not_better": 0.9265,
+      "ratio": 1.0287828727484534,
+      "selected_on_validation": true
+    },
+    {
+      "baseline": "district_trend",
+      "feature_set": "weather+satellite",
+      "hi": 1.0340510392394955,
+      "lead_days": 90,
+      "lo": 0.9364735541833162,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.3035,
+      "ratio": 0.9880315209001143,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "naive_last_year",
+      "feature_set": "weather+satellite",
+      "hi": 0.8622837670225734,
+      "lead_days": 90,
+      "lo": 0.7746779205267037,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.0,
+      "ratio": 0.8157022478768108,
+      "selected_on_validation": false
+    },
+    {
+      "baseline": "prior_mean_3y",
+      "feature_set": "weather+satellite",
+      "hi": 1.0003283077792244,
+      "lead_days": 90,
+      "lo": 0.9204990102017143,
+      "model": "xgboost",
+      "n": 457,
+      "p_not_better": 0.026,
+      "ratio": 0.9593118261721965,
+      "selected_on_validation": false
+    }
+  ],
+  "intervals_test": {
+    "30": {
+      "coverage": 0.7811816192560175,
+      "mean_width_rel": 0.7543190717697144,
+      "n": 457,
+      "coverage_cotton": 0.7049180327868853,
+      "coverage_rice": 0.869281045751634,
+      "coverage_sugarcane": 0.782608695652174,
+      "coverage_wheat": 0.6818181818181818,
+      "conformal_qhat_rel": 0.035063757198536716,
+      "coverage_valid_calibration": 0.8034188034188035,
+      "target_coverage": 0.8
+    },
+    "60": {
+      "coverage": 0.8030634573304157,
+      "mean_width_rel": 0.7409979104995728,
+      "n": 457,
+      "coverage_cotton": 0.6639344262295082,
+      "coverage_rice": 0.8823529411764706,
+      "coverage_sugarcane": 0.8695652173913043,
+      "coverage_wheat": 0.7045454545454546,
+      "conformal_qhat_rel": 0.047828290632130344,
+      "coverage_valid_calibration": 0.8055555555555556,
+      "target_coverage": 0.8
+    },
+    "90": {
+      "coverage": 0.7964989059080962,
+      "mean_width_rel": 0.7396969199180603,
+      "n": 457,
+      "coverage_cotton": 0.6721311475409836,
+      "coverage_rice": 0.8954248366013072,
+      "coverage_sugarcane": 0.8260869565217391,
+      "coverage_wheat": 0.7045454545454546,
+      "conformal_qhat_rel": 0.06522687962937035,
+      "coverage_valid_calibration": 0.8055555555555556,
+      "target_coverage": 0.8
+    }
+  },
+  "leave_one_state_out": {
+    "lead_days": 60,
+    "feature_set": "weather",
+    "rows": [
+      {
+        "held_out_state": "Andhra Pradesh",
+        "n_test": 105,
+        "xgb_rmse_rel": 0.35035922879341913,
+        "naive_rmse_rel": 0.4351429866068932,
+        "xgb_mae": 0.5376331032107424,
+        "naive_mae": 0.4077081095959118
+      },
+      {
+        "held_out_state": "Karnataka",
+        "n_test": 177,
+        "xgb_rmse_rel": 0.4003123719852101,
+        "naive_rmse_rel": 0.5053011906192705,
+        "xgb_mae": 0.5767012138794623,
+        "naive_mae": 0.676286435814021
+      },
+      {
+        "held_out_state": "Tamil Nadu",
+        "n_test": 84,
+        "xgb_rmse_rel": 0.3127355264284745,
+        "naive_rmse_rel": 0.38007129306140813,
+        "xgb_mae": 0.6941699069771805,
+        "naive_mae": 0.8930362913586553
+      },
+      {
+        "held_out_state": "Telangana",
+        "n_test": 91,
+        "xgb_rmse_rel": 0.5101294740826118,
+        "naive_rmse_rel": 0.6206416060699916,
+        "xgb_mae": 0.6010182923631587,
+        "naive_mae": 0.7714960074040469
+      }
+    ]
+  },
+  "shap": {
+    "top_features": [
+      {
+        "feature": "prev_year_rel",
+        "mean_abs_shap": 0.10075632482767105
+      },
+      {
+        "feature": "mean_prev3_rel",
+        "mean_abs_shap": 0.04882628470659256
+      },
+      {
+        "feature": "log_scale",
+        "mean_abs_shap": 0.031085291877388954
+      },
+      {
+        "feature": "rain_d60_ratio",
+        "mean_abs_shap": 0.019864574074745178
+      },
+      {
+        "feature": "crop_sugarcane",
+        "mean_abs_shap": 0.010021735914051533
+      },
+      {
+        "feature": "mean_tmax_d60_anom",
+        "mean_abs_shap": 0.009040473960340023
+      },
+      {
+        "feature": "mean_tmax_d60",
+        "mean_abs_shap": 0.005029596854001284
+      },
+      {
+        "feature": "rain_d60",
+        "mean_abs_shap": 0.003430795855820179
+      },
+      {
+        "feature": "mean_tmax_d30",
+        "mean_abs_shap": 0.0032741238828748465
+      },
+      {
+        "feature": "rain_d30_ratio",
+        "mean_abs_shap": 0.0023106697481125593
+      }
+    ]
+  },
+  "xgboost_params": {
+    "30": {
+      "max_depth": 3,
+      "learning_rate": 0.19564156449038717,
+      "subsample": 0.6154296246277002,
+      "colsample_bytree": 0.725956564659385,
+      "min_child_weight": 7,
+      "reg_lambda": 18.77216490338487,
+      "gamma": 0.022077083992207355,
+      "n_estimators": 14
+    },
+    "60": {
+      "max_depth": 3,
+      "learning_rate": 0.01252616265429781,
+      "subsample": 0.7873382137341236,
+      "colsample_bytree": 0.5839769701526194,
+      "min_child_weight": 5,
+      "reg_lambda": 15.173194256168978,
+      "gamma": 0.04274959459983576,
+      "n_estimators": 234
+    },
+    "90": {
+      "max_depth": 3,
+      "learning_rate": 0.09647413670634838,
+      "subsample": 0.8844942727149475,
+      "colsample_bytree": 0.7971881718397023,
+      "min_child_weight": 2,
+      "reg_lambda": 0.5304889167177631,
+      "gamma": 0.007268877623690098,
+      "n_estimators": 39
+    }
+  },
+  "rf_params": {
+    "30": {
+      "min_samples_leaf": 10,
+      "max_features": 0.3
+    },
+    "60": {
+      "min_samples_leaf": 10,
+      "max_features": 0.6
+    },
+    "90": {
+      "min_samples_leaf": 10,
+      "max_features": 0.6
+    }
+  },
+  "ridge_alpha": {
+    "weather|30": 316.22776601683796,
+    "weather|60": 316.22776601683796,
+    "weather|90": 0.01,
+    "weather+satellite|30": 1000.0,
+    "weather+satellite|60": 316.22776601683796,
+    "weather+satellite|90": 316.22776601683796
+  },
+  "lstm_epochs": {
+    "weather|30": 56,
+    "weather|60": 39,
+    "weather|90": 39,
+    "weather+satellite|30": 39,
+    "weather+satellite|60": 39,
+    "weather+satellite|90": 39
+  },
+  "n_features": {
+    "weather|30": 25,
+    "weather|60": 33,
+    "weather|90": 41,
+    "weather+satellite|30": 29,
+    "weather+satellite|60": 39,
+    "weather+satellite|90": 49
+  },
+  "n_rows": {
+    "weather|30": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    },
+    "weather|60": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    },
+    "weather|90": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    },
+    "weather+satellite|30": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    },
+    "weather+satellite|60": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    },
+    "weather+satellite|90": {
+      "train": 1904,
+      "valid": 468,
+      "test": 457
+    }
+  },
+  "xgb_valid_rmse_rel_optuna": {
+    "30": 0.3522389181393305,
+    "60": 0.35656259812895863,
+    "90": 0.3528647800319716
+  },
+  "synthetic_satellite": true,
+  "meta": {
+    "generated_at": "2026-10-16T05:38:22+00:00",
+    "git_commit": "cc86097",
+    "seed": 42,
+    "data_source": "postgres",
+    "n_optuna_trials": 40,
+    "satellite_features_synthetic": true,
+    "labels_synthetic": false,
+    "split": {
+      "train_end": 2011,
+      "valid": [
+        2012,
+        2014
+      ],
+      "test": [
+        2015,
+        2017
+      ]
+    },
+    "levels": {
+      "crop": [
+        "rice",
+        "wheat",
+        "cotton",
+        "sugarcane"
+      ],
+      "season": [
+        "kharif",
+        "rabi"
+      ],
+      "cluster": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "runtime_s": 217.6
+  },
+  "scenario_response": [
+    {
+      "scenario": "rain x0.6",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": -0.07249601385708802,
+      "mean_change_pct": -2.2168402964987677,
+      "share_increase": 0.1047008547008547
+    },
+    {
+      "scenario": "rain x0.6",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": -0.008035649202722631,
+      "mean_change_pct": -2.268883844353347,
+      "share_increase": 0.12878787878787878
+    },
+    {
+      "scenario": "rain x0.6",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": -0.07607525298007628,
+      "mean_change_pct": -2.5773617563254514,
+      "share_increase": 0.10457516339869281
+    },
+    {
+      "scenario": "rain x0.6",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": -0.14972115803118946,
+      "mean_change_pct": -2.0056203466244775,
+      "share_increase": 0.10218978102189781
+    },
+    {
+      "scenario": "rain x0.6",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": -0.015567748568112834,
+      "mean_change_pct": -1.4974403282920419,
+      "share_increase": 0.043478260869565216
+    },
+    {
+      "scenario": "rain x0.8",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": -0.03752588674259191,
+      "mean_change_pct": -1.178223379510336,
+      "share_increase": 0.1111111111111111
+    },
+    {
+      "scenario": "rain x0.8",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": -0.004128686475231749,
+      "mean_change_pct": -1.2230803655602116,
+      "share_increase": 0.15151515151515152
+    },
+    {
+      "scenario": "rain x0.8",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": -0.03889017116814911,
+      "mean_change_pct": -1.354795917582965,
+      "share_increase": 0.08496732026143791
+    },
+    {
+      "scenario": "rain x0.8",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": -0.07805983592304068,
+      "mean_change_pct": -1.0693004901606835,
+      "share_increase": 0.11678832116788321
+    },
+    {
+      "scenario": "rain x0.8",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": -0.008102927622152924,
+      "mean_change_pct": -0.7866084959713493,
+      "share_increase": 0.06521739130434782
+    },
+    {
+      "scenario": "rain x1.2",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": 0.02687350640175011,
+      "mean_change_pct": 0.9636908524099397,
+      "share_increase": 0.7948717948717948
+    },
+    {
+      "scenario": "rain x1.2",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": 0.0038104354884748643,
+      "mean_change_pct": 1.152994091619143,
+      "share_increase": 0.803030303030303
+    },
+    {
+      "scenario": "rain x1.2",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": 0.02939320704590028,
+      "mean_change_pct": 1.049898725419476,
+      "share_increase": 0.8758169934640523
+    },
+    {
+      "scenario": "rain x1.2",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": 0.05281511399074037,
+      "mean_change_pct": 0.7707760553206106,
+      "share_increase": 0.7372262773722628
+    },
+    {
+      "scenario": "rain x1.2",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": 0.0074128742779608296,
+      "mean_change_pct": 0.7082885710004665,
+      "share_increase": 0.6739130434782609
+    },
+    {
+      "scenario": "rain x1.4",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": 0.04942582040007691,
+      "mean_change_pct": 1.6851083794418138,
+      "share_increase": 0.8311965811965812
+    },
+    {
+      "scenario": "rain x1.4",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": 0.00638591261992939,
+      "mean_change_pct": 1.9008932446881368,
+      "share_increase": 0.8333333333333334
+    },
+    {
+      "scenario": "rain x1.4",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": 0.04828585614746724,
+      "mean_change_pct": 1.7495309977431832,
+      "share_increase": 0.8888888888888888
+    },
+    {
+      "scenario": "rain x1.4",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": 0.104058353697462,
+      "mean_change_pct": 1.532268865667666,
+      "share_increase": 0.8029197080291971
+    },
+    {
+      "scenario": "rain x1.4",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": 0.014013326832402936,
+      "mean_change_pct": 1.3068203484512493,
+      "share_increase": 0.717391304347826
+    },
+    {
+      "scenario": "-2 C",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": 0.060847224330571215,
+      "mean_change_pct": 1.873838220370721,
+      "share_increase": 0.9337606837606838
+    },
+    {
+      "scenario": "-2 C",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": 0.008731743609957304,
+      "mean_change_pct": 2.357728759175397,
+      "share_increase": 0.9545454545454546
+    },
+    {
+      "scenario": "-2 C",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": 0.05242910298157229,
+      "mean_change_pct": 1.7051749462101469,
+      "share_increase": 0.8954248366013072
+    },
+    {
+      "scenario": "-2 C",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": 0.13508655661245586,
+      "mean_change_pct": 1.6515839505962524,
+      "share_increase": 0.9343065693430657
+    },
+    {
+      "scenario": "-2 C",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": 0.017291300393607503,
+      "mean_change_pct": 1.7082026721849117,
+      "share_increase": 1.0
+    },
+    {
+      "scenario": "+1 C",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": -0.05028889879443102,
+      "mean_change_pct": -1.6012996423944794,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+1 C",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": -0.005967446836632407,
+      "mean_change_pct": -1.6775286950933603,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+1 C",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": -0.045856115513683265,
+      "mean_change_pct": -1.5741129885328184,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+1 C",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": -0.10790091810411598,
+      "mean_change_pct": -1.412764568918528,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+1 C",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": -0.020632395641322,
+      "mean_change_pct": -2.0344872108898526,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+2 C",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": -0.0723777216817957,
+      "mean_change_pct": -2.3045578296174587,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+2 C",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": -0.009189511633359944,
+      "mean_change_pct": -2.550589378608962,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+2 C",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": -0.06774479123889997,
+      "mean_change_pct": -2.2639857234475915,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+2 C",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": -0.15326450209775008,
+      "mean_change_pct": -1.9716922146714833,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+2 C",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": -0.028208007924639487,
+      "mean_change_pct": -2.7248612431981063,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+4 C",
+      "crop": "all",
+      "n": 468,
+      "mean_change_t_ha": -0.10181189473417387,
+      "mean_change_pct": -3.519562501336853,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+4 C",
+      "crop": "cotton",
+      "n": 132,
+      "mean_change_t_ha": -0.014675837573813418,
+      "mean_change_pct": -3.972430342586239,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+4 C",
+      "crop": "rice",
+      "n": 153,
+      "mean_change_t_ha": -0.09355334015252226,
+      "mean_change_pct": -3.1732689528187836,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+4 C",
+      "crop": "sugarcane",
+      "n": 137,
+      "mean_change_t_ha": -0.20949083669072294,
+      "mean_change_pct": -2.735727084435607,
+      "share_increase": 0.0
+    },
+    {
+      "scenario": "+4 C",
+      "crop": "wheat",
+      "n": 46,
+      "mean_change_t_ha": -0.0586271849105446,
+      "mean_change_pct": -5.706297501202421,
+      "share_increase": 0.0
+    }
+  ]
+}
