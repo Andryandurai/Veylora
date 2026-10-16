@@ -1,0 +1,18 @@
+# Keep the build context small and free of secrets and regenerable data.
+.git
+.venv
+.env
+.pytest_cache
+.ruff_cache
+**/__pycache__
+*.pyc
+*.egg-info
+data/raw
+data/interim
+data/processed
+models
+simulator/index_embedded.html
+simulator/sim_data.json
+dashboards/static/simulator.html
+reports/figures/*.html
+notebooks

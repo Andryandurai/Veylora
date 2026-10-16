@@ -1,0 +1,33 @@
+# Install once with `pip install pre-commit && pre-commit install`; run on everything with `pre-commit run --all-files`.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1          # keep equal to the ruff version in requirements.lock
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      # The quick tests: pure logic, no models, no database, no browser (seconds, not minutes).
+      - id: fast-tests
+        name: fast tests
+        entry: python -m pytest -x -q -p no:cacheprovider tests/test_smoke.py tests/test_etl.py tests/test_analytics.py tests/test_packaging.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+      # Block accidental secrets and large files.
+      - id: no-secrets
+        name: no credentials in staged files
+        entry: python scripts/check_secrets.py
+        language: system
+        pass_filenames: true
+        stages: [pre-commit]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=20000]
+      - id: end-of-file-fixer
+        exclude: '\.(png|json|parquet|html|joblib|pt)$'
+      - id: trailing-whitespace
+        exclude: '\.(md|png|html)$'

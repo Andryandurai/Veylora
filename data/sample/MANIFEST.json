@@ -1,0 +1,46 @@
+{
+  "created": "2026-10-16T07:34:57+00:00",
+  "note": "derived district-level tables and serving models; satellite_16d is synthetic (is_synthetic=True)",
+  "files": {
+    "processed/districts.parquet": {
+      "bytes": 353089,
+      "sha256": "33d8ee0e32db2c95aae4567490bd906ca87fba77905d4a3800a0808c8368599e"
+    },
+    "processed/weather_daily.parquet": {
+      "bytes": 12419154,
+      "sha256": "4b63372b2a80ceb4bbe23fb841deb00d65657a0eb5045b0cce3567507717eaa9"
+    },
+    "processed/crops_annual.parquet": {
+      "bytes": 89835,
+      "sha256": "f9c764b2f9bafd4b8d23611f31c51a870907fbdebafae050a22c26589b379c6b"
+    },
+    "processed/satellite_16d.parquet": {
+      "bytes": 362855,
+      "sha256": "863b8d33e8a715b242e9ba2306b80b855b93769003bb1d9d6c2dd93f60b331d2"
+    },
+    "processed/district_clusters.parquet": {
+      "bytes": 9104,
+      "sha256": "877c051afc1eca80af93ff232fc64800d9eed9a567766fd1e454507bee5eaf96"
+    },
+    "models/yield_xgb.joblib": {
+      "bytes": 1022521,
+      "sha256": "55a11cff7bac65455a0e3b04760c2e4206b5dfa573c79a9b54f42b65a8d13654"
+    },
+    "models/drought_xgb.joblib": {
+      "bytes": 149360,
+      "sha256": "fdd88a2a4811fa326f4f6c3befdaedee82fa1ffe87a216cc31abe15aaad01c42"
+    },
+    "models/heatwave_lstm.pt": {
+      "bytes": 492769,
+      "sha256": "09a74c389f47a61223a816be0864abfac5764956821ecfd1a163cea7b005c54d"
+    },
+    "simulator/index_embedded.html": {
+      "bytes": 10019589,
+      "sha256": "f73eb7b2b0c8d478286258a3ae1076e0c88d1e9ed9720e3921eb46dd18de5828"
+    },
+    "simulator/sim_districts.json": {
+      "bytes": 1004,
+      "sha256": "6358b746c38cecc0e465c4c4a65d2c0b264cd0681a5a7c3c5f4c9ec01939d0c8"
+    }
+  }
+}

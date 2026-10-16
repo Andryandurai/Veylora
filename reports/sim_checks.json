@@ -1,0 +1,20 @@
+{
+ "title": "Crop-Climate Simulator",
+ "scenarios_chip": "6 districts, 2772 scenarios, built 2026-10-16 (27a069f)",
+ "drought_gauge_normal_rain": 0.043,
+ "drought_gauge_rain_0.4": 0.816,
+ "heat_gauge_dT0_week3": 0.0,
+ "heat_gauge_max_dT+4": 0.0,
+ "compare_water_baseline_mm": 600.0,
+ "compare_water_optimized_mm": 296.822,
+ "average_fps_5s_headless_software_gl": 11.2,
+ "yield_shown_vs_file_optimized": [
+  2.66,
+  2.66
+ ],
+ "yield_shown_vs_file_baseline": [
+  2.484,
+  2.484
+ ],
+ "failures": []
+}

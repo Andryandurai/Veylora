@@ -2,8 +2,8 @@
 
 Opens ``simulator/index_embedded.html`` from ``file://`` and checks that there are no console errors, that lowering
 the rainfall slider to 0.4 raises the drought gauge, that compare mode shows less optimized than baseline water,
-and that keyboard control works. Saves screenshots at weeks 3, 9 and 14 to ``reports/figures`` and prints the
-average frame rate over 5 seconds.
+and that keyboard control works. Saves screenshots at weeks 3, 9 and 14 to ``reports/figures``, prints the
+average frame rate over 5 seconds and saves the result to ``reports/sim_checks.json``.
 
 Run: ``python scripts/test_sim.py`` (exit code 1 on any failed check). Frame rates measured in headless Chromium use
 software WebGL (SwiftShader), so they are a *lower bound* for real GPUs and say little about integrated graphics.
@@ -184,6 +184,9 @@ def run() -> int:
     if errors:
         failures.append("browser errors: " + "; ".join(errors[:5]))
     report["failures"] = failures
+    (ROOT / "reports" / "sim_checks.json").write_text(
+        json.dumps(report, indent=1), encoding="utf-8"
+    )
     print(json.dumps(report, indent=1))  # noqa: T201 - CLI result
     return 1 if failures else 0
 

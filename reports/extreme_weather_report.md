@@ -3,7 +3,7 @@
 
 # Extreme-weather early warning: heatwave and drought
 
-Generated 2026-10-16T06:00:24+00:00 (seed 42, 158 s).
+Generated 2026-10-16T07:29:40+00:00 (seed 42, 170 s).
 
 ## Definitions and setup
 

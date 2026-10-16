@@ -1,0 +1,27 @@
+# Serving dependencies for the dashboards and the advisory bot (Streamlit Community Cloud, Hugging Face Spaces, Docker).
+# Exact versions: the trained models are pickles and must be loaded with the library versions that wrote them.
+# Use Python 3.11. Everything for development, ETL and training is in requirements.lock.
+--extra-index-url https://download.pytorch.org/whl/cpu
+streamlit==1.66.0
+altair==6.3.0
+pandas==3.0.6
+numpy==2.4.6
+pyarrow==26.0.0
+PyYAML==6.0.3
+geopandas==1.2.0
+shapely==2.2.0
+matplotlib==3.11.2
+scipy==1.17.1
+scikit-learn==1.9.1
+xgboost==3.2.0
+torch==2.14.1
+shap==0.51.0
+joblib==1.6.0
+PuLP==3.3.2
+SQLAlchemy==2.1.4
+psycopg[binary]==3.3.6
+fastapi==0.143.2
+uvicorn==0.54.0
+python-multipart==0.0.32
+twilio==9.12.0
+RapidFuzz==3.14.6

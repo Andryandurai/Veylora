@@ -689,8 +689,8 @@
   },
   "synthetic_satellite": true,
   "meta": {
-    "generated_at": "2026-10-16T05:38:22+00:00",
-    "git_commit": "cc86097",
+    "generated_at": "2026-10-16T07:26:20+00:00",
+    "git_commit": "27a069f",
     "seed": 42,
     "data_source": "postgres",
     "n_optuna_trials": 40,
@@ -728,7 +728,7 @@
         6
       ]
     },
-    "runtime_s": 217.6
+    "runtime_s": 204.6
   },
   "scenario_response": [
     {

@@ -19,5 +19,32 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # Dashboards (http://localhost:8501). `docker compose up --build app` starts the database first. Without mounted data
+  # the app starts from the committed demo bundle (data/sample); mount real outputs to use them instead.
+  app:
+    build: .
+    image: climateresilience:latest
+    environment:
+      DB_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}
+      DRY_RUN: "true"
+    ports:
+      - "${APP_PORT:-8501}:8501"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # WhatsApp/SMS webhook: `docker compose --profile bot up --build bot`. Needs TWILIO_AUTH_TOKEN (and PUBLIC_BASE_URL
+  # behind a tunnel) in .env; it refuses unsigned requests. Replies only, nothing is sent unless DRY_RUN=false.
+  bot:
+    image: climateresilience:latest
+    profiles: ["bot"]
+    command: ["uvicorn", "advisory.bot:app", "--host", "0.0.0.0", "--port", "8000"]
+    env_file: .env
+    ports:
+      - "${BOT_PORT:-8000}:8000"
+    depends_on:
+      - app
+
 volumes:
   climate_pgdata:

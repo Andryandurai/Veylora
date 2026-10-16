@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 from dashboards.components import ROOT
 
 SOURCE = ROOT / "simulator" / "index_embedded.html"
-SIM_DATA = ROOT / "simulator" / "sim_data.json"
+SIM_DISTRICTS = ROOT / "simulator" / "sim_districts.json"
 TARGET = ROOT / "dashboards" / "static" / "simulator.html"
 URL = "/app/static/simulator.html"
 
@@ -40,9 +40,9 @@ def ensure_simulator() -> Path | None:
 @lru_cache(maxsize=1)
 def simulator_districts() -> tuple[dict, ...]:
     """The representative districts exported to the simulator (id, name, cluster, lat, lon, crops)."""
-    if not SIM_DATA.exists():
+    if not SIM_DISTRICTS.exists():
         return ()
-    return tuple(json.loads(SIM_DATA.read_text(encoding="utf-8"))["districts"])
+    return tuple(json.loads(SIM_DISTRICTS.read_text(encoding="utf-8")))
 
 
 def _distance(a: tuple[float, float], b: tuple[float, float]) -> float:

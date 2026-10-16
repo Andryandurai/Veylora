@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-10-16T06:00:24+00:00",
+  "generated_at": "2026-10-16T07:29:40+00:00",
   "seed": 42,
   "reference_end_year": 2014,
   "quick": false,
@@ -35,7 +35,7 @@
     "severe": 0.7
    }
   },
-  "runtime_s": 158.5,
+  "runtime_s": 170.1,
   "heatwave_served": "climatology"
  },
  "heatwave": {

@@ -45,6 +45,7 @@ LOG = logging.getLogger(__name__)
 
 SIM_DIR = ROOT / "simulator"
 OUT_PATH = SIM_DIR / "sim_data.json"
+DISTRICT_INDEX = "sim_districts.json"
 SCHEMA_PATH = SIM_DIR / "sim_schema.json"
 GRID_RAIN = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6]
 GRID_TEMP = [-2, 0, 1, 2, 3, 4]
@@ -391,6 +392,15 @@ def write(data: dict[str, Any], path: Path = OUT_PATH) -> Path:
         raise ValueError(f"sim_data.json is {len(text) / 1e6:.1f} MB, above the 15 MB limit")
     path.write_text(text, encoding="utf-8")
     LOG.info("wrote %s (%.1f MB)", path, len(text) / 1e6)
+    # A small index of the exported districts lets the dashboards map any district to a simulated one without
+    # loading the full scenario grid.
+    index = [
+        {key: d[key] for key in ("id", "name", "state", "cluster", "lat", "lon", "crops")}
+        for d in data["districts"]
+    ]
+    (path.parent / DISTRICT_INDEX).write_text(
+        json.dumps(index, ensure_ascii=False), encoding="utf-8"
+    )
     return path
 
 

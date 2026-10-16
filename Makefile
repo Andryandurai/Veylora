@@ -11,10 +11,10 @@ endif
 # Use the venv interpreter when it exists, otherwise whatever `python` is on PATH.
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python)
 
-.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot test lint format clean help
+.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot pipeline test lint format clean help
 
 help:
-	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot test lint format clean')"
+	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards bot test-bot pipeline test lint format clean')"
 
 setup:
 	python -m venv .venv
@@ -76,6 +76,19 @@ bot:
 
 test-bot:
 	$(PY) scripts/smoke_bot.py
+
+# The whole chain from raw sources to the dashboards' inputs. Every step is idempotent (ETL skips existing downloads).
+# Needs Docker for the database; the IMD download is slow the first time (hours). See README.md for the offline demo bundle.
+pipeline:
+	$(MAKE) db-up
+	$(MAKE) etl
+	$(MAKE) db-all
+	$(MAKE) analytics-eda
+	$(MAKE) train-yield
+	$(MAKE) train-extreme
+	$(MAKE) prescriptive-report
+	$(MAKE) export-sim
+	$(MAKE) embed-sim
 
 test:
 	$(PY) -m pytest

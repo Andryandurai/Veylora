@@ -3,7 +3,7 @@
 
 # Yield model comparison
 
-Generated 2026-10-16T05:38:22+00:00 (commit `cc86097`, seed 42, data from postgres, 40 Optuna trials, 218 s).
+Generated 2026-10-16T07:26:20+00:00 (commit `27a069f`, seed 42, data from postgres, 40 Optuna trials, 205 s).
 
 ## Setup
 

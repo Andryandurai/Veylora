@@ -1,3 +1,7 @@
 * text=auto eol=lf
 *.png binary
 *.parquet binary
+*.joblib binary
+*.pt binary
+# The demo bundle is copied byte for byte and verified by SHA-256: no line-ending conversion.
+data/sample/** binary

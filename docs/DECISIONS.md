@@ -274,3 +274,25 @@ dashboard warns on every non-English advisory and the sender defaults to dry run
 - Control replies (help, confirmation questions) are English only; district names must be typed in English letters. Both are
   limitations of this version.
 - Bulk composition never sends; it writes a reviewable CSV with masked numbers.
+
+## 2026-10-16 - Phase 10 (hardening, packaging, report)
+
+### D-028: Packaging, demo bundle and generated documents
+- **Demo bundle in git.** `data/sample/` (git-tracked; the rest of `data/` and `models/` is ignored) holds the derived district tables,
+  the three serving models and the simulator page with a SHA-256 manifest (`python -m config.bundle make|restore|verify`). Dashboards
+  call `restore_if_missing()` at start-up, so a fresh clone, a container or a hosted Space runs without the multi-hour IMD download.
+  It contains IMD-derived series and ODbL-derived polygons whose redistribution terms are **unconfirmed**: `scripts/check_licenses.md`
+  lists what to verify, and the bundle should be dropped from a public push if permission is not obtained. The bundle's satellite table
+  stays flagged synthetic.
+- **Two dependency files.** `requirements.lock` is the exact development environment (the models are pickles and need the same
+  scikit-learn/XGBoost versions); `requirements.txt` is the exact serving subset with the CPU PyTorch index, used by the Docker image
+  and by Streamlit Cloud. `tests/test_packaging.py` keeps them consistent with each other and with `pyproject.toml`.
+- **Image.** `python:3.11-slim`, non-root user, health check, CPU-only PyTorch (default Linux wheels pull CUDA libraries that a CPU
+  service never uses), dependencies in a separate layer.
+- **Generated documents cannot drift from the results.** `scripts/make_report.py` writes the final report, the README results block,
+  the demo script and the CV bullets from `reports/*.json`; unknown values print as `MISSING (...)`, and `verify_claims` fails the run
+  when a sentence of the fixed prose (heatwave LSTM has no skill, optimizer keeps less yield, the yield model is not clearly better
+  than baselines, the satellite table is synthetic) is contradicted by the numbers, so the prose must be rewritten rather than
+  silently left wrong. The plan's targets are shown as hypotheses with measured values beside them, never as achievements.
+- **`make pipeline`** chains db-up, etl, db-all, analytics-eda, train-yield, train-extreme, prescriptive-report, export-sim, embed-sim
+  and stops at the first failure; every step is idempotent.

@@ -9,6 +9,7 @@ from typing import Any
 
 import streamlit as st
 
+from config import bundle
 from dashboards.components import ROOT
 
 REQUIRED = {
@@ -32,7 +33,9 @@ REQUIRED = {
 
 
 def missing(groups: list[str]) -> list[tuple[str, str]]:
-    """(group, instruction) for every requested group with a missing file."""
+    """(group, instruction) for every requested group with a missing file (after trying the demo bundle)."""
+    if any(not (ROOT / f).exists() for group in groups for f in REQUIRED[group][0]):
+        bundle.restore_if_missing()  # a fresh clone or a deployed app starts from data/sample
     problems = []
     for group in groups:
         files, hint = REQUIRED[group]

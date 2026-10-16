@@ -21,7 +21,7 @@ SMS/WhatsApp advisories.
 ## Environment and commands
 
 - Python 3.11 virtualenv in `.venv`. Repo root is the working directory; run modules as `python -m pkg.module`.
-- `make` targets: `setup db-up db-down test lint format clean` (later phases add more).
+- `make` targets: `setup db-up db-down db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim pipeline dashboards bot test test-sim test-dashboards test-bot lint format clean`.
   On this Windows machine GNU make is absent: use `mingw32-make` (same targets).
 - Database: Docker `postgis/postgis:16-3.4`, container `climateresilience-db`, host port from `DB_PORT`
   (default **5434**, because 5432/5433 are taken locally). Connection string is `DB_URL` in `.env`.
@@ -42,7 +42,7 @@ SMS/WhatsApp advisories.
 | 7 | 3D simulator | `simulator/export_sim_data.py` -> `simulator/sim_data.json`; `simulator/index.html`; `python -m simulator.embed` -> `index_embedded.html` |
 | 8 | Streamlit dashboards | `make dashboards` (= `streamlit run dashboards/app.py`); router `app.py`, pages in `dashboards/pages/`, shared code in `dashboards/components/`; numbers read from `reports/*.json`; `make test-dashboards` runs the browser check |
 | 9 | Farmer advisory | `advisory.generate.generate(district_id, crop, as_of_date, lang) -> str` / `compose(...)`; `advisory/twilio_client.py` (`send_sms`, `send_whatsapp`, dry run by default); `advisory/bot.py` (FastAPI `/whatsapp`, `/health`); `scripts/bulk_advisory.py`; `make bot`, `make test-bot`; `advisory/README.md` |
-| 10 | Hardening, deploy, report | `make pipeline`, Dockerfile, `reports/final_report.md`, README, demo script |
+| 10 | Hardening, deploy, report | `make pipeline`; `Dockerfile`, compose `app`/`bot`; `requirements.txt` (serving) and `requirements.lock`; `python -m config.bundle make|restore|verify` (demo bundle `data/sample`); `scripts/make_report.py` -> `reports/final_report.{md,pdf}`, README results block, `docs/DEMO_SCRIPT.md`, `docs/CV_BULLETS.md`; `scripts/check_container.py`; `docs/DEPLOY.md`; `scripts/check_licenses.md` |
 
 Dependencies flow downward only: a phase may import from earlier phases, never later ones. If a later
 phase needs something that does not exist yet (e.g. the dashboards need `advisory.generate`), create a

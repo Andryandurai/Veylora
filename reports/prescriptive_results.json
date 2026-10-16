@@ -212,7 +212,7 @@
   }
  ],
  "n_cases": 40,
- "max_case_seconds": 0.10191620000114199,
+ "max_case_seconds": 0.7684028000003309,
  "settings": {
   "seed": 42,
   "season_days": 112,
