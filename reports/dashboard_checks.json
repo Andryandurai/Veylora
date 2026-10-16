@@ -1,44 +1,44 @@
 {
   "pages": {
     "home": {
-      "cold_s": 12.57,
-      "warm_s": 1.12,
+      "cold_s": 10.83,
+      "warm_s": 1.11,
       "exception_boxes": 0,
       "console_errors": []
     },
     "weather": {
-      "cold_s": 1.74,
+      "cold_s": 1.75,
       "warm_s": 1.29,
       "exception_boxes": 0,
       "console_errors": []
     },
     "yield": {
-      "cold_s": 2.14,
-      "warm_s": 1.35,
+      "cold_s": 2.13,
+      "warm_s": 1.31,
       "exception_boxes": 0,
       "console_errors": []
     },
     "risk_map": {
-      "cold_s": 3.08,
-      "warm_s": 1.73,
+      "cold_s": 2.73,
+      "warm_s": 1.63,
       "exception_boxes": 0,
       "console_errors": []
     },
     "advisory": {
-      "cold_s": 1.72,
-      "warm_s": 1.41,
+      "cold_s": 1.77,
+      "warm_s": 1.45,
       "exception_boxes": 0,
       "console_errors": []
     },
     "simulator": {
-      "cold_s": 1.63,
-      "warm_s": 1.93,
+      "cold_s": 1.43,
+      "warm_s": 1.87,
       "exception_boxes": 0,
       "console_errors": []
     },
     "methodology": {
-      "cold_s": 3.15,
-      "warm_s": 1.3,
+      "cold_s": 3.17,
+      "warm_s": 1.41,
       "exception_boxes": 0,
       "console_errors": []
     }
@@ -46,7 +46,7 @@
   "warm_budget_s": 3.0,
   "simulator_embed": {
     "loaded": true,
-    "url": "http://127.0.0.1:51227/app/static/simulator.html?district=tamil_nadu__trichy&crop=rice&theme=light",
+    "url": "http://127.0.0.1:61902/app/static/simulator.html?district=tamil_nadu__trichy&crop=rice&theme=light",
     "district": "tamil_nadu__trichy"
   },
   "failures": []

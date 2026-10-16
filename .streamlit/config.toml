@@ -1,19 +1,28 @@
 # Shared Streamlit theme and server settings for the dashboards.
-# Minimal design: white page, near-black text, one blue accent, hairline borders, small radius. The finer rules
-# (type scale, spacing, flat alerts and metrics) are in dashboards/assets/minimal.css.
+# "Paper and field": warm paper page, white cards, deep green brand colour, dark green sidebar. The tokens are
+# defined once in dashboards/components/theme.py (used by the charts and the stylesheet); the finer rules
+# (type scale, cards, notes, navigation) are in dashboards/assets/minimal.css. Keep the values below in step.
 [theme]
 base = "light"
-primaryColor = "#2a78d6"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f7f7f5"
-textColor = "#111111"
-linkColor = "#2a78d6"
-borderColor = "#e8e7e2"
+primaryColor = "#1f6f5a"
+backgroundColor = "#f4f1e8"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1a2420"
+linkColor = "#1f6f5a"
+borderColor = "#e2dccb"
 font = "sans serif"
-baseRadius = "6px"
-showSidebarBorder = true
-headingFontSizes = ["2rem", "1.2rem", "1.05rem", "1rem", "0.95rem", "0.9rem"]
+baseRadius = "10px"
+showSidebarBorder = false
+headingFontSizes = ["2rem", "1.25rem", "1.05rem", "1rem", "0.95rem", "0.9rem"]
 headingFontWeights = [600, 600, 600, 600, 600, 600]
+
+[theme.sidebar]
+backgroundColor = "#123d33"
+secondaryBackgroundColor = "#1c5546"
+textColor = "#e8f1ec"
+primaryColor = "#8fd3b0"
+linkColor = "#8fd3b0"
+borderColor = "#2b6554"
 
 [client]
 toolbarMode = "minimal"        # no Deploy button or menu

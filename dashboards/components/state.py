@@ -24,6 +24,7 @@ def sidebar_selection(show_crop: bool = True) -> tuple[str, str]:
     )
     st.session_state.setdefault("crop", "rice" if "rice" in crops else crops[0])
     with st.sidebar:
+        ui.brand()
         ui.eyebrow("Selection")
         st.selectbox("District", ids, format_func=lambda d: labels[d], key="district")
         if show_crop:

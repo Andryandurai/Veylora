@@ -346,3 +346,18 @@ and per-crop `development` / `senescence` (a visual growth curve built from the 
 - **Layout.** Reading pages use a 1040 px column; the simulator page is wide (1480 px). The simulator embeds with `?theme=light` and its own
   chrome was flattened to match; its scene and numbers are unchanged. The embedded frame is 900 px tall so the results column is not clipped.
 - Nothing about the data, models or reported numbers changed. Browser checks (`make test-dashboards`) were updated for the new labels.
+
+### D-032: "Paper and field" theme replaces the all-white look of D-031
+
+Feedback on the first minimal version: it read as a blank white page. The structure of D-031 (top navigation, narrow column, flat notes,
+no shadows beyond a hairline) stays; the colour and surfaces changed.
+- **Palette in one place.** `dashboards/components/theme.py` holds the tokens; `ui.inject_css` writes them as CSS variables ahead of
+  `assets/minimal.css`, and the charts and maps read the same constants. `.streamlit/config.toml` repeats the values for Streamlit's own widgets.
+- **Surfaces.** Warm paper page, white cards (metrics, charts, tables, expanders, home tiles), a dark green sidebar with the product mark,
+  a tinted hero on the home page, tinted notes (green for information, amber for data caveats and warnings, red for errors).
+- **Type.** Headings use a serif stack (Palatino/Georgia) for an editorial feel; numbers stay in the sans face with tabular figures.
+- **Chart colours were checked, not chosen by eye.** The two-series pair (rain/Tmin blue `#2a86c0`, heat/Tmax orange `#d65a2b`) passes the
+  lightness, chroma, colour-vision and contrast checks of the dataviz validator. Green was rejected as a second category next to orange
+  (worst protan separation 6.2, below the floor) and is used only for single series and the interface. The risk maps use one terracotta ramp.
+- **Simulator chrome** takes the same tokens (paper page, white stage, green accent); the 3D scene and every number in it are unchanged.
+- Nothing about data, models or reported numbers changed.

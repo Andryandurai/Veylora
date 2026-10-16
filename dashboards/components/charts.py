@@ -5,24 +5,31 @@ from __future__ import annotations
 import altair as alt
 import pandas as pd
 
-from analytics import common
 from analytics.predictive.features import HEAT_TMAX_C
+from dashboards.components import theme
 
-BLUE, ORANGE = common.SERIES[0], common.SERIES[1]
+BLUE, ORANGE = theme.RAIN, theme.HEAT
+PADDING = {
+    "left": 14,
+    "right": 14,
+    "top": 14,
+    "bottom": 14,
+}  # Streamlit's Vega wrapper needs an object
 LEVEL_LABEL = {"low": "Low", "moderate": "Moderate", "high": "High", "severe": "Severe"}
 
 
 def style(chart: alt.Chart, height: int = 260) -> alt.Chart:
     """Apply the shared look: no frame, no axis lines or ticks, one hairline grid, quiet labels."""
     return (
-        chart.properties(height=height)
+        chart.properties(height=height, padding=PADDING)
+        .configure(background=theme.CARD)
         .configure_view(stroke=None)
         .configure_axis(
             domain=False,
             ticks=False,
-            gridColor="#eeeeea",
-            labelColor=common.INK_SECONDARY,
-            titleColor=common.INK_SECONDARY,
+            gridColor=theme.LINE,
+            labelColor=theme.INK_2,
+            titleColor=theme.INK_2,
             labelFontSize=11,
             titleFontSize=11,
             titleFontWeight="normal",
@@ -30,12 +37,12 @@ def style(chart: alt.Chart, height: int = 260) -> alt.Chart:
         )
         .configure_axisX(grid=False)
         .configure_legend(
-            labelColor=common.INK_SECONDARY,
-            titleColor=common.INK_SECONDARY,
+            labelColor=theme.INK_2,
+            titleColor=theme.INK_2,
             orient="top",
             symbolType="stroke",
         )
-        .configure_title(color=common.INK, fontSize=13, anchor="start", fontWeight=600)
+        .configure_title(color=theme.INK, fontSize=13, anchor="start", fontWeight=600)
     )
 
 
@@ -82,12 +89,12 @@ def temperature_chart(weather: pd.DataFrame) -> alt.Chart:
     )
     threshold = (
         alt.Chart(pd.DataFrame({"y": [HEAT_TMAX_C]}))
-        .mark_rule(strokeDash=[4, 4], color=common.INK_MUTED)
+        .mark_rule(strokeDash=[4, 4], color=theme.MUTED)
         .encode(y="y:Q")
     )
     label = (
         alt.Chart(pd.DataFrame({"y": [HEAT_TMAX_C], "t": [f"heat threshold {HEAT_TMAX_C:.0f} °C"]}))
-        .mark_text(align="left", dx=4, dy=-6, color=common.INK_MUTED, fontSize=10)
+        .mark_text(align="left", dx=4, dy=-6, color=theme.MUTED, fontSize=10)
         .encode(y="y:Q", text="t:N", x=alt.value(2))
     )
     return style(lines + threshold + label, height=190)
@@ -98,7 +105,7 @@ def probability_chart(probabilities: dict[str, float]) -> alt.Chart:
     frame = pd.DataFrame({"hazard": list(probabilities), "p": list(probabilities.values())})
     bars = (
         alt.Chart(frame)
-        .mark_bar(color=BLUE, size=16, cornerRadiusEnd=4)
+        .mark_bar(color=ORANGE, size=16, cornerRadiusEnd=4)
         .encode(
             y=alt.Y("hazard:N", title=None, sort=list(probabilities)),
             x=alt.X(
@@ -113,7 +120,7 @@ def probability_chart(probabilities: dict[str, float]) -> alt.Chart:
             ],
         )
     )
-    text = bars.mark_text(align="left", dx=4, color=common.INK_SECONDARY, fontSize=11).encode(
+    text = bars.mark_text(align="left", dx=4, color=theme.INK_2, fontSize=11).encode(
         text=alt.Text("p:Q", format=".0%")
     )
     return style(bars + text, height=40 + 34 * len(frame))
@@ -152,7 +159,7 @@ def history_chart(history: pd.DataFrame, forecast: dict | None, year: int | None
         )
         layers.append(
             alt.Chart(point)
-            .mark_point(size=110, filled=True, color=ORANGE, stroke=common.SURFACE, strokeWidth=2)
+            .mark_point(size=110, filled=True, color=ORANGE, stroke=theme.CARD, strokeWidth=2)
             .encode(
                 x="year:O",
                 y="yield:Q",
@@ -167,7 +174,7 @@ def history_chart(history: pd.DataFrame, forecast: dict | None, year: int | None
 
 
 def contributions_chart(contributions: list[dict]) -> alt.Chart:
-    """SHAP contributions in t/ha: blue raises, red lowers the forecast relative to the base value."""
+    """SHAP contributions in t/ha: blue raises, orange lowers the forecast relative to the base value."""
     frame = pd.DataFrame(contributions)
     frame["direction"] = frame["contribution_t_ha"].map(lambda v: "raises" if v >= 0 else "lowers")
     order = frame["feature"].tolist()
@@ -180,9 +187,8 @@ def contributions_chart(contributions: list[dict]) -> alt.Chart:
             color=alt.Color(
                 "direction:N",
                 title=None,
-                scale=alt.Scale(
-                    domain=["raises", "lowers"], range=[common.DIVERGING_HIGH, common.DIVERGING_LOW]
-                ),
+                scale=alt.Scale(domain=["raises", "lowers"], range=[theme.RAIN, theme.HEAT]),
+                legend=alt.Legend(symbolType="square"),
             ),
             tooltip=[
                 alt.Tooltip("feature:N", title="Feature"),
@@ -199,7 +205,7 @@ def crop_ranking_chart(ranking: pd.DataFrame) -> alt.Chart:
     order = ranking.sort_values("net_mid_inr_ha", ascending=False)["crop"].tolist()
     bars = (
         alt.Chart(ranking)
-        .mark_bar(color=BLUE, size=22, cornerRadiusEnd=4)
+        .mark_bar(color=theme.PRIMARY, size=22, cornerRadiusEnd=4)
         .encode(
             y=alt.Y("crop:N", title=None, sort=order),
             x=alt.X("net_mid_inr_ha:Q", title="Expected net return (INR/ha, approximate)"),

@@ -5,10 +5,10 @@ from __future__ import annotations
 import altair as alt
 import pandas as pd
 
-from analytics import common
-from dashboards.components import data
+from dashboards.components import data, theme
 
-SEQ = [common.SEQ_BLUE[k] for k in sorted(common.SEQ_BLUE)]
+SEQ = theme.SEQ_RISK
+PADDING = {"left": 14, "right": 14, "top": 14, "bottom": 14}
 
 
 def choropleth(
@@ -45,7 +45,7 @@ def choropleth(
     tooltip += [alt.Tooltip(f"properties.{name}:N", title=name.replace("_", " ")) for name in extra]
     chart = (
         alt.Chart(alt.Data(values=features))
-        .mark_geoshape(stroke=common.SURFACE, strokeWidth=0.6)
+        .mark_geoshape(stroke=theme.CARD, strokeWidth=0.6)
         .encode(
             color=alt.Color(
                 f"properties.{column}:Q",
@@ -56,8 +56,10 @@ def choropleth(
             tooltip=tooltip,
         )
         .project(type="mercator")
-        .properties(height=height)
+        .properties(height=height, padding=PADDING)
     )
-    return chart.configure_view(stroke=None).configure_legend(
-        labelColor=common.INK_SECONDARY, titleColor=common.INK_SECONDARY
+    return (
+        chart.configure(background=theme.CARD)
+        .configure_view(stroke=None)
+        .configure_legend(labelColor=theme.INK_2, titleColor=theme.INK_2)
     )

@@ -56,6 +56,8 @@ def main() -> None:
     layout.start(
         "ClimateResilience India",
         crop=False,
+        hero=True,
+        label="Climate risk · Crop yield · Irrigation",
         intro="District-level climate risk, yield forecasts and irrigation decision support for Andhra Pradesh, Telangana, Karnataka and Tamil Nadu.",
     )
     settings = load_settings()
