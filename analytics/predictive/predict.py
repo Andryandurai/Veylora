@@ -376,3 +376,72 @@ def scenario_response(
                 }
             )
     return pd.DataFrame(records)
+
+
+@lru_cache(maxsize=4)
+def _explainer(lead_days: int) -> Any:
+    import shap
+
+    return shap.TreeExplainer(_bundle()["leads"][lead_days]["model"])
+
+
+def explain_yield(
+    district_id: str,
+    crop: str,
+    season: str,
+    overrides: dict[str, float] | None = None,
+    *,
+    year: int | None = None,
+    lead_days: int = DEFAULT_LEAD,
+    top: int = 8,
+) -> dict[str, Any]:
+    """SHAP contributions of one forecast, in t/ha, using the same features as :func:`predict_yield`.
+
+    Returns:
+        ``{"base_t_ha", "yield_t_ha", "contributions": [{"feature", "value", "contribution_t_ha"}, ...]}`` where
+        ``base_t_ha`` is the model's average prediction for this district-crop's scale, the listed contributions are
+        the ``top`` largest by magnitude, and a final ``other features`` row collects the rest, so
+        ``base_t_ha + sum(contributions) == yield_t_ha`` (up to numerical error).
+    """
+    if lead_days not in F.LEADS:
+        raise ValueError(f"lead_days must be one of {F.LEADS}")
+    mult, delta = _validate_overrides(overrides)
+    bundle, ctx = _bundle(), _context()
+    art = bundle["leads"][lead_days]
+    frame, _ = feature_frame(
+        ctx,
+        {
+            "district_id": district_id,
+            "crop": crop,
+            "season": season,
+            "year": year,
+            "overrides": {"rain_multiplier": mult, "temperature_delta": delta},
+        },
+    )
+    X, _, meta = F.build_features(
+        frame.assign(yield_label=np.nan), lead_days, include_satellite=False, levels=ctx.levels
+    )
+    if X.empty:
+        raise ValueError(f"not enough yield history for {district_id} / {crop} / {season}")
+    X = X[art["columns"]]
+    scale = float(meta["scale"].iloc[0])
+    explainer = _explainer(lead_days)
+    values = np.asarray(explainer.shap_values(X))[0]
+    base = float(np.ravel(explainer.expected_value)[0])
+    order = np.argsort(-np.abs(values))
+    rows = [
+        {
+            "feature": X.columns[i],
+            "value": float(X.iloc[0, i]) if pd.notna(X.iloc[0, i]) else None,
+            "contribution_t_ha": float(values[i] * scale),
+        }
+        for i in order[:top]
+    ]
+    rest = float(values[order[top:]].sum() * scale)
+    if len(order) > top:
+        rows.append({"feature": "other features", "value": None, "contribution_t_ha": rest})
+    return {
+        "base_t_ha": base * scale,
+        "yield_t_ha": float(art["model"].predict(X)[0] * scale),
+        "contributions": rows,
+    }

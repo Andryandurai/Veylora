@@ -114,3 +114,16 @@ etl:
 risk_levels:
   heatwave: {moderate: 0.05, high: 0.15, severe: 0.35}
   drought: {moderate: 0.30, high: 0.50, severe: 0.70}
+
+# Phase 9 advisory rules (advisory/generate.py). Thresholds are deterministic and documented in advisory/README.md.
+advisory:
+  alert_min_level: moderate     # hazards below this level produce no alert message
+  irrigation_min_mm: 5          # planned weekly irrigation below this is not worth a message
+  sowing_lead_days: 21          # announce the sowing window this many days before the season starts
+  sms_max_chars: 320
+
+# Early-warning relevance rule (analytics/predictive/extreme_weather.py: risk_forecast): a drought probability only sets
+# the risk level if the target month normally receives at least this much rain (district mean over the reference years).
+# SPI of an almost-dry month is noisy and agronomically meaningless (e.g. January in Telangana).
+early_warning:
+  drought_min_month_rain_mm: 40

@@ -212,3 +212,42 @@ in `meta.definitions` and the README:
 - Frame rate is measured in headless Chromium with software WebGL (about 15 fps at 1500x900); this is not a measurement on integrated
   graphics and the 30+ fps acceptance criterion is **not verified here**. The code limits per-frame work (instancing, reused buffers,
   adaptive rain count), but only a run on real hardware can confirm the criterion.
+
+## 2026-10-16 - Phase 8 (dashboards) and advisory groundwork
+
+### D-024: Dry-season drought signals do not set the risk level or the advisory
+A test advisory for Krishna on 2005-01-10 raised a "severe drought" alert because the SPI of a month that normally gets almost no
+rain is dominated by tiny absolute deficits. `risk_forecast` now returns `drought_relevant` (False when the target month's
+normal rain is below `early_warning.drought_min_month_rain_mm`, 40 mm) and `drought_normal_month_rain_mm`; the probability is still
+reported, but it is excluded from `level`, and `advisory.generate` suppresses the drought watch with an explanatory note. Added keys
+only: the earlier contract (`heatwave_p`, `drought_p`, `level`, `lead_days`) is unchanged. The 40 mm threshold is a judgement call,
+not a fitted value.
+
+### D-025: Dashboard design choices
+- **Router.** `dashboards/app.py` is a thin `st.navigation` router (so the sidebar says "Home" rather than "app"); every page is a
+  stand-alone script that bootstraps `sys.path`, calls `layout.start` (page config, data guards, synthetic banner, shared
+  district/crop sidebar) and wraps its body in `guards.run_guarded`, which turns missing files and `ValueError`s into messages.
+- **Altair, not Plotly/Folium, for charts and maps.** Streamlit ships Altair, so the dashboards need no extra dependency and the
+  district choropleths (`mark_geoshape`) work offline. Folium/Plotly stay in the analytics reports only.
+- **"Weather forecast" is a replay.** There is no live forecast feed. The page runs the Phase 5 models on observed weather up to a
+  chosen date within the record (1991-2024) and says so on the page.
+- **Vulnerability index** (Risk map, second tab) is defined here, not in an earlier phase: the mean percentile rank of kharif drought
+  frequency (season rain < 75 percent of the district mean), rice-yield coefficient of variation (2000-2017, at least 10 years) and
+  mean heat days (Tmax >= 40 C) per kharif season. It describes history and is not a forecast.
+- **Headline accuracy tile compares with the best simple baseline** on relative RMSE (error as a share of each district's prior mean
+  yield, the quantity the models optimise and the bootstrap uses), not with the weakest baseline. In absolute t/ha the pooled RMSE is
+  dominated by sugarcane and the prior-three-year mean is actually lower than the model's, which the Methodology table shows.
+- **What-if sensitivity is weak and the page says so.** The served model moves the forecast by about -2 percent for 40 percent less
+  rain and -3.5 percent for +4 C (validation years); it learned yield mostly from each district's history.
+- **Simulator embedding.** `simulator/index_embedded.html` is copied on demand to `dashboards/static/simulator.html` (git-ignored)
+  and shown with `st.iframe("/app/static/simulator.html?district=..&crop=..")`. The simulator holds only six representative districts
+  (one per climate cluster, none for cluster 1), so other selections are mapped to the same-cluster representative or the nearest
+  district, with a visible note.
+- **Browser checks.** `scripts/screenshot_dashboards.py` (Playwright) reloads every page, requires no exception boxes or failed
+  requests, takes the median of three warm visits (budget 3 s; measured 1.3-2.4 s in software-rendered headless Chromium, server-side
+  script time 0.3-0.9 s) and writes `reports/dashboard_checks.json` and `reports/figures/dash_*.png`. Streamlit's own deep-link probes
+  of `/<page>/_stcore/health` and `/host-config` return harmless 404s and are ignored.
+
+### D-026: Translations are unreviewed drafts
+Hindi, Tamil and Telugu templates in `advisory/templates.yaml` were written without a native-speaker or agronomist review. The
+dashboard warns on every non-English advisory and the sender defaults to dry run (Phase 9). Review is a manual step before any real send.

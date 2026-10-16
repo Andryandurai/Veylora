@@ -11,10 +11,10 @@ endif
 # Use the venv interpreter when it exists, otherwise whatever `python` is on PATH.
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python)
 
-.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim test lint format clean help
+.PHONY: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards test lint format clean help
 
 help:
-	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim test lint format clean')"
+	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl analytics-eda train-yield train-extreme prescriptive-report export-sim embed-sim test-sim dashboards test-dashboards test lint format clean')"
 
 setup:
 	python -m venv .venv
@@ -64,6 +64,12 @@ embed-sim:
 
 test-sim:
 	$(PY) scripts/test_sim.py
+
+dashboards:
+	$(PY) -m streamlit run dashboards/app.py
+
+test-dashboards:
+	$(PY) scripts/screenshot_dashboards.py
 
 test:
 	$(PY) -m pytest

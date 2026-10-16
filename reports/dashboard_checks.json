@@ -1,0 +1,53 @@
+{
+  "pages": {
+    "home": {
+      "cold_s": 15.66,
+      "warm_s": 1.36,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "weather": {
+      "cold_s": 2.83,
+      "warm_s": 1.85,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "yield": {
+      "cold_s": 3.0,
+      "warm_s": 1.93,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "risk_map": {
+      "cold_s": 4.03,
+      "warm_s": 2.71,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "advisory": {
+      "cold_s": 2.5,
+      "warm_s": 2.01,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "simulator": {
+      "cold_s": 1.94,
+      "warm_s": 2.38,
+      "exception_boxes": 0,
+      "console_errors": []
+    },
+    "methodology": {
+      "cold_s": 12.07,
+      "warm_s": 1.85,
+      "exception_boxes": 0,
+      "console_errors": []
+    }
+  },
+  "warm_budget_s": 3.0,
+  "simulator_embed": {
+    "loaded": true,
+    "url": "http://127.0.0.1:52026/app/static/simulator.html?district=tamil_nadu__trichy&crop=rice",
+    "district": "tamil_nadu__trichy"
+  },
+  "failures": []
+}

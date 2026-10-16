@@ -1,0 +1,15 @@
+# Shared Streamlit theme and server settings for the dashboards (Phase 8).
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f0efec"
+textColor = "#0b0b0b"
+font = "sans serif"
+
+[server]
+headless = true
+enableStaticServing = true     # serves dashboards/static (the 3D simulator page) at /app/static/...
+
+[browser]
+gatherUsageStats = false

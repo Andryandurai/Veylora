@@ -26,3 +26,4 @@ reports/figures/*.html
 # Generated simulator artefacts (rebuild with `make export-sim embed-sim`)
 simulator/sim_data.json
 simulator/index_embedded.html
+dashboards/static/simulator.html

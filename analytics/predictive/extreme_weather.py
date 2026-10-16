@@ -35,6 +35,7 @@ from torch import nn
 
 from analytics.predictive import extreme_data as E
 from analytics.predictive import labels as L
+from analytics.predictive import spi
 from config import get_path, get_seed, load_settings
 
 LOG = logging.getLogger(__name__)
@@ -457,18 +458,40 @@ def _serving() -> dict[str, Any]:
     net.eval()
     heat = E.build_heat_data(weather, reference_end)
     table = E.drought_table(weather, satellite, reference_end)
+    monthly = spi.monthly_rain(weather)
+    reference = monthly[monthly["month"].dt.year <= reference_end]
+    normals = reference.groupby(["district_id", reference["month"].dt.month])["rain_mm"].mean()
     return {
         "net": net,
         "heat_state": heat_state,
         "heat": heat,
         "drought": drought,
         "drought_table": table,
+        "month_normals": normals.to_dict(),
     }
 
 
 def reset_cache() -> None:
     """Forget loaded artifacts (after retraining or in tests)."""
     _serving.cache_clear()
+
+
+def forecast_date_range() -> tuple[pd.Timestamp, pd.Timestamp]:
+    """First and last ``as_of_date`` that :func:`risk_forecast` accepts.
+
+    The heatwave network needs ``WINDOW_DAYS`` of observed weather and the drought model needs complete SPI
+    features for the last complete month, so the usable range is narrower than the weather record.
+    """
+    serving = _serving()
+    dates = serving["heat"].dates
+    table = serving["drought_table"]
+    complete = table[list(serving["drought"]["features"])].notna().all(axis=1)
+    months = table.loc[complete, "month"]
+    first = max(dates[E.WINDOW_DAYS - 1], months.min().to_period("M").end_time.normalize())
+    last = min(
+        dates[-1], (months.max().to_period("M") + 1).end_time.normalize() - pd.Timedelta(days=1)
+    )
+    return first, last
 
 
 def risk_forecast(district_id: str, as_of_date: str | pd.Timestamp) -> dict[str, Any]:
@@ -481,7 +504,8 @@ def risk_forecast(district_id: str, as_of_date: str | pd.Timestamp) -> dict[str,
         (thresholds per hazard in settings.yaml ``risk_levels``) and ``lead_days`` the lead of the hazard that sets
         the level (14 heatwave, 30 drought). ``heatwave_source`` says whether the probability comes from the LSTM or
         from climatology (used unless the LSTM shows skill over it in the evaluation). Extra keys: ``heatwave_p3``,
-        ``heatwave_p7``, ``heatwave_in_season``, ``hazard``, ``drought_month``, ``as_of``.
+        ``heatwave_p7``, ``heatwave_in_season``, ``hazard``, ``drought_month``, ``as_of``, ``drought_relevant`` (False when the
+        target month is normally almost dry: the drought probability is then reported but does not set ``level``).
 
     Raises:
         ValueError: unknown district, or a date outside the observed weather record (a forecast needs data
@@ -525,10 +549,18 @@ def risk_forecast(district_id: str, as_of_date: str | pd.Timestamp) -> dict[str,
             f"not enough history for drought features of {district_id} in {month_start:%Y-%m}"
         )
     drought_p = float(art["model_wrapper"].predict_proba(row)[0])
-    level, hazard, lead = combine_levels(float(probs[2]), drought_p)
+    # SPI of a month that is normally almost dry is not agronomically meaningful: such a drought may be reported
+    # (drought_p) but must not set the risk level (early Jan 2005 'severe dry spell' in a dry-season month).
+    target_month = (month_start + pd.offsets.MonthBegin(1)).month
+    normal_rain = float(s["month_normals"].get((district_id, target_month), np.nan))
+    minimum = float(load_settings()["early_warning"]["drought_min_month_rain_mm"])
+    relevant = bool(normal_rain >= minimum)
+    level, hazard, lead = combine_levels(float(probs[2]), drought_p if relevant else 0.0)
     return {
         "heatwave_p": float(probs[2]),
         "drought_p": drought_p,
+        "drought_relevant": relevant,
+        "drought_normal_month_rain_mm": normal_rain,
         "level": level,
         "lead_days": lead,
         "heatwave_p3": float(probs[0]),

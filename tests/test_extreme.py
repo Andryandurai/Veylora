@@ -318,3 +318,27 @@ def test_served_heatwave_probability_matches_the_declared_source() -> None:
         assert result["heatwave_p"] == pytest.approx(
             table[districts.index("andhra_pradesh__krishna"), slot, 2]
         )
+
+
+@serving
+def test_risk_forecast_reports_whether_the_drought_signal_is_agronomically_relevant() -> None:
+    wet = X.risk_forecast("andhra_pradesh__east_godavari", "2023-05-20")  # June is a monsoon month
+    assert wet["drought_relevant"] is True and wet["drought_normal_month_rain_mm"] >= 40
+    dry = X.risk_forecast("andhra_pradesh__krishna", "2005-01-10")  # February is almost rainless
+    assert dry["drought_relevant"] is False and dry["drought_normal_month_rain_mm"] < 40
+    assert (
+        dry["level"] == X.combine_levels(dry["heatwave_p"], 0.0)[0]
+    )  # an irrelevant drought never sets the level
+    assert 0.0 <= dry["drought_p"] <= 1.0  # still reported
+
+
+@serving
+def test_forecast_date_range_is_the_set_of_dates_risk_forecast_accepts() -> None:
+    first, last = X.forecast_date_range()
+    assert first < last and last.year >= 2024
+    X.risk_forecast("tamil_nadu__thanjavur", str(first.date()))
+    X.risk_forecast("tamil_nadu__thanjavur", str(last.date()))
+    with pytest.raises(ValueError):
+        X.risk_forecast("tamil_nadu__thanjavur", str((last + pd.Timedelta(days=1)).date()))
+    with pytest.raises(ValueError):
+        X.risk_forecast("tamil_nadu__thanjavur", str((first - pd.Timedelta(days=1)).date()))

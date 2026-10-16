@@ -37,11 +37,11 @@ SMS/WhatsApp advisories.
 | 2 | Warehouse | `python -m database.load`; views `v_season_weather`, `v_training_table` (materialized); `database/README.md` |
 | 3 | Descriptive + diagnostic analytics | `make analytics-eda`; figures in `reports/figures`; `docs/FINDINGS.md` (generated); `analytics/common.py` |
 | 4 | Yield models | `analytics.predictive.predict.predict_yield(district_id, crop, season, overrides=None)` -> `{"yield_t_ha","lo","hi","model"}`; `predict_batch`; `models/yield_*`; `reports/yield_model_comparison.md` |
-| 5 | Extreme weather early warning | `risk_forecast(district_id, as_of_date)` -> `{"heatwave_p","drought_p","level","lead_days"}`; `models/heatwave_lstm.pt`, `models/drought_xgb.joblib` |
+| 5 | Extreme weather early warning | `risk_forecast(district_id, as_of_date)` -> `{"heatwave_p","drought_p","level","lead_days"}` plus `drought_relevant`, `hazard`, `heatwave_source`, `heatwave_p3/p7` (D-024); `forecast_date_range()`; `models/heatwave_lstm.pt`, `models/drought_xgb.joblib` |
 | 6 | Prescriptive optimization | `analytics/prescriptive/{water_balance,irrigation_lp,crop_switch}.py`; CLI `python -m analytics.prescriptive.run`; `config/crop_params.yaml`, `config/economics.yaml` |
 | 7 | 3D simulator | `simulator/export_sim_data.py` -> `simulator/sim_data.json`; `simulator/index.html`; `python -m simulator.embed` -> `index_embedded.html` |
-| 8 | Streamlit dashboards | `streamlit run dashboards/app.py`; metrics read from `reports/*.json` |
-| 9 | Farmer advisory | `advisory.generate.generate(district_id, crop, as_of_date, lang) -> str`; Twilio wrapper (DRY_RUN default); FastAPI bot |
+| 8 | Streamlit dashboards | `make dashboards` (= `streamlit run dashboards/app.py`); router `app.py`, pages in `dashboards/pages/`, shared code in `dashboards/components/`; numbers read from `reports/*.json`; `make test-dashboards` runs the browser check |
+| 9 | Farmer advisory | `advisory.generate.generate(district_id, crop, as_of_date, lang) -> str` and `compose(...)` -> `Advisory` (text, reasoning); `predict.explain_yield`; Twilio wrapper (DRY_RUN default); FastAPI bot |
 | 10 | Hardening, deploy, report | `make pipeline`, Dockerfile, `reports/final_report.md`, README, demo script |
 
 Dependencies flow downward only: a phase may import from earlier phases, never later ones. If a later

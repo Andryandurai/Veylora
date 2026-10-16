@@ -456,3 +456,17 @@ def test_reference_year_never_comes_from_validation_or_test_years() -> None:
     ctx = P._context()
     for district in list(ctx.daily)[:10]:
         assert P.typical_year(ctx, district, "kharif") <= 2011
+
+
+@serving
+def test_explain_yield_contributions_add_up_to_the_forecast() -> None:
+    forecast = P.predict_yield("tamil_nadu__thanjavur", "rice", "kharif")
+    explanation = P.explain_yield("tamil_nadu__thanjavur", "rice", "kharif", top=5)
+    total = explanation["base_t_ha"] + sum(
+        c["contribution_t_ha"] for c in explanation["contributions"]
+    )
+    assert explanation["yield_t_ha"] == pytest.approx(forecast["yield_t_ha"], rel=1e-4)
+    assert total == pytest.approx(forecast["yield_t_ha"], rel=1e-3)
+    assert (
+        len(explanation["contributions"]) <= 6
+    )  # top features plus the "other features" remainder

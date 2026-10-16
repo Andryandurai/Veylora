@@ -1,0 +1,51 @@
+# Farmer advisory templates (Phase 9). Deterministic text only: no generative model writes advice.
+#
+# !!! TRANSLATIONS NEED NATIVE-SPEAKER REVIEW BEFORE ANY REAL USE !!!
+# The Hindi (hi), Tamil (ta) and Telugu (te) texts were drafted by an AI assistant, not by a translator or an
+# agronomist. They may contain errors of grammar, register or agronomic meaning. Do not send them to farmers until a
+# native speaker and an agronomist have reviewed every line (docs/DECISIONS.md D-025).
+#
+# Placeholders: {district}, {crop}, {date}, {mm}, {risk}. {crop} and {risk} are replaced by the localised words in
+# the `crops` and `risk` tables below. Keep every message under 160 characters where possible: SMS is 160 characters
+# in the GSM-7 alphabet (English) but only 70 in Unicode (Hindi/Tamil/Telugu), so Indic messages span several segments.
+
+languages: [en, hi, ta, te]
+
+risk:
+  en: {low: low, moderate: moderate, high: high, severe: severe}
+  hi: {low: कम, moderate: मध्यम, high: अधिक, severe: गंभीर}
+  ta: {low: குறைவு, moderate: மிதமான, high: அதிகம், severe: கடுமையான}
+  te: {low: తక్కువ, moderate: మధ్యస్థ, high: ఎక్కువ, severe: తీవ్రమైన}
+
+crops:
+  rice: {en: rice, hi: धान, ta: நெல், te: వరి}
+  wheat: {en: wheat, hi: गेहूं, ta: கோதுமை, te: గోధుమ}
+  cotton: {en: cotton, hi: कपास, ta: பருத்தி, te: పత్తి}
+  sugarcane: {en: sugarcane, hi: गन्ना, ta: கரும்பு, te: చెరకు}
+
+messages:
+  heat_alert:
+    en: "Heat alert ({risk}) for {district}, {date}: very hot days likely in the next 2 weeks. Water {crop} early morning or evening; avoid spraying at midday."
+    hi: "{district} में {date} के लिए गर्मी की चेतावनी ({risk}): अगले दो हफ्तों में बहुत गर्म दिन हो सकते हैं। {crop} को सुबह जल्दी या शाम को पानी दें, दोपहर में छिड़काव न करें।"
+    ta: "{district}: {date} வெப்ப எச்சரிக்கை ({risk}). அடுத்த இரண்டு வாரங்களில் மிகவும் வெப்பமான நாட்கள் வரலாம். {crop} பயிருக்கு அதிகாலை அல்லது மாலையில் நீர் பாய்ச்சுங்கள்; நண்பகலில் தெளிக்க வேண்டாம்."
+    te: "{district}: {date} వేడి హెచ్చరిక ({risk}). రాబోయే రెండు వారాల్లో చాలా వేడి రోజులు ఉండవచ్చు. {crop} పంటకు తెల్లవారుజామున లేదా సాయంత్రం నీరు పెట్టండి; మధ్యాహ్నం పిచికారీ చేయవద్దు."
+  drought_watch:
+    en: "Dry-spell watch ({risk}) for {district}: rain may fall short next month. Plan water for {crop} and use mulch to keep soil moisture."
+    hi: "{district} के लिए सूखे की निगरानी ({risk}): अगले महीने बारिश कम हो सकती है। {crop} के लिए पानी की योजना बनाएं और नमी बचाने के लिए मल्चिंग करें।"
+    ta: "{district}: வறட்சி கண்காணிப்பு ({risk}). அடுத்த மாதம் மழை குறையலாம். {crop} பயிருக்கு நீர் திட்டமிடுங்கள்; ஈரம் காக்க மூடாக்கு இடுங்கள்."
+    te: "{district}: కరువు పర్యవేక్షణ ({risk}). వచ్చే నెలలో వర్షం తక్కువగా ఉండవచ్చు. {crop} పంటకు నీటి ప్రణాళిక వేసుకోండి; తేమ కాపాడేందుకు మల్చింగ్ చేయండి."
+  irrigation_plan:
+    en: "Irrigation plan, {crop} in {district}: about {mm} mm this week, given in the early morning. Check the soil before irrigating."
+    hi: "{district} में {crop} की सिंचाई: इस हफ्ते लगभग {mm} मिमी पानी दें, सुबह जल्दी। सिंचाई से पहले मिट्टी जांच लें।"
+    ta: "{district} {crop} நீர்ப்பாசனம்: இந்த வாரம் சுமார் {mm} மி.மீ நீர் பாய்ச்சுங்கள், அதிகாலையில். நீர் பாய்ச்சும் முன் மண்ணைச் சோதியுங்கள்."
+    te: "{district} {crop} నీటి పారుదల: ఈ వారం సుమారు {mm} మి.మీ నీరు ఇవ్వండి, తెల్లవారుజామున. నీరు పెట్టే ముందు నేలను పరీక్షించండి."
+  sowing_window:
+    en: "Sowing window for {crop} in {district} opens around {date}. Get seed and land ready and ask your local office for advice."
+    hi: "{district} में {crop} की बुवाई का समय {date} के आसपास शुरू होगा। बीज और खेत तैयार रखें; स्थानीय कार्यालय से सलाह लें।"
+    ta: "{district}: {crop} விதைப்பு {date} அளவில் தொடங்கும். விதை, நிலத்தைத் தயார் செய்யுங்கள்; உள்ளூர் அலுவலகத்தில் ஆலோசனை பெறுங்கள்."
+    te: "{district}: {crop} విత్తనాలు {date} ప్రాంతంలో మొదలవుతాయి. విత్తనాలు, భూమి సిద్ధం చేయండి; స్థానిక కార్యాలయంలో సలహా తీసుకోండి."
+  all_clear:
+    en: "No weather alert for {district} on {date}. Keep normal care of your {crop} and check again soon."
+    hi: "{district} के लिए {date} को कोई मौसम चेतावनी नहीं है। अपनी {crop} की सामान्य देखभाल जारी रखें।"
+    ta: "{district}: {date} அன்று வானிலை எச்சரிக்கை இல்லை. உங்கள் {crop} பயிருக்கு வழக்கமான பராமரிப்பைத் தொடருங்கள்."
+    te: "{district}: {date} న వాతావరణ హెచ్చరిక లేదు. మీ {crop} పంటకు సాధారణ సంరక్షణ కొనసాగించండి."
