@@ -24,16 +24,41 @@ seasons:
   kharif: {start_month: 6, end_month: 10}
   rabi: {start_month: 11, end_month: 3}
 
+# Crop-year window used for yield modelling. ICRISAT's district database ends at crop year 2017
+# (checked 2026-10-16), so real yields cannot extend further; see docs/DECISIONS.md D-006.
+# Crop year Y = the season(s) starting in calendar year Y (rabi runs Nov Y - Mar Y+1).
+# history_start: earlier yields are kept in crops_annual so lag-1 / 3-year-mean features exist
+# for the first modelling year (weather exists from 1991, satellite only from 2000).
 years:
+  history_start: 1991
+  start: 2000
+  end: 2017
+
+# Daily weather window: 1991-2020 climatological normals (Phase 5) need data from 1991, and the
+# extreme-weather test years run to 2024.
+weather_years:
+  start: 1991
+  end: 2024
+
+# MODIS starts in Feb 2000, so satellite features start in 2000.
+satellite_years:
   start: 2000
   end: 2024
 
+# ICRISAT reports annual crop totals; each crop is attributed to the season in which it is
+# predominantly grown (documented limitation, docs/DECISIONS.md D-007).
+crop_season:
+  rice: kharif
+  wheat: rabi
+  cotton: kharif
+  sugarcane: kharif
+
 # Time-based splits (CLAUDE.md: never random-split time series).
 splits:
-  yield:
-    train_end: 2018
-    valid: [2019, 2021]
-    test: [2022, 2024]
+  yield:          # shifted from the plan's 2018/2019-21/2022-24 because real yields end in 2017
+    train_end: 2011
+    valid: [2012, 2014]
+    test: [2015, 2017]
   extreme_weather:
     train_end: 2014
     valid: [2015, 2019]
@@ -56,7 +81,17 @@ etl:
   boundaries:
     iso3: IND
     level: ADM2
+    # Polygons that geoBoundaries attributes to a study state but that belong elsewhere
+    # (Yanam is a Puducherry enclave inside Andhra Pradesh; ICRISAT has no data for it).
+    exclude_districts: [Yanam]
+  # Real data is preferred. IMD gridded rain/Tmax/Tmin first, NASA POWER as the real fallback,
+  # synthetic generators only if both fail (rows are then flagged is_synthetic=True).
   allow_synthetic_fallback: true
+  power_parameters: [RH2M, WS2M, ALLSKY_SFC_SW_DWN, T2M_MAX, T2M_MIN, PRECTOTCORR]
+  # Soil moisture: SMAP (GEE NASA_USDA/HSL/SMAP10KM_soil_moisture) only starts in April 2015, so
+  # ERA5-Land layer-1 volumetric soil water (1950+) is used to cover the whole study window.
+  soil_moisture_source: era5_land
+  min_crop_area_ha: 100
 
 # Phase 5 risk level thresholds on the larger of heatwave_p / drought_p (documented in the report).
 risk_levels:

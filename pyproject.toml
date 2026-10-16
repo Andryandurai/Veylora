@@ -55,6 +55,8 @@ extend-exclude = [".venv", "data", "models", "notebooks"]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "NPY", "PD"]
 ignore = [
     "E501",   # line length is handled by `ruff format`
+    "PD008",  # `.at` is deliberate scalar access on small frames
+    "PD011",  # `.values` is used on xarray objects, not only pandas
 ]
 
 [tool.ruff.lint.per-file-ignores]

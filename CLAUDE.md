@@ -76,9 +76,13 @@ clearly documented, working implementation of the agreed interface, not a stub t
 
 ## Data contracts (processed parquet = warehouse tables)
 
-All tables carry `is_synthetic: bool` (True for any row produced by a synthetic generator).
+All tables except `districts` carry `is_synthetic: bool` (True for any row produced by a synthetic generator).
 `district_id` is a stable lowercase slug `"<state>__<district>"` built from normalised names
-(`etl/names.py`), e.g. `tamil_nadu__tiruchirappalli`.
+(`etl/names.py`), e.g. `tamil_nadu__trichy`. **A "district" is a yield-reporting unit** (ICRISAT 1966 parent
+district reconstructed from 2021 polygons, see docs/DECISIONS.md D-006), 51 units in the 4 study states.
+**Windows (settings.yaml):** crop years 2000-2017 (real yields end 2017; history from 1991 for lags),
+weather 1991-2024, satellite 2000-2024. **Crop year Y** = the season starting in calendar year Y.
+Current data status: weather real (IMD + NASA POWER), crops real (ICRISAT), **satellite SYNTHETIC until GEE is authenticated**.
 
 ### districts
 | column | dtype | notes |
@@ -88,8 +92,10 @@ All tables carry `is_synthetic: bool` (True for any row produced by a synthetic 
 | district | str | canonical district name |
 | centroid_lat | float64 | EPSG:4326 |
 | centroid_lon | float64 | EPSG:4326 |
-| geometry_wkt | str | WKT (Multi)Polygon, EPSG:4326 |
-| area_km2 | float64 | computed in an equal-area CRS |
+| geometry_wkt | str | WKT MultiPolygon, EPSG:4326 |
+| area_km2 | float64 | computed in an equal-area CRS (EPSG:6933) |
+| member_districts | str | extra: `\|`-joined modern (2021) district names inside the unit |
+| icrisat_name | str | extra: ICRISAT district name exactly as in the yield table |
 
 ### weather_daily  (key: district_id + date)
 | column | dtype | notes |
@@ -110,26 +116,28 @@ All tables carry `is_synthetic: bool` (True for any row produced by a synthetic 
 | district_id | str | FK districts |
 | date | datetime64[ns] | start of the 16-day MODIS composite |
 | ndvi | float32 | scaled by 0.0001, range -0.2..1 |
-| soil_moisture | float32 | SMAP surface soil moisture, mm (HSL product) |
+| soil_moisture | float32 | volumetric soil water m3/m3 in 0-1 (ERA5-Land layer 1; SMAP starts only in 2015) |
 | is_synthetic | bool | |
 
 ### crops_annual  (key: district_id + year + season + crop)
 | column | dtype | notes |
 |---|---|---|
 | district_id | str | FK districts |
-| year | int16 | harvest year |
+| year | int16 | crop year (calendar year in which the season starts) |
 | season | str | `kharif` or `rabi` |
 | crop | str | rice, wheat, cotton, sugarcane |
 | area_ha | float64 | |
 | production_t | float64 | |
-| yield_t_per_ha | float64 | recomputed as production/area |
+| yield_t_per_ha | float64 | recomputed as production/area (sugarcane is probably jaggery-equivalent, D-007) |
 | yield_flag | bool | reported yield differs from recomputed by more than 5 percent |
 | is_synthetic | bool | |
 
 ## Evaluation rules
 
 - **Time-based splits only.** Never random-split a time series. Yield: train <= 2018, validation 2019-2021,
-  test 2022-2024. Extreme weather: train <= 2014, validation 2015-2019, test 2020-2024. Tune hyperparameters
+  test 2022-2024 **in the original plan; adapted to train <= 2011, validation 2012-2014, test 2015-2017 because
+  real yields end in 2017 (D-006); always read the split from settings.yaml**. Extreme weather: train <= 2014,
+  validation 2015-2019, test 2020-2024. Tune hyperparameters
   on validation years only; touch the test years once.
 - Report RMSE, MAE, R2 (and MAPE for yield) for **every model and a naive baseline** (last-year yield;
   climatology and persistence for extreme events). Rare events: PR-AUC, F1, Brier, reliability diagram.

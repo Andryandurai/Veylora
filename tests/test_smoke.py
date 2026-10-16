@@ -61,7 +61,10 @@ def test_settings_load() -> None:
     assert set(settings["crops"]) == {"rice", "wheat", "cotton", "sugarcane"}
     assert "Tamil Nadu" in settings["states"]
     years = year_range()
-    assert years[0] == 2000 and years[-1] == 2024
+    # Crop-year window follows real data availability (ICRISAT ends 2017, docs/DECISIONS.md D-006).
+    assert years[0] == 2000 and years[-1] == 2017
+    assert settings["weather_years"] == {"start": 1991, "end": 2024}
+    assert settings["splits"]["yield"]["test"][1] <= years[-1]
 
 
 def test_expected_layout_exists() -> None:

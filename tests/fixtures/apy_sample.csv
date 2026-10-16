@@ -1,0 +1,11 @@
+State_Name,District_Name,Crop_Year,Season,Crop,Area,Production
+Tamil Nadu,TIRUCHIRAPPALLI,2010,Kharif     ,Rice,1000,3000
+Tamil Nadu,KARUR,2010,Kharif     ,Rice,500,1250
+Tamil Nadu,KARUR,2010,Rabi       ,Rice,100,260
+Tamil Nadu,TRICHY,2011,Whole Year ,Sugarcane,200,16000
+Karnataka,RAICHUR,2010,Kharif     ,Cotton(lint),400,1000
+Karnataka,RAICHUR,2010,Rabi       ,Wheat,50,60
+Karnataka,RAICHUR,2010,Kharif     ,Banana,300,9000
+Andhra Pradesh,ADILABAD,2010,Kharif     ,Rice,800,2000
+Andhra Pradesh,NOWHERE,2010,Kharif     ,Rice,100,200
+Tamil Nadu,NOWHEREVILLE,2010,Kharif     ,Rice,100,200

@@ -36,3 +36,63 @@ in the first attempt). Tables live in the `public` schema of a local, single-pur
 pandas 3.0 (string dtype and copy-on-write are the default), numpy 2.4, torch 2.14, xgboost 3.2,
 scikit-learn 1.9, statsmodels 0.15, geopandas 1.2, SQLAlchemy 2.1, psycopg 3.3, imdlib 0.3.1,
 earthengine-api 1.7. Code must be written for pandas 3 semantics (no chained assignment, `str` dtype).
+
+## 2026-10-16 - Phase 1 (ETL)
+
+### D-006: Study window, splits and district units follow what real data can support
+- **ICRISAT's district database ends at crop year 2017** (API `years` = 1966..2017, checked 2026-10-16),
+  so real yields cannot cover the plan's 2000-2024. Rather than fabricate 2018-2024 yields, the yield
+  modelling window is 2000-2017 and the yield time split is shifted to **train <= 2011, validation
+  2012-2014, test 2015-2017** (`config/settings.yaml: splits.yield`). The plan's 2022-2024 test years
+  are not possible with real labels. Users can extend later by placing a data.gov.in APY CSV (to ~2020)
+  in `data/raw/crops/`.
+- Weather is kept for **1991-2024** because Phase 5 needs a 1991-2020 climatology and 2020-2024 test years.
+  Yields are kept from 1991 (`years.history_start`) so lag features exist for 2000.
+- **Crop year Y** = the season starting in calendar year Y (rabi runs Nov Y - Mar Y+1), ICRISAT's convention.
+- **Districts are yield-reporting units, not raw 2021 ADM2 polygons.** ICRISAT's apportioned series is stated
+  on 1966 parent districts (51 units in our 4 states: TN 12, AP 11, Telangana 9, Karnataka 19), while geoBoundaries
+  has 114 modern polygons. Each unit = the modern polygons whose names match the ICRISAT district (alias map),
+  plus the remaining polygons attached to the nearest anchor, with 11 hand-reviewed overrides for known splits
+  (`config/unit_overrides.csv`). This is a *reconstruction* of the old boundaries, so unit polygons are approximate.
+  ICRISAT's own coordinates were not used for anchoring because two are wrong (Chengalpattu at 24.6N, South Arcot at 9.3N).
+- Yanam (a Puducherry enclave inside Andhra Pradesh) is excluded; geoBoundaries 2021 predates AP's 2022 split
+  into 26 districts, which suits the 1966-parent units anyway.
+
+### D-007: Season and unit assumptions in ICRISAT yields
+- ICRISAT gives annual totals per crop, not kharif/rabi splits. Each crop is attributed to one season
+  (rice kharif, wheat rabi, cotton kharif, sugarcane kharif; `settings.yaml: crop_season`). Rice is also
+  grown in rabi/summer in AP, TS and TN, so "kharif rice" is really an annual rice average.
+- ICRISAT sugarcane "production" gives ~8 t/ha against usual cane yields of ~70-100 t/ha, so it is probably
+  jaggery (gur) equivalent. We have not verified this against ICRISAT documentation; treat sugarcane as a
+  relative index and never compare it with cane tonnage from other sources.
+- Cotton yield (~0.35 t/ha) is lint. Missing crop = area 0 (ICRISAT does not use NaN); those rows are dropped.
+
+### D-008: Soil moisture from ERA5-Land instead of SMAP; GEE not yet authenticated
+SMAP L4/HSL soil moisture starts in April 2015, so it cannot cover the 2000-2014 training years. The GEE module
+uses `ECMWF/ERA5_LAND/DAILY_AGGR` layer 1 (m3/m3) averaged over each MODIS 16-day window. Earth Engine is **not
+authenticated on this machine**, so `satellite_16d` is currently **synthetic** (derived from real rainfall by
+construction, `is_synthetic=True`). Everything that uses NDVI/soil moisture must say so until
+`python -m etl.gee_auth_check` passes and `python -m etl.run --source gee --force` is run.
+
+### D-009: NASA POWER as a real fallback before synthetic
+POWER daily point data (free, no key) supplies humidity, wind and solar radiation, and also temperature and
+precipitation. If an IMD year cannot be downloaded (imdpune.gov.in times out regularly), POWER fills it with
+real (model-derived, ~0.5 degree) data and the share is reported in `docs/DATA_QUALITY.md`. Synthetic generators
+are the last resort only.
+
+### D-010: ICRISAT access
+The DLD web portal is an interactive app, but it is a thin client over `http://data.icrisat.org/dldAPI/`
+(JSON). We call `apportioned/area-production-yield` once and cache the response in `data/raw/crops`. No scraping
+of rendered pages. Cite "ICRISAT District Level Database" and check its terms of use before redistributing data.
+
+## 2026-10-16 - Phase 2 (warehouse)
+
+### D-011: No partitioning; lead-specific columns live in the view
+- `weather_daily` has ~0.63 M rows (51 units x 34 years), so the plan's "partition by year if over 5M rows"
+  does not apply. The primary key (district_id, date) is the btree index the plan asks for.
+- The plan's `v_training_table` description only mentions full-season aggregates, but Phase 4 forecasts at 30/60/90-day
+  leads and full-season weather would leak the future. `v_season_weather` therefore also emits `*_d30/_d60/_d90`
+  columns (season days 0..L-1) and satellite values from composites that had finished by the forecast date
+  (MODIS composite `d` covers `d..d+15`). Leakage-safety of every column is documented in `database/README.md` and
+  asserted in `tests/test_database.py`.
+- `crops_annual` key is (district_id, year, season, crop): the plan says "PK over all five" but only four key columns exist.

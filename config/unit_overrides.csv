@@ -1,0 +1,15 @@
+state,modern_district,unit
+# Hand-reviewed parent districts for polygons that were split off before 2021, where the
+# nearest-anchor rule in etl/boundaries.py would pick the wrong ICRISAT (1966) parent.
+# "unit" is the ICRISAT district name exactly as it appears in the yield table.
+Karnataka,Udupi,Dakshina Kannada
+Karnataka,Koppal,Raichur
+Karnataka,Yadgir,Gulbarga / Kalaburagi
+Karnataka,Chikkaballapura,Kolar
+Telangana,Nirmal,Adilabad
+Telangana,Mancherial,Adilabad
+Telangana,Vikarabad,Hyderabad
+Telangana,Yadadri Bhongiri,Nalgonda
+Tamil Nadu,Erode,Coimbatore
+Tamil Nadu,Mayiladuthurai,Thanjavur
+Tamil Nadu,Ariyalur,Tiruchirapalli / Trichy

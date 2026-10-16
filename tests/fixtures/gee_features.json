@@ -1,0 +1,5 @@
+[
+  {"type": "Feature", "properties": {"district_id": "a__b", "date": "2020-01-01", "mean": 5500.5}},
+  {"type": "Feature", "properties": {"district_id": "a__b", "date": "2020-01-17", "mean": null}},
+  {"type": "Feature", "properties": {"district_id": "a__c", "date": "2020-01-01"}}
+]

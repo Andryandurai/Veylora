@@ -1,0 +1,67 @@
+state,alias,canonical
+# Maps spelling variants / historical names to the geoBoundaries (2021) district spelling.
+# Matching is done on normalised keys (lowercase, no diacritics/punctuation), see etl/names.py.
+# ICRISAT parent districts (1966 boundaries, "old / new" names) are resolved through these rows.
+Tamil Nadu,Tiruchirapalli,Tiruchirappalli
+Tamil Nadu,Tiruchirappalli,Tiruchirappalli
+Tamil Nadu,Trichy,Tiruchirappalli
+Tamil Nadu,Trichinopoly,Tiruchirappalli
+Tamil Nadu,Thirunelveli,Tirunelveli
+Tamil Nadu,Tinnevelly,Tirunelveli
+Tamil Nadu,Ramananthapuram,Ramanathapuram
+Tamil Nadu,Ramnad,Ramanathapuram
+Tamil Nadu,Chengalpattu MGR,Chengalputtu
+Tamil Nadu,Chengalpattu,Chengalputtu
+Tamil Nadu,Chingleput,Chengalputtu
+Tamil Nadu,Kanchipuram,Kancheepuram
+Tamil Nadu,North Arcot,Vellore
+Tamil Nadu,South Arcot,Cuddalore
+Tamil Nadu,Villupuram,Viluppuram
+Tamil Nadu,Thoothukudi,Thoothukkudi
+Tamil Nadu,Tuticorin,Thoothukkudi
+Tamil Nadu,Kanyakumari,Kanniyakumari
+Tamil Nadu,Nilgiris,The Nilgiris
+Tamil Nadu,Nilgiri,The Nilgiris
+Tamil Nadu,Tirupattur,Tirupathur
+Tamil Nadu,Tiruvallur,Thiruvallur
+Tamil Nadu,Tiruvarur,Thiruvarur
+Tamil Nadu,Pudukottai,Pudukkottai
+Tamil Nadu,Tanjore,Thanjavur
+Tamil Nadu,Madras,Chennai
+Andhra Pradesh,Ananthapur,Anantapur
+Andhra Pradesh,Anantapuram,Anantapur
+Andhra Pradesh,Kadapa YSR,Kadapa(YSR)
+Andhra Pradesh,Kadapa,Kadapa(YSR)
+Andhra Pradesh,Cuddapah,Kadapa(YSR)
+Andhra Pradesh,YSR Kadapa,Kadapa(YSR)
+Andhra Pradesh,S.P.S. Nellore,Sri Potti Sriramulu Nellore
+Andhra Pradesh,SPS Nellore,Sri Potti Sriramulu Nellore
+Andhra Pradesh,Nellore,Sri Potti Sriramulu Nellore
+Andhra Pradesh,Visakhapatanam,Visakhapatnam
+Andhra Pradesh,Vishakhapatnam,Visakhapatnam
+Telangana,Hyderabad,Hydrabad
+Telangana,Rangareddi,Rangareddy
+Telangana,Ranga Reddy,Rangareddy
+Telangana,Mahbubnagar,Mahabubnagar
+Telangana,Mahabub Nagar,Mahabubnagar
+Karnataka,Shimoge,Shimoga
+Karnataka,Shivamogga,Shimoga
+Karnataka,Chickmagalur,Chikmagalur
+Karnataka,Chikkamagaluru,Chikmagalur
+Karnataka,Vijayapura,Bijapur
+Karnataka,Kalaburagi,Gulbarga
+Karnataka,Coorg,Kodagu
+Karnataka,Bengaluru,Bangalore
+Karnataka,Bengaluru Urban,Bangalore
+Karnataka,Bengaluru Rural,Bangalore Rural
+Karnataka,Belagavi,Belgaum
+Karnataka,Ballari,Bellary
+Karnataka,Mysuru,Mysore
+Karnataka,Tumakuru,Tumkur
+Karnataka,Chamarajanagar,Chamarajanagar
+Karnataka,Chamrajnagar,Chamarajanagar
+Karnataka,Davangere,Davanagere
+Karnataka,Chikballapur,Chikkaballapura
+Karnataka,Ramanagar,Ramanagara
+Karnataka,Mangalore,Dakshina Kannada
+Karnataka,Karwar,Uttara Kannada

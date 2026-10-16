@@ -33,6 +33,26 @@ def load_settings(path: Path | None = None) -> dict[str, Any]:
     return settings
 
 
+def load_env(path: Path | None = None) -> dict[str, str]:
+    """Load KEY=VALUE lines from .env into ``os.environ`` without overriding existing variables.
+
+    Returns the variables that were read from the file (empty if there is no .env).
+    """
+    target = Path(path) if path else ROOT / ".env"
+    loaded: dict[str, str] = {}
+    if not target.is_file():
+        return loaded
+    for line in target.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip().strip('"').strip("'")
+        loaded[key] = value
+        os.environ.setdefault(key, value)
+    return loaded
+
+
 def get_path(key: str) -> Path:
     """Return an absolute path for a key under `paths:` in settings.yaml, creating it if needed."""
     relative = load_settings()["paths"][key]
