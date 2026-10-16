@@ -11,10 +11,10 @@ endif
 # Use the venv interpreter when it exists, otherwise whatever `python` is on PATH.
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python)
 
-.PHONY: setup db-up db-down test lint format clean help
+.PHONY: setup db-up db-down db-schema db-load db-views db-all etl test lint format clean help
 
 help:
-	@$(PY) -c "print('targets: setup db-up db-down test lint format clean')"
+	@$(PY) -c "print('targets: setup db-up db-down db-schema db-load db-views db-all etl test lint format clean')"
 
 setup:
 	python -m venv .venv
@@ -28,6 +28,21 @@ db-up:
 
 db-down:
 	docker compose down
+
+db-schema:
+	$(PY) -m database.load --schema
+
+db-load:
+	$(PY) -m database.load
+
+db-views:
+	$(PY) -m database.load --views
+
+db-all:
+	$(PY) -m database.load --all
+
+etl:
+	$(PY) -m etl.run --all
 
 test:
 	$(PY) -m pytest
