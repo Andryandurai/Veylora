@@ -1,0 +1,65 @@
+# Central configuration. Every module reads this through config/__init__.py (load_settings).
+# Changing the study region or years here is the only edit needed to re-run the pipeline.
+
+project:
+  name: climateresilience-india
+  random_seed: 42
+
+# Study region used for development (rice-heavy southern states). Names must match the
+# state names in the boundary file after normalisation via config/district_name_map.csv.
+states:
+  - Tamil Nadu
+  - Andhra Pradesh
+  - Telangana
+  - Karnataka
+
+crops:
+  - rice
+  - wheat
+  - cotton
+  - sugarcane
+
+# Growing seasons (inclusive month ranges). Rabi spans the year boundary.
+seasons:
+  kharif: {start_month: 6, end_month: 10}
+  rabi: {start_month: 11, end_month: 3}
+
+years:
+  start: 2000
+  end: 2024
+
+# Time-based splits (CLAUDE.md: never random-split time series).
+splits:
+  yield:
+    train_end: 2018
+    valid: [2019, 2021]
+    test: [2022, 2024]
+  extreme_weather:
+    train_end: 2014
+    valid: [2015, 2019]
+    test: [2020, 2024]
+
+paths:
+  data_raw: data/raw
+  data_interim: data/interim
+  data_processed: data/processed
+  models: models
+  reports: reports
+  figures: reports/figures
+  docs: docs
+  simulator: simulator
+
+# Phase 1 data-source switches. Real data is always preferred; a synthetic generator only
+# fills a source that is unreachable, and its rows are flagged is_synthetic=True.
+etl:
+  grid_resolution_deg: 0.25
+  boundaries:
+    iso3: IND
+    level: ADM2
+  allow_synthetic_fallback: true
+
+# Phase 5 risk level thresholds on the larger of heatwave_p / drought_p (documented in the report).
+risk_levels:
+  moderate: 0.20
+  high: 0.40
+  severe: 0.65

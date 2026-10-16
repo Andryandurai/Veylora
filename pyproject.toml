@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "climateresilience-india"
+version = "0.1.0"
+description = "Predictive analytics for extreme weather and crop-yield optimization in India (district level)."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.12",
+    "pyarrow>=15.0",
+    "pyyaml>=6.0",
+    "geopandas>=0.14",
+    "shapely>=2.0",
+    "scikit-learn>=1.4",
+    "xgboost>=2.0",
+    "torch>=2.2",
+    "statsmodels>=0.14",
+    "pulp>=2.8",
+    "plotly>=5.20",
+    "folium>=0.16",
+    "streamlit>=1.33",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+    "earthengine-api>=0.1.390",
+    "imdlib>=0.1.8",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+include = ["config*", "etl*", "database*", "analytics*", "simulator*", "dashboards*", "advisory*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra -q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "data", "models", "notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "NPY", "PD"]
+ignore = [
+    "E501",   # line length is handled by `ruff format`
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
