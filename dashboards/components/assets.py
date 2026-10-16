@@ -91,4 +91,4 @@ def simulator_choice(
 
 def simulator_url(district_id: str, crop: str) -> str:
     """URL of the simulator with the district and crop preselected (the page reads these query parameters)."""
-    return f"{URL}?{urlencode({'district': district_id, 'crop': crop})}"
+    return f"{URL}?{urlencode({'district': district_id, 'crop': crop, 'theme': 'light'})}"

@@ -333,3 +333,16 @@ and per-crop `development` / `senescence` (a visual growth curve built from the 
 - **Uncertainty view** illustrates the 80 percent interval with three strips of low, model and high vigour; it is not a separate model.
 - The measured software-rendering frame rate fell (about 8 fps from about 12) because the scene has more geometry; the page lowers detail
   automatically below 28 fps and offers fixed High and Low. A real-GPU measurement is still missing.
+
+### D-031: Minimal interface for the dashboards and the simulator chrome
+
+- **One stylesheet, no framework.** `dashboards/assets/minimal.css` (injected by `dashboards/components/ui.py`) sets white surfaces, near-black
+  text, one blue accent, hairline borders and no shadows. Streamlit's theme options in `.streamlit/config.toml` carry the same tokens.
+- **Navigation moved to the top** (`st.navigation(position="top")`), page titles are short words, emoji icons were removed, and the toolbar,
+  decoration and footer are hidden. The header is kept because it holds the navigation.
+- **Notes instead of coloured boxes.** Alerts are flat with a left rule. The synthetic-data caveat is one amber-ruled line shown on every
+  page while any table has `is_synthetic` rows and disappears when the share is zero. Risk levels use words (`charts.LEVEL_LABEL`), not
+  coloured emoji, so they do not rely on colour alone.
+- **Layout.** Reading pages use a 1040 px column; the simulator page is wide (1480 px). The simulator embeds with `?theme=light` and its own
+  chrome was flattened to match; its scene and numbers are unchanged. The embedded frame is 900 px tall so the results column is not clipped.
+- Nothing about the data, models or reported numbers changed. Browser checks (`make test-dashboards`) were updated for the new labels.

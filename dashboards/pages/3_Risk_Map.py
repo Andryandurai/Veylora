@@ -33,7 +33,7 @@ def early_warning_tab() -> None:
     column = "drought_p" if hazard.startswith("Drought") else "heatwave_p"
     table = table.assign(
         probability=table[column],
-        level_label=table["level"].map(charts.LEVEL_ICON),
+        level_label=table["level"].map(charts.LEVEL_LABEL),
         counts_towards_level=table["drought_relevant"].map({True: "yes", False: "no (dry month)"})
         if column == "drought_p"
         else "yes",
@@ -43,11 +43,11 @@ def early_warning_tab() -> None:
         maps.choropleth(table, "probability", "Probability", (0.0, 1.0), extra),
         width="stretch",
     )
-    levels = table["level"].value_counts().reindex(list(charts.LEVEL_ICON), fill_value=0)
+    levels = table["level"].value_counts().reindex(list(charts.LEVEL_LABEL), fill_value=0)
     cols = st.columns(4)
-    for col, (level, label) in zip(cols, charts.LEVEL_ICON.items(), strict=True):
+    for col, (level, label) in zip(cols, charts.LEVEL_LABEL.items(), strict=True):
         col.metric(
-            f"Districts {label}",
+            f"Districts at {label.lower()} risk",
             int(levels[level]),
             help="Overall level (heatwave and drought combined) for each district.",
         )
@@ -111,9 +111,9 @@ def vulnerability_tab() -> None:
 def main() -> None:
     layout.start(
         "Risk map",
-        "🗺️",
         needs=("processed data", "early-warning models"),
         crop=False,
+        label="Early warning",
         intro="Where heatwave and drought risk is highest, and which districts are structurally most exposed.",
     )
     early, structural = st.tabs(["Early warning on a date", "Long-term vulnerability"])

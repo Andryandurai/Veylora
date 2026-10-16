@@ -10,7 +10,7 @@ from typing import Any
 import streamlit as st
 
 from config import bundle
-from dashboards.components import ROOT
+from dashboards.components import ROOT, ui
 
 REQUIRED = {
     "processed data": (
@@ -78,7 +78,7 @@ def run_guarded(body: Callable[[], Any]) -> None:
 
 
 def synthetic_banner() -> None:
-    """Show a warning on every page when any pipeline input is synthetic (reads reports/data_quality.json)."""
+    """One quiet line on every page while any pipeline input is synthetic (reads reports/data_quality.json)."""
     path = ROOT / "reports" / "data_quality.json"
     if not path.exists():
         return
@@ -86,11 +86,9 @@ def synthetic_banner() -> None:
     synthetic = {t: s for t, s in share.items() if s > 0}
     if synthetic:
         parts = ", ".join(f"{t} ({s:.0%})" for t, s in synthetic.items())
-        st.warning(
-            f"**Synthetic data in the pipeline: {parts} (satellite NDVI / soil moisture, Earth Engine was not authenticated).** "
-            "The forecasts served here use observed weather (IMD, NASA POWER) and ICRISAT yield history only; "
-            "the synthetic satellite table appears only in the experimental comparison on the Methodology page.",
-            icon="⚠️",
+        ui.note(
+            f"<b>Synthetic data in the pipeline: {parts}.</b> The forecasts shown use observed weather and "
+            "ICRISAT yields only; the synthetic satellite table appears only in an experimental comparison (see Methodology)."
         )
 
 

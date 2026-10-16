@@ -9,27 +9,33 @@ from analytics import common
 from analytics.predictive.features import HEAT_TMAX_C
 
 BLUE, ORANGE = common.SERIES[0], common.SERIES[1]
-LEVEL_ICON = {"low": "🟢 low", "moderate": "🟡 moderate", "high": "🟠 high", "severe": "🔴 severe"}
+LEVEL_LABEL = {"low": "Low", "moderate": "Moderate", "high": "High", "severe": "Severe"}
 
 
 def style(chart: alt.Chart, height: int = 260) -> alt.Chart:
-    """Apply the shared look: thin marks, recessive grid, secondary-ink labels."""
+    """Apply the shared look: no frame, no axis lines or ticks, one hairline grid, quiet labels."""
     return (
         chart.properties(height=height)
         .configure_view(stroke=None)
         .configure_axis(
-            gridColor=common.GRID,
-            domainColor=common.AXIS,
-            tickColor=common.AXIS,
+            domain=False,
+            ticks=False,
+            gridColor="#eeeeea",
             labelColor=common.INK_SECONDARY,
             titleColor=common.INK_SECONDARY,
             labelFontSize=11,
             titleFontSize=11,
+            titleFontWeight="normal",
+            labelPadding=6,
         )
+        .configure_axisX(grid=False)
         .configure_legend(
-            labelColor=common.INK_SECONDARY, titleColor=common.INK_SECONDARY, orient="top"
+            labelColor=common.INK_SECONDARY,
+            titleColor=common.INK_SECONDARY,
+            orient="top",
+            symbolType="stroke",
         )
-        .configure_title(color=common.INK, fontSize=13, anchor="start")
+        .configure_title(color=common.INK, fontSize=13, anchor="start", fontWeight=600)
     )
 
 

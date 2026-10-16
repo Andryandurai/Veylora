@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from dashboards.components import data
+from dashboards.components import data, ui
 
 
 def sidebar_selection(show_crop: bool = True) -> tuple[str, str]:
@@ -24,9 +24,9 @@ def sidebar_selection(show_crop: bool = True) -> tuple[str, str]:
     )
     st.session_state.setdefault("crop", "rice" if "rice" in crops else crops[0])
     with st.sidebar:
-        st.header("Selection")
+        ui.eyebrow("Selection")
         st.selectbox("District", ids, format_func=lambda d: labels[d], key="district")
         if show_crop:
             st.selectbox("Crop", crops, format_func=str.capitalize, key="crop")
-        st.caption("District units are reconstructed ICRISAT parent districts, see Methodology.")
+        st.caption("Districts are reconstructed ICRISAT parent units; see Methodology.")
     return st.session_state["district"], st.session_state["crop"]

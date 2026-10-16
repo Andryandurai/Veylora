@@ -270,9 +270,9 @@ def limits_section() -> None:
 def main() -> None:
     layout.start(
         "Methodology",
-        "📚",
         needs=("processed data",),
         crop=False,
+        label="Evidence",
         intro="How the numbers on the other pages were produced, and how far to trust them. Everything below is read from the files in `reports/`.",
     )
     tabs = st.tabs(["Data", "Yield", "Early warning", "Irrigation", "Limitations"])

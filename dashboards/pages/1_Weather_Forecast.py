@@ -23,10 +23,10 @@ LEVEL_HELP = {
 
 def main() -> None:
     district, _ = layout.start(
-        "Weather and early warning",
-        "🌦️",
+        "Early warning",
         needs=("processed data", "early-warning models"),
         crop=False,
+        label="Early warning",
         intro="Replay of the early-warning models on observed history. No live forecast feed is connected.",
     )
     first, last = models.risk_range()
@@ -46,7 +46,7 @@ def main() -> None:
 
     head, detail = st.columns([1, 2])
     with head:
-        st.metric("Overall risk level", charts.LEVEL_ICON[level])
+        st.metric("Overall risk level", charts.LEVEL_LABEL[level])
         st.write(LEVEL_HELP[level])
         hazard = {"heatwave": "heatwave within 14 days", "drought": "drought next month"}.get(
             forecast["hazard"], forecast["hazard"]

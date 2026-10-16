@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from config import load_settings
-from dashboards.components import data, guards, layout, models
+from dashboards.components import data, guards, layout, models, ui
 
 
 def _headline_numbers() -> list[tuple[str, str, str]]:
@@ -55,7 +55,6 @@ def _headline_numbers() -> list[tuple[str, str, str]]:
 def main() -> None:
     layout.start(
         "ClimateResilience India",
-        "🌾",
         crop=False,
         intro="District-level climate risk, yield forecasts and irrigation decision support for Andhra Pradesh, Telangana, Karnataka and Tamil Nadu.",
     )
@@ -63,60 +62,63 @@ def main() -> None:
     years, weather_years = settings["years"], settings["weather_years"]
     districts = data.load_districts()
     cols = st.columns(4)
-    cols[0].metric("Yield-reporting districts", len(districts))
+    cols[0].metric("Districts", len(districts))
     cols[1].metric("Crops", len(settings["crops"]))
     cols[2].metric("Weather record", f"{weather_years['start']}-{weather_years['end']}")
     cols[3].metric("Yield record", f"{years['start']}-{years['end']}")
 
-    st.subheader("Where to start")
-    st.page_link(
-        "pages/1_Weather_Forecast.py",
-        label="Weather and early warning: heatwave and drought risk for a district and date",
-        icon="🌦️",
-    )
-    st.page_link(
-        "pages/2_Yield_Predictor.py",
-        label="Yield predictor: what-if rainfall and temperature, drivers, crop choice",
-        icon="📈",
-    )
-    st.page_link(
-        "pages/3_Risk_Map.py",
-        label="Risk map: early-warning and long-term vulnerability by district",
-        icon="🗺️",
-    )
-    st.page_link(
-        "pages/4_Advisory.py",
-        label="Farmer advisory: SMS text in English, Hindi, Tamil and Telugu",
-        icon="📱",
-    )
-    st.page_link(
-        "pages/5_3D_Simulator.py",
-        label="3D simulator: the season week by week under climate scenarios",
-        icon="🧊",
-    )
-    st.page_link(
-        "pages/6_Methodology.py",
-        label="Methodology: data, models, measured results and limits",
-        icon="📚",
-    )
+    st.subheader("Explore")
+    tiles = [
+        (
+            "pages/1_Weather_Forecast.py",
+            "Early warning",
+            "Heatwave and drought risk for a district and a date.",
+        ),
+        (
+            "pages/2_Yield_Predictor.py",
+            "Yield",
+            "Forecast with an interval, what-if rainfall and temperature, crop choice.",
+        ),
+        (
+            "pages/3_Risk_Map.py",
+            "Risk map",
+            "Early-warning probabilities and long-term vulnerability by district.",
+        ),
+        (
+            "pages/4_Advisory.py",
+            "Advisory",
+            "Short farmer messages in English, Hindi, Tamil and Telugu.",
+        ),
+        (
+            "pages/5_3D_Simulator.py",
+            "Simulator",
+            "The season week by week under climate and irrigation scenarios.",
+        ),
+        ("pages/6_Methodology.py", "Methodology", "Data, models, measured results and limits."),
+    ]
+    for row in (tiles[:3], tiles[3:]):
+        for col, (page, title, text) in zip(st.columns(3), row, strict=True):
+            with col:
+                ui.tile(page, title, text)
 
-    tiles = _headline_numbers()
-    if tiles:
-        st.subheader("Measured results (held-out years)")
-        for col, (label, value, note) in zip(st.columns(len(tiles)), tiles, strict=True):
+    measured = _headline_numbers()
+    if measured:
+        st.subheader("Measured results")
+        st.caption(
+            "Held-out years only. The yield model is level with the best simple baselines, not clearly better; Methodology has the intervals."
+        )
+        for col, (label, value, note) in zip(st.columns(len(measured)), measured, strict=True):
             col.metric(label, value, help=note)
             col.caption(note)
-        st.caption(
-            "The yield model is level with the best simple baselines, not clearly better; see Methodology for the confidence intervals and the other findings."
-        )
 
-    with st.expander("Read this before using any number", expanded=False):
-        st.markdown(
-            "- Units are the 51 district groups for which ICRISAT reports yields (1966 boundaries), not villages or today's 114 districts.\n"
-            "- There is **no live weather feed**: the early-warning pages replay the models on observed history up to the end of the weather record.\n"
-            "- The forecasts are decision support with uncertainty. They are not a substitute for local agronomic advice.\n"
-            "- Crop-economics parameters are approximate and must be checked before real use; advisory translations are drafts that need native-speaker review."
-        )
+    with st.expander("Read this before using any number"):
+        notes = [
+            "Units are the 51 district groups for which ICRISAT reports yields (1966 boundaries), not villages or today's 114 districts.",
+            "There is **no live weather feed**: the early-warning pages replay the models on observed history up to the end of the weather record.",
+            "The forecasts are decision support with uncertainty. They are not a substitute for local agronomic advice.",
+            "Crop-economics parameters are approximate and must be checked before real use; advisory translations are drafts that need native-speaker review.",
+        ]
+        st.markdown("\n".join(f"- {n}" for n in notes))
     models_ready = not guards.missing(["yield models", "early-warning models"])
     if models_ready:
         models.warm_up()

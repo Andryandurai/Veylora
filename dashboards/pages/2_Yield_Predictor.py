@@ -59,9 +59,9 @@ def _sensitivity_note() -> str | None:
 
 def main() -> None:
     district, crop = layout.start(
-        "Yield predictor",
-        "📈",
+        "Yield",
         needs=("processed data", "district clusters", "yield models"),
+        label="Forecast",
         intro="Seasonal yield forecast from weather observed so far plus what-if changes to rainfall and temperature.",
     )
     season = data.season_of(crop)

@@ -44,7 +44,7 @@ PAGES = [
     ("home", "/", "Measured results"),
     ("weather", "/weather", "Hazard probabilities"),
     ("yield", "/yield", "Which kharif crop pays best here?"),
-    ("risk_map", "/risk-map", "Districts 🟢 low"),
+    ("risk_map", "/risk-map", "Districts at low risk"),
     ("advisory", "/advisory", "Why this message"),
     ("simulator", "/simulator", "Open the simulator in its own tab"),
     ("methodology", "/methodology", "Data and provenance"),
