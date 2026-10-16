@@ -10,11 +10,11 @@
 
 **2:30 Yield predictor.** Rice, Thanjavur. Show the forecast with its 80% interval (80% of test cases fall inside) and the SHAP drivers. Move the rainfall slider. "Honest finding: the forecast hardly moves (-2.2% for 40% less rain). The model mostly learned each district's own history. Against the best simple baseline its error is 40.4% against 40.9% of the mean yield: no clear gain, so I show an interval, not a promise." Open the crop comparison and point out when the pessimistic ranking differs.
 
-**3:30 3D simulator.** Pick the optimized and baseline strategies and use Compare. "The optimizer saves 70% of the water in the model but keeps 93% of the baseline yield; against an even split it saves 136 mm with no clear yield difference. That is a trade-off for agronomists to judge, not a free lunch." Mention that the frame rate was only checked with software rendering (12 fps); real-GPU performance: MISSING (not measured: needs a real browser on real hardware).
+**3:30 3D simulator.** Pick the optimized and baseline strategies and use Compare. "The optimizer saves 70% of the water in the model but keeps 93% of the baseline yield; against an even split it saves 136 mm with no clear yield difference. That is a trade-off for agronomists to judge, not a free lunch." Mention that the frame rate was only checked with software rendering (11 fps); real-GPU performance: MISSING (not measured: needs a real browser on real hardware).
 
 **4:15 Farmer advisory.** Show the same district in English and Tamil. "Fixed templates, no language model, 320 characters; the WhatsApp bot asks before using an uncertain district name and honours STOP. Sending is a dry run by default. The translations are drafts: MISSING (no native-speaker review done)."
 
-**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: 306; browser checks: 7 dashboard pages with 0 failures. Next steps: real satellite data, a live forecast feed, reviewed translations, field validation."
+**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: 306; browser checks: 7 dashboard addresses with 0 failures. Next steps: real satellite data, a live forecast feed, reviewed translations, field validation."
 
 ## Questions to be ready for
 

@@ -163,10 +163,10 @@ def check_full(report: dict[str, object]) -> None:
             FULL,
             "sh",
             "-c",
-            "python -m config.bundle restore && python -m pytest -q -p no:cacheprovider -W ignore",
+            "python -m config.bundle restore && python -m pytest -q -p no:cacheprovider -W ignore -o addopts=",
         ]
     )
-    summary = re.findall(r"(\d+ (?:passed|failed|skipped|error)[^\n]*)", tests.stdout)
+    summary = re.findall(r"^(\d+ (?:passed|failed|error).*)$", tests.stdout, re.M)
     step(
         report,
         "full_test_suite_in_container",

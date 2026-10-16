@@ -7,7 +7,7 @@
  "heat_gauge_max_dT+4": 0.0,
  "compare_water_baseline_mm": 600.0,
  "compare_water_optimized_mm": 296.822,
- "average_fps_5s_headless_software_gl": 11.2,
+ "average_fps_5s_headless_software_gl": 12.8,
  "yield_shown_vs_file_optimized": [
   2.66,
   2.66

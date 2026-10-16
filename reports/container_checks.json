@@ -1,0 +1,52 @@
+{
+  "build_serving_image": {
+    "ok": true,
+    "seconds": 5.5,
+    "detail": {
+      "image_mb": 3515
+    }
+  },
+  "app_health_endpoint": {
+    "ok": true,
+    "seconds": 2.7,
+    "detail": null
+  },
+  "runs_as_non_root": {
+    "ok": true,
+    "seconds": 0.1,
+    "detail": {
+      "uid": "10001"
+    }
+  },
+  "restore_demo_bundle": {
+    "ok": true,
+    "seconds": 0.5,
+    "detail": "restored 9 file(s) from the demo bundle\nwrote 9 file(s)\n"
+  },
+  "models_work_in_container": {
+    "ok": true,
+    "seconds": 11.3,
+    "detail": {
+      "yield_t_ha": 2.276,
+      "level": "high",
+      "advisory_chars": 137,
+      "messages": [
+        "drought_watch"
+      ]
+    }
+  },
+  "memory_in_use_after_smoke": "347.3MiB / 8.729GiB",
+  "build_full_image": {
+    "ok": true,
+    "seconds": 4.2,
+    "detail": null
+  },
+  "full_test_suite_in_container": {
+    "ok": true,
+    "seconds": 38.0,
+    "detail": {
+      "summary": "300 passed, 6 skipped in 34.18s",
+      "database_reachable": true
+    }
+  }
+}

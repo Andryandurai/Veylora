@@ -128,9 +128,12 @@ def test_secret_scanner_ignores_placeholders_binaries_and_the_env_example(tmp_pa
 
 
 def test_the_repository_itself_has_no_credentials() -> None:
-    tracked = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=False
-    )
+    try:
+        tracked = subprocess.run(
+            ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=False
+        )
+    except FileNotFoundError:
+        pytest.skip("git is not installed (container)")
     if tracked.returncode != 0:
         pytest.skip("not a git checkout")
     paths = [

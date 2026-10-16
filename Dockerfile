@@ -34,7 +34,7 @@ RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu -r "${REQ
     && python -c "import xgboost, torch, shap, geopandas"
 
 COPY --chown=app:app . .
-RUN mkdir -p data/interim data/processed models reports dashboards/static && chown -R app:app /app
+RUN mkdir -p data/raw data/interim data/processed models reports dashboards/static && chown -R app:app /app
 
 USER app
 EXPOSE 8501 8000

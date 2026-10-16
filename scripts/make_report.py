@@ -77,6 +77,7 @@ def collect(f: Facts, count_tests: bool) -> dict[str, str]:
     dash = f.json("dashboard_checks.json")
     bot = f.json("bot_smoke.json")
     sim = f.json("sim_checks.json")
+    ctr = f.json("container_checks.json")
     metrics = f.csv("yield_metrics.csv")
 
     def metric(model: str, col: str, crop: str = "all") -> float:
@@ -276,6 +277,25 @@ def collect(f: Facts, count_tests: bool) -> dict[str, str]:
             lambda: sum(1 for v in bot.values() if isinstance(v, dict) and "ok" in v),
             "{:d}",
         ),
+        "ctr_tests": f.show(
+            "container test summary",
+            lambda: ctr["full_test_suite_in_container"]["detail"]["summary"],
+            "{}",
+        ),
+        "ctr_ok": f.show(
+            "container checks passed",
+            lambda: sum(1 for v in ctr.values() if isinstance(v, dict) and v.get("ok")),
+            "{:d}",
+        ),
+        "ctr_n": f.show(
+            "container checks",
+            lambda: sum(1 for v in ctr.values() if isinstance(v, dict) and "ok" in v),
+            "{:d}",
+        ),
+        "ctr_mem": f.show("container memory", lambda: ctr["memory_in_use_after_smoke"], "{}"),
+        "ctr_mb": f.show(
+            "serving image size", lambda: ctr["build_serving_image"]["detail"]["image_mb"], "{:,}"
+        ),
         "sim_fps": f.show(
             "simulator fps (software GL)",
             lambda: sim["average_fps_5s_headless_software_gl"],
@@ -328,7 +348,7 @@ def results_table(v: dict[str, str]) -> str:
 | Irrigation optimizer (normal rain) | saves {v["w_saved"]} of the 600 mm baseline water; keeps {v["w_yield"]} of baseline yield | Modelled, not field-tested. Vs an even split: {v["w_even_water"]} mm less water, yield difference {v["w_even_dy"]} (interval {v["w_even_lo"]} to {v["w_even_hi"]}), worse in {v["w_worse"]} of {v["w_cases"]} cases |
 | Dashboards | {v["dash_pages"]} addresses, {v["dash_fail"]} failed browser checks, median warm page load {v["dash_warm_min"]}-{v["dash_warm_max"]} s | Headless Chromium with software rendering |
 | Advisory bot | {v["bot_ok"]} of {v["bot_n"]} smoke checks passed | Dry run by default; translations unreviewed |
-| Tests | {v["tests"]} automated tests | `make test` |
+| Tests | {v["tests"]} automated tests | `make test`; in a clean Linux container: {v["ctr_tests"]} |
 """
 
 
@@ -390,6 +410,7 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 * **3D simulator** (Three.js, one self-contained page): checked in headless Chromium with software rendering ({v["sim_scen"]}), which ran at {v["sim_fps"]} frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: {v["real_gpu_fps"]}.
 * **Dashboards** (Streamlit, a home page and six pages): {v["dash_pages"]} addresses loaded in a browser with {v["dash_fail"]} failed checks (no exception boxes, no failed requests); median warm page loads {v["dash_warm_min"]}-{v["dash_warm_max"]} s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; {v["bot_ok"]} of {v["bot_n"]} bot smoke checks passed. Translation review: {v["translation_review"]}.
+* **Container:** {v["ctr_ok"]} of {v["ctr_n"]} checks passed (serving image {v["ctr_mb"]} MB, non-root, health check answers, models run from the demo bundle, memory {v["ctr_mem"]}); the full test suite inside a container built from `requirements.lock`: {v["ctr_tests"]} (browser tests skip there: no Chromium or node in the image).
 * **Automated tests:** {v["tests"]} (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
 * **Deployed URL:** {v["deployed_url"]}.
 
@@ -462,7 +483,7 @@ def demo_script(v: dict[str, str]) -> str:
 
 **4:15 Farmer advisory.** Show the same district in English and Tamil. "Fixed templates, no language model, 320 characters; the WhatsApp bot asks before using an uncertain district name and honours STOP. Sending is a dry run by default. The translations are drafts: {v["translation_review"]}."
 
-**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: {v["tests"]}; browser checks: {v["dash_pages"]} dashboard pages with {v["dash_fail"]} failures. Next steps: real satellite data, a live forecast feed, reviewed translations, field validation."
+**4:50 Methodology and close.** "Everything on this page is read from the report files. Tests: {v["tests"]}; browser checks: {v["dash_pages"]} dashboard addresses with {v["dash_fail"]} failures. Next steps: real satellite data, a live forecast feed, reviewed translations, field validation."
 
 ## Questions to be ready for
 

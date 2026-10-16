@@ -17,8 +17,10 @@ into place; mount your own `data/processed` and `models` over `/app/data/process
 pipeline outputs. The bot: `docker compose --profile bot up bot` (needs `TWILIO_AUTH_TOKEN` in `.env`; refuses unsigned
 requests; replies only; outbound sending stays a dry run unless `DRY_RUN=false`).
 
-Verified in this repository: image build from `requirements.txt`, the test suite inside a container built from
-`requirements.lock`, and the dashboards' health check (see the verification notes at the end of the final report).
+Verified in this repository (`python scripts/check_container.py`; durations, test counts, memory and image size are in
+`reports/container_checks.json` and in the final report): the serving image builds from `requirements.txt`, starts as a non-root
+user, answers its health check, restores the bundle and runs the models; an image built from `requirements.lock` runs the whole
+test suite inside the container against the compose database (browser and node tests skip there: the image has neither Chromium nor node).
 
 ## 2. Streamlit Community Cloud (manual, needs your GitHub account)
 
@@ -27,11 +29,12 @@ Verified in this repository: image build from `requirements.txt`, the test suite
    `dashboards/app.py`.
 3. **Advanced settings**: Python version **3.11**. Dependencies come from `requirements.txt` at the repository root (it
    already points pip at the CPU-only PyTorch wheels).
-4. Deploy. The first load restores the bundle and loads the models (about 10-20 s); later loads take a few seconds.
+4. Deploy. The first load restores the bundle and loads the models (the cold and warm load times of every page are in `reports/dashboard_checks.json`).
 5. Do not add Twilio secrets to a public app: the dashboards never send messages.
 
-Limits to expect: community instances have limited memory; the app needs roughly 1.5-2 GB while PyTorch, XGBoost and
-GeoPandas are loaded. If the build runs out of memory, deploy with Docker (option 1 or 3) instead.
+Limits to expect: community instances have limited memory, and the image is large because of PyTorch, XGBoost, SHAP and GeoPandas
+(sizes and the memory used in the container check are in `reports/container_checks.json`; every additional concurrent session adds to
+the memory). If the build runs out of memory or disk, deploy with Docker (option 1 or 3) instead.
 
 ## 3. Hugging Face Spaces (Docker Space, manual, needs your Hugging Face account)
 

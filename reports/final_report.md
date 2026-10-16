@@ -17,7 +17,7 @@ ClimateResilience-India is a district-level decision-support system for four sou
 | Irrigation optimizer (normal rain) | saves 70% of the 600 mm baseline water; keeps 93% of baseline yield | Modelled, not field-tested. Vs an even split: 136 mm less water, yield difference +0.017 (interval -0.003 to +0.038), worse in 8 of 20 cases |
 | Dashboards | 7 addresses, 0 failed browser checks, median warm page load 1.3-2.4 s | Headless Chromium with software rendering |
 | Advisory bot | 7 of 7 smoke checks passed | Dry run by default; translations unreviewed |
-| Tests | 306 automated tests | `make test` |
+| Tests | 306 automated tests | `make test`; in a clean Linux container: 300 passed, 6 skipped in 34.18s |
 
 
 * The yield models are **not better than simple baselines** by a margin the data can confirm. They are useful as a weather-adjusted baseline with an honest interval, not as precise predictors.
@@ -65,9 +65,10 @@ Daily FAO-56 water balance, FAO-33 yield response and a weekly linear programme 
 
 ## 7. Simulator, dashboards, advisory
 
-* **3D simulator** (Three.js, one self-contained page): checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 12 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
+* **3D simulator** (Three.js, one self-contained page): checked in headless Chromium with software rendering (6 districts, 2772 scenarios), which ran at 11 frames per second; software rendering is far slower than a GPU, so this is a lower bound, not a measurement of the 30 fps goal. Frame rate on real hardware: MISSING (not measured: needs a real browser on real hardware).
 * **Dashboards** (Streamlit, a home page and six pages): 7 addresses loaded in a browser with 0 failed checks (no exception boxes, no failed requests); median warm page loads 1.3-2.4 s.
 * **Advisory:** fixed templates in English, Hindi, Tamil and Telugu, at most 320 characters; WhatsApp webhook with signature validation; sending is a dry run unless explicitly switched; 7 of 7 bot smoke checks passed. Translation review: MISSING (no native-speaker review done).
+* **Container:** 7 of 7 checks passed (serving image 3,515 MB, non-root, health check answers, models run from the demo bundle, memory 347.3MiB / 8.729GiB); the full test suite inside a container built from `requirements.lock`: 300 passed, 6 skipped in 34.18s (browser tests skip there: no Chromium or node in the image).
 * **Automated tests:** 306 (`make test`), plus the browser checks (`make test-sim test-dashboards test-bot`).
 * **Deployed URL:** MISSING (deployment is a manual step, see docs/DEPLOY.md).
 
