@@ -1,0 +1,255 @@
+{
+  "years": [
+    1991,
+    2017
+  ],
+  "n_series": 13,
+  "skipped_series": [
+    {
+      "state": "Andhra Pradesh",
+      "crop": "wheat"
+    },
+    {
+      "state": "Tamil Nadu",
+      "crop": "wheat"
+    },
+    {
+      "state": "Telangana",
+      "crop": "wheat"
+    }
+  ],
+  "n_significant_increasing": 8,
+  "n_significant_decreasing": 1,
+  "series": [
+    {
+      "state": "Andhra Pradesh",
+      "crop": "rice",
+      "n_years": 27,
+      "n_districts": 11,
+      "mean_yield_t_ha": 3.0291167556683414,
+      "slope_t_ha_per_year": 0.04475956413544025,
+      "slope_ci_lo": 0.03304077214374643,
+      "slope_ci_hi": 0.05488680016052979,
+      "slope_pct_of_mean_per_year": 1.4776440707239937,
+      "mk_tau": 0.7037037037037037,
+      "mk_p": 2.923084081452032e-07,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Andhra Pradesh",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 8,
+      "mean_yield_t_ha": 0.41952108725753884,
+      "slope_t_ha_per_year": 0.010100646784225628,
+      "slope_ci_lo": 0.00415017377389391,
+      "slope_ci_hi": 0.015326729270952744,
+      "slope_pct_of_mean_per_year": 2.407661281165818,
+      "mk_tau": 0.42450142450142453,
+      "mk_p": 0.0020331775572490773,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Andhra Pradesh",
+      "crop": "sugarcane",
+      "n_years": 27,
+      "n_districts": 8,
+      "mean_yield_t_ha": 6.280796777653673,
+      "slope_t_ha_per_year": -0.048923958846865956,
+      "slope_ci_lo": -0.16471670047329265,
+      "slope_ci_hi": 0.01537407620358819,
+      "slope_pct_of_mean_per_year": -0.778945101693651,
+      "mk_tau": -0.18518518518518517,
+      "mk_p": 0.1821375864449275,
+      "mk_trend": "no trend"
+    },
+    {
+      "state": "Karnataka",
+      "crop": "rice",
+      "n_years": 27,
+      "n_districts": 19,
+      "mean_yield_t_ha": 2.5825756448498884,
+      "slope_t_ha_per_year": 0.023064762098806774,
+      "slope_ci_lo": 0.01837809747040884,
+      "slope_ci_hi": 0.03142187981952792,
+      "slope_pct_of_mean_per_year": 0.8930914432187873,
+      "mk_tau": 0.6353276353276354,
+      "mk_p": 3.691890443802137e-06,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Karnataka",
+      "crop": "wheat",
+      "n_years": 27,
+      "n_districts": 7,
+      "mean_yield_t_ha": 0.8004580763375442,
+      "slope_t_ha_per_year": 0.015386372185604324,
+      "slope_ci_lo": 0.008306184581562492,
+      "slope_ci_hi": 0.022147435591635147,
+      "slope_pct_of_mean_per_year": 1.922195882638089,
+      "mk_tau": 0.5042735042735043,
+      "mk_p": 0.000243447606952385,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Karnataka",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 13,
+      "mean_yield_t_ha": 0.2917744367911081,
+      "slope_t_ha_per_year": 0.008437436665978605,
+      "slope_ci_lo": 0.00409431147827897,
+      "slope_ci_hi": 0.013408256382305323,
+      "slope_pct_of_mean_per_year": 2.891766927484217,
+      "mk_tau": 0.4757834757834758,
+      "mk_p": 0.000538998928746981,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Karnataka",
+      "crop": "sugarcane",
+      "n_years": 27,
+      "n_districts": 15,
+      "mean_yield_t_ha": 8.438053505030119,
+      "slope_t_ha_per_year": -0.024154069569295444,
+      "slope_ci_lo": -0.0815286382836657,
+      "slope_ci_hi": 0.030656053925031936,
+      "slope_pct_of_mean_per_year": -0.2862516758740229,
+      "mk_tau": -0.1282051282051282,
+      "mk_p": 0.35900429696743297,
+      "mk_trend": "no trend"
+    },
+    {
+      "state": "Tamil Nadu",
+      "crop": "rice",
+      "n_years": 27,
+      "n_districts": 12,
+      "mean_yield_t_ha": 3.170074759407434,
+      "slope_t_ha_per_year": 0.025443733217448604,
+      "slope_ci_lo": -0.0072408106145195154,
+      "slope_ci_hi": 0.05312456840890881,
+      "slope_pct_of_mean_per_year": 0.8026224978430689,
+      "mk_tau": 0.20797720797720798,
+      "mk_p": 0.13336137676854287,
+      "mk_trend": "no trend"
+    },
+    {
+      "state": "Tamil Nadu",
+      "crop": "cotton",
+      "n_years": 26,
+      "n_districts": 9,
+      "mean_yield_t_ha": 0.31427664595603794,
+      "slope_t_ha_per_year": 0.005448865735959858,
+      "slope_ci_lo": 0.0024457752005351127,
+      "slope_ci_hi": 0.010849546327571364,
+      "slope_pct_of_mean_per_year": 1.733780032997445,
+      "mk_tau": 0.38461538461538464,
+      "mk_p": 0.006273131918895336,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Tamil Nadu",
+      "crop": "sugarcane",
+      "n_years": 27,
+      "n_districts": 10,
+      "mean_yield_t_ha": 10.597361205842285,
+      "slope_t_ha_per_year": -0.05377571186833945,
+      "slope_ci_lo": -0.09695824483289227,
+      "slope_ci_hi": -0.010045231107807926,
+      "slope_pct_of_mean_per_year": -0.5074443611367433,
+      "mk_tau": -0.33903133903133903,
+      "mk_p": 0.013896203558318554,
+      "mk_trend": "decreasing"
+    },
+    {
+      "state": "Telangana",
+      "crop": "rice",
+      "n_years": 27,
+      "n_districts": 9,
+      "mean_yield_t_ha": 2.798114580480327,
+      "slope_t_ha_per_year": 0.04545911221289746,
+      "slope_ci_lo": 0.03276280185386672,
+      "slope_ci_hi": 0.05402831627665883,
+      "slope_pct_of_mean_per_year": 1.624633691916001,
+      "mk_tau": 0.6638176638176638,
+      "mk_p": 1.3215649592446255e-06,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Telangana",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 9,
+      "mean_yield_t_ha": 0.3110129653826383,
+      "slope_t_ha_per_year": 0.010102930672720702,
+      "slope_ci_lo": 0.007981010307965542,
+      "slope_ci_hi": 0.012509390310796415,
+      "slope_pct_of_mean_per_year": 3.2483953394968914,
+      "mk_tau": 0.6923076923076923,
+      "mk_p": 4.536347351091763e-07,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Telangana",
+      "crop": "sugarcane",
+      "n_years": 27,
+      "n_districts": 3,
+      "mean_yield_t_ha": 6.218211426248961,
+      "slope_t_ha_per_year": -0.021652324718713464,
+      "slope_ci_lo": -0.15475508746478575,
+      "slope_ci_hi": 0.05254544717589127,
+      "slope_pct_of_mean_per_year": -0.34820824244271303,
+      "mk_tau": -0.07692307692307693,
+      "mk_p": 0.587804963067637,
+      "mk_trend": "no trend"
+    }
+  ],
+  "strongest_increasing": [
+    {
+      "state": "Telangana",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 9,
+      "mean_yield_t_ha": 0.3110129653826383,
+      "slope_t_ha_per_year": 0.010102930672720702,
+      "slope_ci_lo": 0.007981010307965542,
+      "slope_ci_hi": 0.012509390310796415,
+      "slope_pct_of_mean_per_year": 3.2483953394968914,
+      "mk_tau": 0.6923076923076923,
+      "mk_p": 4.536347351091763e-07,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Karnataka",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 13,
+      "mean_yield_t_ha": 0.2917744367911081,
+      "slope_t_ha_per_year": 0.008437436665978605,
+      "slope_ci_lo": 0.00409431147827897,
+      "slope_ci_hi": 0.013408256382305323,
+      "slope_pct_of_mean_per_year": 2.891766927484217,
+      "mk_tau": 0.4757834757834758,
+      "mk_p": 0.000538998928746981,
+      "mk_trend": "increasing"
+    },
+    {
+      "state": "Andhra Pradesh",
+      "crop": "cotton",
+      "n_years": 27,
+      "n_districts": 8,
+      "mean_yield_t_ha": 0.41952108725753884,
+      "slope_t_ha_per_year": 0.010100646784225628,
+      "slope_ci_lo": 0.00415017377389391,
+      "slope_ci_hi": 0.015326729270952744,
+      "slope_pct_of_mean_per_year": 2.407661281165818,
+      "mk_tau": 0.42450142450142453,
+      "mk_p": 0.0020331775572490773,
+      "mk_trend": "increasing"
+    }
+  ],
+  "rice_slope_pct_range": [
+    0.8026224978430689,
+    1.624633691916001
+  ]
+}

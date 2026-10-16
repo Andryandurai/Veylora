@@ -29,12 +29,17 @@ dependencies = [
     "earthengine-api>=0.1.390",
     "imdlib>=0.1.8",
     "requests>=2.31",
+    "matplotlib>=3.8",
+    "pymannkendall>=1.4",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
     "ruff>=0.4",
+    "nbformat>=5.9",
+    "nbclient>=0.10",
+    "ipykernel>=6.29",
 ]
 
 [tool.setuptools.packages.find]

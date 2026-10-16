@@ -1,0 +1,88 @@
+{
+  "years": [
+    1991,
+    2024
+  ],
+  "n_districts": 51,
+  "kharif_cv_mean": 0.2589873219383252,
+  "kharif_cv_median": 0.25219107231241206,
+  "rabi_cv_mean": 0.6379448296092955,
+  "kharif_cv_by_state": {
+    "Andhra Pradesh": 0.24839082564972664,
+    "Karnataka": 0.26813132222815617,
+    "Tamil Nadu": 0.26733874068135915,
+    "Telangana": 0.2414993695773685
+  },
+  "top_cv_districts": [
+    {
+      "district_id": "tamil_nadu__kanyakumari",
+      "district": "Kanyakumari",
+      "cv": 0.4411517716920025,
+      "mean_rain_mm": 804.0306502941175
+    },
+    {
+      "district_id": "tamil_nadu__thirunelveli",
+      "district": "Thirunelveli",
+      "cv": 0.41676706120792545,
+      "mean_rain_mm": 852.1544982352941
+    },
+    {
+      "district_id": "tamil_nadu__ramananthapuram",
+      "district": "Ramananthapuram",
+      "cv": 0.35228623064585696,
+      "mean_rain_mm": 497.61824382352944
+    },
+    {
+      "district_id": "karnataka__tumkur",
+      "district": "Tumkur",
+      "cv": 0.31320274615730515,
+      "mean_rain_mm": 597.0164620588235
+    },
+    {
+      "district_id": "karnataka__kolar",
+      "district": "Kolar",
+      "cv": 0.3097125618420218,
+      "mean_rain_mm": 589.8405570588235
+    }
+  ],
+  "lowest_cv_district": {
+    "district_id": "karnataka__dakshina_kannada",
+    "district": "Dakshina Kannada",
+    "cv": 0.17402777287503354
+  },
+  "spearman_meanrain_vs_cv": {
+    "rho": -0.23447963800904978,
+    "p": 0.09768425437488451
+  },
+  "driest_regional_years": [
+    {
+      "year": 2018,
+      "mean_anomaly_pct": -28.48676927852335,
+      "share_districts_below_normal": 0.9411764705882353
+    },
+    {
+      "year": 2015,
+      "mean_anomaly_pct": -26.10965659312122,
+      "share_districts_below_normal": 0.9411764705882353
+    },
+    {
+      "year": 2016,
+      "mean_anomaly_pct": -22.740048459335853,
+      "share_districts_below_normal": 0.7647058823529411
+    }
+  ],
+  "wettest_regional_years": [
+    {
+      "year": 2020,
+      "mean_anomaly_pct": 31.440626709839616
+    },
+    {
+      "year": 2005,
+      "mean_anomaly_pct": 29.391377479600163
+    },
+    {
+      "year": 2022,
+      "mean_anomaly_pct": 24.817776546138067
+    }
+  ]
+}

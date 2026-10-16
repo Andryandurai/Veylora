@@ -92,6 +92,13 @@ etl:
   # ERA5-Land layer-1 volumetric soil water (1950+) is used to cover the whole study window.
   soil_moisture_source: era5_land
   min_crop_area_ha: 100
+  # Reliability filter for crop rows (etl/crop_yield.py: filter_unreliable). A row is dropped when
+  # ICRISAT's reported yield differs from production/area by more than this share, or when the
+  # recomputed yield is outside the crop's plausible district-average range (t/ha). Dropped rows are
+  # listed in docs/DATA_QUALITY.md. Sugarcane has no bound: its ICRISAT unit is unclear (D-007).
+  max_yield_mismatch: 0.5
+  max_plausible_yield_t_ha: {rice: 7.0, wheat: 4.5, cotton: 1.2}
+  min_plausible_yield_t_ha: {rice: 0.2, wheat: 0.1, cotton: 0.02}
 
 # Phase 5 risk level thresholds on the larger of heatwave_p / drought_p (documented in the report).
 risk_levels:

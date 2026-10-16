@@ -1,0 +1,66 @@
+{
+  "definitions": {
+    "drought": "season rain < 75% of the district's long-term mean",
+    "flood_risk": "season rain > 125% of mean and >= 3 days > 100 mm"
+  },
+  "n_seasons_per_district": 34,
+  "kharif_drought": {
+    "mean_events_per_district": 5.882352941176471,
+    "mean_frequency": 0.17301038062283736,
+    "most_drought_prone": [
+      {
+        "district": "Kanyakumari",
+        "events": 14,
+        "frequency": 0.4117647058823529
+      },
+      {
+        "district": "Thirunelveli",
+        "events": 13,
+        "frequency": 0.38235294117647056
+      },
+      {
+        "district": "Ramananthapuram",
+        "events": 10,
+        "frequency": 0.29411764705882354
+      }
+    ],
+    "worst_regional_years": [
+      {
+        "year": 2015,
+        "share_of_districts_in_drought": 0.5686274509803921
+      },
+      {
+        "year": 2018,
+        "share_of_districts_in_drought": 0.5686274509803921
+      },
+      {
+        "year": 2016,
+        "share_of_districts_in_drought": 0.5098039215686274
+      }
+    ]
+  },
+  "rabi_drought": {
+    "mean_frequency": 0.42721330956625075,
+    "most_drought_prone": [
+      {
+        "district": "Bellary",
+        "events": 19,
+        "frequency": 0.5757575757575758
+      },
+      {
+        "district": "Dharwad",
+        "events": 19,
+        "frequency": 0.5757575757575758
+      },
+      {
+        "district": "Belgaum",
+        "events": 18,
+        "frequency": 0.5454545454545454
+      }
+    ]
+  },
+  "kharif_wet_seasons_mean_per_district": 5.509803921568627,
+  "flood_risk_events_total": 9,
+  "flood_risk_districts_affected": 7,
+  "max_heavy_days_in_a_season": 10
+}

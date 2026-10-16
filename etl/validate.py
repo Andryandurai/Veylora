@@ -270,6 +270,17 @@ def render_report(
             .round(3)
         )
         lines += ["", _md_table(by_crop), ""]
+        dropped = crop_report.get("dropped_unreliable", {})
+        if dropped.get("n"):
+            lines += [
+                f"**Rows dropped as unreliable: {dropped['n']}** "
+                f"(by reason {dropped['by_reason']}; by crop {dropped['by_crop']}). "
+                "Rule: the source's reported yield contradicts production/area by more than "
+                "`max_yield_mismatch`, or the yield exceeds the crop's plausible maximum (settings.yaml).",
+                "",
+                _md_table(pd.DataFrame(dropped["rows"])),
+                "",
+            ]
     lines += [
         "## Known limitations",
         "",

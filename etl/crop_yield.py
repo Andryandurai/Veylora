@@ -58,20 +58,67 @@ class CropDataUnavailableError(RuntimeError):
     """No real crop source could be loaded (ICRISAT unreachable/uncached and no CSV present)."""
 
 
-def _finalise(frame: pd.DataFrame, flag: pd.Series | None = None) -> pd.DataFrame:
-    """Recompute yield, apply dtypes and the 5 percent reported-vs-recomputed flag."""
+def _finalise(
+    frame: pd.DataFrame, flag: pd.Series | None = None, mismatch: pd.Series | None = None
+) -> pd.DataFrame:
+    """Recompute yield, apply dtypes and the 5 percent reported-vs-recomputed flag.
+
+    ``mismatch`` (relative |reported - recomputed| / recomputed, ICRISAT only) travels in an extra
+    ``mismatch_rel`` column until :func:`filter_unreliable` has used it.
+    """
     out = frame.copy()
     out["yield_t_per_ha"] = out["production_t"] / out["area_ha"]
     out["yield_flag"] = (
         flag.reindex(out.index).fillna(False).astype(bool) if flag is not None else False
     )
+    out["mismatch_rel"] = mismatch.reindex(out.index) if mismatch is not None else np.nan
     out["year"] = out["year"].astype("int16")
     out["is_synthetic"] = False
     for col in ("area_ha", "production_t", "yield_t_per_ha"):
         out[col] = out[col].astype("float64")
-    return out[CROP_COLUMNS].sort_values(
+    return out[[*CROP_COLUMNS, "mismatch_rel"]].sort_values(
         ["district_id", "crop", "season", "year"], ignore_index=True
     )
+
+
+def filter_unreliable(
+    crops: pd.DataFrame, settings: dict | None = None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Drop rows whose numbers contradict each other or are physically implausible.
+
+    Two transparent rules (thresholds in ``settings.yaml: etl``), applied to the label so that bad
+    source rows cannot distort trends or models:
+
+    1. ICRISAT's own reported yield differs from production/area by more than
+       ``max_yield_mismatch``, so at least one of the three numbers is wrong and we cannot tell
+       which.
+    2. The recomputed yield is above ``max_plausible_yield_t_ha`` or below ``min_plausible_yield_t_ha``
+       for the crop (e.g. cotton 2017 in Tamil Nadu: 10 t on 19 000 ha, where the source's reported
+       yield is equally absurd, so rule 1 cannot catch it).
+
+    Returns:
+        (kept rows without the helper column, dropped rows with a ``reason`` column)
+    """
+    etl = (settings or load_settings())["etl"]
+    max_mismatch = float(etl.get("max_yield_mismatch", 0.5))
+    upper = crops["crop"].map(etl.get("max_plausible_yield_t_ha", {}) or {}).fillna(np.inf)
+    lower = crops["crop"].map(etl.get("min_plausible_yield_t_ha", {}) or {}).fillna(0.0)
+    inconsistent = crops["mismatch_rel"] > max_mismatch
+    too_high = crops["yield_t_per_ha"] > upper
+    too_low = crops["yield_t_per_ha"] < lower
+    bad = (inconsistent | too_high | too_low).to_numpy()
+    reason = np.select(
+        [inconsistent, too_high, too_low],
+        [
+            "reported yield disagrees with production/area",
+            "implausibly high yield",
+            "implausibly low yield",
+        ],
+        default="",
+    )
+    dropped = crops[bad].assign(reason=reason[bad])
+    kept = crops[~bad].drop(columns="mismatch_rel").reset_index(drop=True)
+    return kept, dropped.drop(columns="mismatch_rel").reset_index(drop=True)
 
 
 def icrisat_to_tidy(
@@ -122,8 +169,10 @@ def icrisat_to_tidy(
     valid = (tidy["area_ha"] > 0) & (tidy["production_t"] > 0)
     tidy = tidy[valid].reset_index(drop=True)
     recomputed = tidy["production_t"] / tidy["area_ha"]
-    mismatch = (tidy["reported_t_per_ha"] - recomputed).abs() / recomputed > YIELD_FLAG_TOLERANCE
-    return _finalise(tidy.drop(columns="reported_t_per_ha"), mismatch)
+    relative = (tidy["reported_t_per_ha"] - recomputed).abs() / recomputed
+    return _finalise(
+        tidy.drop(columns="reported_t_per_ha"), relative > YIELD_FLAG_TOLERANCE, relative
+    )
 
 
 def _member_lookup(districts: pd.DataFrame) -> tuple[dict[tuple[str, str], str], dict[str, str]]:
@@ -246,7 +295,20 @@ def build_crops(districts: pd.DataFrame, force: bool = False) -> tuple[pd.DataFr
         subset=["district_id", "year", "season", "crop"], keep="first"
     )
     combined = combined.sort_values(["district_id", "crop", "season", "year"], ignore_index=True)
+    combined, dropped = filter_unreliable(combined, settings)
     coverages = list(report["coverage_by_source"].values())
     report["join_coverage"] = float(min(coverages)) if coverages else None
     report["rows"] = int(len(combined))
+    report["dropped_unreliable"] = {
+        "n": int(len(dropped)),
+        "by_reason": dropped["reason"].value_counts().to_dict(),
+        "by_crop": dropped["crop"].value_counts().to_dict(),
+        "rows": dropped[
+            ["district_id", "crop", "year", "area_ha", "production_t", "yield_t_per_ha", "reason"]
+        ]
+        .round(4)
+        .to_dict("records"),
+    }
+    if len(dropped):
+        LOG.warning("dropped %d unreliable crop rows (see docs/DATA_QUALITY.md)", len(dropped))
     return combined, report

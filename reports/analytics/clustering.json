@@ -1,0 +1,117 @@
+{
+  "train_years_up_to": 2011,
+  "n_districts": 51,
+  "silhouette_by_k": {
+    "3": 0.2542432490870476,
+    "4": 0.289146592137112,
+    "5": 0.3298317018513161,
+    "6": 0.33090441096038636,
+    "7": 0.27243921471865923,
+    "8": 0.2634863207384717
+  },
+  "chosen_k": 6,
+  "chosen_silhouette": 0.33090441096038636,
+  "clusters": [
+    {
+      "cluster_id": 0,
+      "label": "dry-hot",
+      "n_districts": 3,
+      "example_districts": [
+        "Coimbatore",
+        "Thanjavur",
+        "Trichy"
+      ],
+      "mean_rain_mm": 433.04648841269847,
+      "rain_cv": 0.18612502914104734,
+      "mean_tmax_c": 33.098570389821326,
+      "heat_days": 0.2698412698412699,
+      "dry_spell_days": 30.825396825396822,
+      "yield_cv": 0.2030500690275252
+    },
+    {
+      "cluster_id": 1,
+      "label": "moderate-warm-variable-rain-volatile-yield",
+      "n_districts": 5,
+      "example_districts": [
+        "Belgaum",
+        "Bidar",
+        "Dharwad",
+        "Kalaburagi"
+      ],
+      "mean_rain_mm": 653.3272583809523,
+      "rain_cv": 0.24422821630314703,
+      "mean_tmax_c": 30.49529785277352,
+      "heat_days": 0.9238095238095239,
+      "dry_spell_days": 18.41904761904762,
+      "yield_cv": 0.3100214622759664
+    },
+    {
+      "cluster_id": 2,
+      "label": "moderate-warm-variable-rain",
+      "n_districts": 27,
+      "example_districts": [
+        "Ananthapur",
+        "Bangalore",
+        "Bellary",
+        "Chitradurga"
+      ],
+      "mean_rain_mm": 674.090079611993,
+      "rain_cv": 0.2461934238727037,
+      "mean_tmax_c": 30.988163244436937,
+      "heat_days": 0.7389770723104058,
+      "dry_spell_days": 18.368606701940035,
+      "yield_cv": 0.10641998130909401
+    },
+    {
+      "cluster_id": 3,
+      "label": "moderate-warm-stable-rain",
+      "n_districts": 6,
+      "example_districts": [
+        "Adilabad",
+        "Karimnagar",
+        "Khammam",
+        "Nalgonda"
+      ],
+      "mean_rain_mm": 810.2678293650794,
+      "rain_cv": 0.19675978740784714,
+      "mean_tmax_c": 31.294725589750218,
+      "heat_days": 4.682539682539682,
+      "dry_spell_days": 16.984126984126984,
+      "yield_cv": 0.12332266024488944
+    },
+    {
+      "cluster_id": 4,
+      "label": "moderate-cool",
+      "n_districts": 6,
+      "example_districts": [
+        "Hassan",
+        "Mandya",
+        "Mysore",
+        "The Nilgiris"
+      ],
+      "mean_rain_mm": 1037.8926108730159,
+      "rain_cv": 0.17461153462421317,
+      "mean_tmax_c": 27.329017537054973,
+      "heat_days": 0.02380952380952417,
+      "dry_spell_days": 12.865079365079366,
+      "yield_cv": 0.12886977606158384
+    },
+    {
+      "cluster_id": 5,
+      "label": "wet-cool",
+      "n_districts": 4,
+      "example_districts": [
+        "Chickmagalur",
+        "Coorg",
+        "Dakshina Kannada",
+        "Shimoge"
+      ],
+      "mean_rain_mm": 2746.1756321428575,
+      "rain_cv": 0.16136825316720216,
+      "mean_tmax_c": 26.268855439514674,
+      "heat_days": 0.0,
+      "dry_spell_days": 10.511904761904763,
+      "yield_cv": 0.08590761291601909
+    }
+  ]
+}

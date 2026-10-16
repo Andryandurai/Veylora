@@ -1,0 +1,239 @@
+{
+  "period": [
+    2000,
+    2017
+  ],
+  "n_bootstrap": 1000,
+  "satellite_features_synthetic": true,
+  "morans_i_district_mean_yield": {
+    "rice": {
+      "I": 0.17649678698964225,
+      "expected": -0.02,
+      "p_one_sided": 0.018,
+      "k": 5,
+      "n": 51
+    },
+    "wheat": {
+      "I": 0.2466819479819742,
+      "expected": -0.034482758620689655,
+      "p_one_sided": 0.008,
+      "k": 5,
+      "n": 30
+    },
+    "cotton": {
+      "I": 0.0971168132754459,
+      "expected": -0.022727272727272728,
+      "p_one_sided": 0.083,
+      "k": 5,
+      "n": 45
+    },
+    "sugarcane": {
+      "I": 0.6667396329809577,
+      "expected": -0.02040816326530612,
+      "p_one_sided": 0.001,
+      "k": 5,
+      "n": 50
+    }
+  },
+  "rice_rain_raw": {
+    "crop": "rice",
+    "predictor": "total_rain",
+    "scope": "all states",
+    "variant": "raw",
+    "pearson": -0.18649379158511717,
+    "pearson_lo": -0.3158654991739252,
+    "pearson_hi": -0.06334370221358335,
+    "spearman": -0.16935692716395218,
+    "spearman_lo": -0.3316612044107501,
+    "spearman_hi": 0.007276062152752812,
+    "n": 918
+  },
+  "rice_rain_within": {
+    "crop": "rice",
+    "predictor": "total_rain",
+    "scope": "all states",
+    "variant": "within",
+    "pearson": 0.14819973914140708,
+    "pearson_lo": 0.07568697959421057,
+    "pearson_hi": 0.23101200110620965,
+    "spearman": 0.2026347456807441,
+    "spearman_lo": 0.11370672795613947,
+    "spearman_hi": 0.2888583534929285,
+    "n": 918
+  },
+  "rice_tmax_within": {
+    "crop": "rice",
+    "predictor": "mean_tmax",
+    "scope": "all states",
+    "variant": "within",
+    "pearson": -0.24619284335022038,
+    "pearson_lo": -0.3382959452987519,
+    "pearson_hi": -0.1657844457454155,
+    "spearman": -0.2856528989642578,
+    "spearman_lo": -0.37024381718974064,
+    "spearman_hi": -0.20515496495435726,
+    "n": 918
+  },
+  "within_by_crop_rain": {
+    "rice": {
+      "crop": "rice",
+      "predictor": "total_rain",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": 0.14819973914140708,
+      "pearson_lo": 0.07568697959421057,
+      "pearson_hi": 0.23101200110620965,
+      "spearman": 0.2026347456807441,
+      "spearman_lo": 0.11370672795613947,
+      "spearman_hi": 0.2888583534929285,
+      "n": 918
+    },
+    "wheat": {
+      "crop": "wheat",
+      "predictor": "total_rain",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": 0.048695736662880046,
+      "pearson_lo": -0.06654079654467805,
+      "pearson_hi": 0.17357117933494787,
+      "spearman": 0.004271413170227278,
+      "spearman_lo": -0.11367072352768529,
+      "spearman_hi": 0.11733974838815492,
+      "n": 301
+    },
+    "cotton": {
+      "crop": "cotton",
+      "predictor": "total_rain",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": 0.11118557884659186,
+      "pearson_lo": 0.034571164447994136,
+      "pearson_hi": 0.20169815590836895,
+      "spearman": 0.14332098477023883,
+      "spearman_lo": 0.058201742994849634,
+      "spearman_hi": 0.23338684759069142,
+      "n": 772
+    },
+    "sugarcane": {
+      "crop": "sugarcane",
+      "predictor": "total_rain",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": -0.05137736982561265,
+      "pearson_lo": -0.10941020417280704,
+      "pearson_hi": 0.0248373147008483,
+      "spearman": 0.0038699209622974815,
+      "spearman_lo": -0.0647081447237601,
+      "spearman_hi": 0.08320215132352408,
+      "n": 833
+    }
+  },
+  "within_by_crop_tmax": {
+    "rice": {
+      "crop": "rice",
+      "predictor": "mean_tmax",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": -0.24619284335022038,
+      "pearson_lo": -0.3382959452987519,
+      "pearson_hi": -0.1657844457454155,
+      "spearman": -0.2856528989642578,
+      "spearman_lo": -0.37024381718974064,
+      "spearman_hi": -0.20515496495435726,
+      "n": 918
+    },
+    "wheat": {
+      "crop": "wheat",
+      "predictor": "mean_tmax",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": -0.016428566574144526,
+      "pearson_lo": -0.21922821417762614,
+      "pearson_hi": 0.16840665216068648,
+      "spearman": -0.09644584277573652,
+      "spearman_lo": -0.254871861780194,
+      "spearman_hi": 0.06386931782796612,
+      "n": 301
+    },
+    "cotton": {
+      "crop": "cotton",
+      "predictor": "mean_tmax",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": -0.2359321265028335,
+      "pearson_lo": -0.2969410536703605,
+      "pearson_hi": -0.17502652087099924,
+      "spearman": -0.22679609415085814,
+      "spearman_lo": -0.292630047227199,
+      "spearman_hi": -0.1600723390577509,
+      "n": 772
+    },
+    "sugarcane": {
+      "crop": "sugarcane",
+      "predictor": "mean_tmax",
+      "scope": "all states",
+      "variant": "within",
+      "pearson": -0.017171884353259965,
+      "pearson_lo": -0.08306350003592441,
+      "pearson_hi": 0.043813812762411954,
+      "spearman": -0.03542307210654046,
+      "spearman_lo": -0.09815789395190194,
+      "spearman_hi": 0.022631924837189565,
+      "n": 833
+    }
+  },
+  "rice_rain_within_by_state": {
+    "Andhra Pradesh": {
+      "crop": "rice",
+      "predictor": "total_rain",
+      "scope": "Andhra Pradesh",
+      "variant": "within",
+      "pearson": -0.09874695614479037,
+      "pearson_lo": -0.25485080157089374,
+      "pearson_hi": 0.0791528070915794,
+      "spearman": -0.043987820969174446,
+      "spearman_lo": -0.1902193014188987,
+      "spearman_hi": 0.1162982023286555,
+      "n": 198
+    },
+    "Karnataka": {
+      "crop": "rice",
+      "predictor": "total_rain",
+      "scope": "Karnataka",
+      "variant": "within",
+      "pearson": 0.2608672553655321,
+      "pearson_lo": 0.1626730928391221,
+      "pearson_hi": 0.3617456600215415,
+      "spearman": 0.3294916626055533,
+      "spearman_lo": 0.2156770861453698,
+      "spearman_hi": 0.43004965139256,
+      "n": 342
+    },
+    "Tamil Nadu": {
+      "crop": "rice",
+      "predictor": "total_rain",
+      "scope": "Tamil Nadu",
+      "variant": "within",
+      "pearson": -0.0034948036436148002,
+      "pearson_lo": -0.07873886032508162,
+      "pearson_hi": 0.08426880392077872,
+      "spearman": -0.008391383560175759,
+      "spearman_lo": -0.09145360272862443,
+      "spearman_hi": 0.09777361859792895,
+      "n": 216
+    },
+    "Telangana": {
+      "crop": "rice",
+      "predictor": "total_rain",
+      "scope": "Telangana",
+      "variant": "within",
+      "pearson": 0.5283044308020156,
+      "pearson_lo": 0.4198214939022404,
+      "pearson_hi": 0.6372318637935354,
+      "spearman": 0.5661799054703829,
+      "spearman_lo": 0.439799507027132,
+      "spearman_hi": 0.6904794581114675,
+      "n": 162
+    }
+  }
+}

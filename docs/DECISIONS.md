@@ -96,3 +96,14 @@ of rendered pages. Cite "ICRISAT District Level Database" and check its terms of
   (MODIS composite `d` covers `d..d+15`). Leakage-safety of every column is documented in `database/README.md` and
   asserted in `tests/test_database.py`.
 - `crops_annual` key is (district_id, year, season, crop): the plan says "PK over all five" but only four key columns exist.
+
+## 2026-10-16 - Phase 3 (analytics)
+
+### D-012: Reliability filter for ICRISAT crop rows
+Trend plots exposed source errors: Tamil Nadu cotton 2017 reports 10-30 t of production on 19 000-60 000 ha (yield
+0.0005 t/ha; ICRISAT's own reported yield is equally absurd, so the reported-vs-recomputed `yield_flag` cannot catch it),
+Tumkur cotton 2016 gives 2.3 t lint/ha and Adilabad wheat 2015 gives 4.9 t/ha. `etl/crop_yield.py: filter_unreliable`
+now drops rows where (1) reported and recomputed yield disagree by more than 50 percent or (2) the yield is outside a
+plausible per-crop range (`settings.yaml: etl.min/max_plausible_yield_t_ha`; sugarcane has no bound because its unit is
+unclear, D-007). 7 of 4 293 rows (0.16 percent) were dropped; they are listed in `docs/DATA_QUALITY.md`. The bounds
+are physical/agronomic limits chosen before looking at model results, not tuned on the test years.

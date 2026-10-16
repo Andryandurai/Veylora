@@ -195,7 +195,7 @@ def _icrisat_wide() -> pd.DataFrame:
 
 def test_icrisat_units_conversion_zero_area_and_yield_flag() -> None:
     tidy = crop_yield.icrisat_to_tidy(_icrisat_wide(), _districts(), SETTINGS)
-    assert set(tidy.columns) == set(crop_yield.CROP_COLUMNS)
+    assert set(tidy.columns) == {*crop_yield.CROP_COLUMNS, "mismatch_rel"}
     rice = tidy[tidy["crop"] == "rice"].set_index(["district_id", "year"])
     assert rice.loc[("tamil_nadu__trichy", 2010), "area_ha"] == pytest.approx(100_000.0)
     assert rice.loc[("tamil_nadu__trichy", 2010), "production_t"] == pytest.approx(300_000.0)
@@ -466,3 +466,35 @@ def test_data_quality_report_mentions_synthetic_share() -> None:
     )
     assert "WARNING: parts of the data are synthetic" in text
     assert "satellite_16d" in text
+
+
+def test_filter_unreliable_drops_contradictory_and_implausible_rows() -> None:
+    settings = {
+        "etl": {
+            "max_yield_mismatch": 0.5,
+            "max_plausible_yield_t_ha": {"wheat": 4.5},
+            "min_plausible_yield_t_ha": {"wheat": 0.1},
+        }
+    }
+    rows = pd.DataFrame(
+        {
+            "district_id": ["a", "b", "c", "d", "e"],
+            "year": [2010] * 5,
+            "season": ["rabi"] * 5,
+            "crop": ["wheat", "wheat", "wheat", "rice", "wheat"],
+            "area_ha": [100.0, 100.0, 100.0, 100.0, 100.0],
+            "production_t": [120.0, 0.05, 480.0, 900.0, 120.0],
+            "yield_t_per_ha": [1.2, 0.0005, 4.8, 9.0, 1.2],
+            "yield_flag": [False, True, False, False, True],
+            "is_synthetic": [False] * 5,
+            "mismatch_rel": [0.01, 0.0, 0.0, np.nan, 0.8],
+        }
+    )
+    kept, dropped = crop_yield.filter_unreliable(rows, settings)
+    assert list(kept["district_id"]) == ["a", "d"]  # rice has no bound configured -> kept
+    assert dict(zip(dropped["district_id"], dropped["reason"], strict=True)) == {
+        "b": "implausibly low yield",
+        "c": "implausibly high yield",
+        "e": "reported yield disagrees with production/area",
+    }
+    assert "mismatch_rel" not in kept
